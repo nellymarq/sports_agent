@@ -1,0 +1,27 @@
+Name: Fighter X
+Nickname: The Pressure Engine
+Division: Lightweight
+Stance: Orthodox
+Height: 5'10"
+Reach: 72"
+Age: 29
+Camp: Elevation Fight Team
+
+Strengths:
+- High pace and pressure
+- Durable with strong recovery
+- Clinch control and dirty boxing
+
+Weaknesses:
+- Average takedown defense
+- Overextends on combinations
+- Takes damage early
+
+Preferred Range: Pocket
+Preferred Pace: High
+Grappling Style: Clinch-heavy, defensive wrestling
+Striking Style: Pressure boxing with volume
+
+Fight IQ Notes:
+- Builds momentum as fight progresses
+- Sometimes ignores defensive responsibility

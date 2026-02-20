@@ -1,0 +1,17 @@
+Fighter Metadata Template
+
+Name:
+Nickname:
+Division:
+Stance:
+Height:
+Reach:
+Age:
+Camp:
+Strengths:
+Weaknesses:
+Preferred Range:
+Preferred Pace:
+Grappling Style:
+Striking Style:
+Fight IQ Notes:

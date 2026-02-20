@@ -1,0 +1,27 @@
+Name: Fighter Y
+Nickname: The Counter Surgeon
+Division: Lightweight
+Stance: Southpaw
+Height: 5'11"
+Reach: 74"
+Age: 31
+Camp: American Top Team
+
+Strengths:
+- Elite counter timing
+- Strong takedown defense
+- Efficient footwork and distance control
+
+Weaknesses:
+- Low output at times
+- Slow starter
+- Can be backed up to the fence
+
+Preferred Range: Mid-range
+Preferred Pace: Low to moderate
+Grappling Style: Defensive wrestling
+Striking Style: Counter striking with straight left focus
+
+Fight IQ Notes:
+- Reads opponents well
+- Sometimes gives away early rounds
