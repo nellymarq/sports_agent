@@ -1,17 +1,16 @@
 # llm.py
 # Global GroqLLM singleton with correct .env loading and full message return
+# + non-blocking usage via asyncio.to_thread and a concurrency semaphore.
 
 import os
 import logging
 import asyncio
 from typing import List, Dict
 from pathlib import Path
+
 from dotenv import load_dotenv
 from groq import Groq
 
-# ---------------------------------------------------------
-# Load .env BEFORE creating the singleton
-# ---------------------------------------------------------
 ROOT_ENV = Path(__file__).resolve().parent / ".env"
 load_dotenv(ROOT_ENV)
 
@@ -22,9 +21,6 @@ if not logger.handlers:
         format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
     )
 
-# ---------------------------------------------------------
-# Global semaphore to prevent Groq 429 rate limits
-# ---------------------------------------------------------
 GROQ_SEMAPHORE = asyncio.Semaphore(1)
 
 
@@ -37,7 +33,6 @@ class GroqLLM:
         return cls._instance
 
     def __init__(self):
-        # Prevent reinitialization on Streamlit reload
         if getattr(self, "_initialized", False):
             return
 
@@ -47,33 +42,41 @@ class GroqLLM:
 
         self.model = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
         self.temperature = float(os.getenv("GROQ_TEMPERATURE", "0.2"))
+        self.max_tokens = int(os.getenv("GROQ_MAX_TOKENS", "1024"))
+
         self.client = Groq(api_key=api_key)
 
         logger.info(
-            f"GroqLLM initialized with model={self.model}, temperature={self.temperature}"
+            f"GroqLLM initialized with model={self.model}, "
+            f"temperature={self.temperature}, max_tokens={self.max_tokens}"
         )
 
         self._initialized = True
 
-    # ---------------------------------------------------------
-    # FIXED: Direct synchronous call + semaphore for rate limiting
-    # ---------------------------------------------------------
-    async def chat(self, messages: List[Dict[str, str]]):
-        try:
-            # Prevent multiple concurrent Groq requests
-            async with GROQ_SEMAPHORE:
-                resp = self.client.chat.completions.create(
-                    model=self.model,
-                    messages=messages,
-                    temperature=self.temperature,
-                )
+    async def _create_completion(self, messages: List[Dict[str, str]]):
+        """
+        Run the Groq completion in a thread to avoid blocking the event loop.
+        """
+        def _call():
+            return self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+            )
 
-            # Return the full message object:
-            # {
-            #   "role": "assistant",
-            #   "content": "...",
-            #   "tool_calls": [...]
-            # }
+        return await asyncio.to_thread(_call)
+
+    async def chat(self, messages: List[Dict[str, str]]):
+        """
+        Core chat method used by the entire system.
+
+        Returns the full message object (with .content, .tool_calls, etc.).
+        """
+        try:
+            async with GROQ_SEMAPHORE:
+                resp = await self._create_completion(messages)
+
             return resp.choices[0].message
 
         except Exception as e:
@@ -81,7 +84,4 @@ class GroqLLM:
             raise RuntimeError(f"Groq LLM error (model={self.model}): {e}") from e
 
 
-# ---------------------------------------------------------
-# Create the global singleton AFTER .env is loaded
-# ---------------------------------------------------------
 llm = GroqLLM()

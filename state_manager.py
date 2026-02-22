@@ -2,6 +2,7 @@ import json
 import os
 import threading
 from typing import Any, Dict, List, Optional, Tuple
+from datetime import datetime, UTC
 
 STATE_DIR = os.path.join(os.path.dirname(__file__), "state")
 
@@ -14,8 +15,6 @@ os.makedirs(STATE_DIR, exist_ok=True)
 
 _file_lock = threading.Lock()
 
-
-# ---------- INTERNAL SAFE IO ---------- #
 
 def _safe_read_json(path: str, default: Any) -> Any:
     if not os.path.exists(path):
@@ -34,8 +33,6 @@ def _safe_write_json(path: str, data: Any) -> None:
     os.replace(tmp_path, path)
 
 
-# ---------- PROJECT STATE ---------- #
-
 def load_project_state() -> Dict[str, Any]:
     with _file_lock:
         return _safe_read_json(PROJECT_STATE_PATH, default={})
@@ -50,11 +47,13 @@ def update_project_state(updates: Dict[str, Any]) -> Dict[str, Any]:
     with _file_lock:
         state = _safe_read_json(PROJECT_STATE_PATH, default={})
         state.update(updates)
+
+        # Modern, timezone-aware timestamp (fixes DeprecationWarning)
+        state.setdefault("last_updated", datetime.now(UTC).isoformat())
+
         _safe_write_json(PROJECT_STATE_PATH, state)
         return state
 
-
-# ---------- TASK QUEUE ---------- #
 
 Task = Dict[str, Any]
 
@@ -77,7 +76,7 @@ def clear_task_queue() -> None:
 def add_tasks(new_tasks: List[Task]) -> List[Task]:
     with _file_lock:
         tasks = _safe_read_json(TASK_QUEUE_PATH, default=[])
-        existing_by_id = {t["id"]: t for t in tasks}
+        existing_by_id = {t["id"]: t for t in tasks if "id" in t}
 
         for t in new_tasks:
             if "id" not in t:
@@ -101,6 +100,8 @@ def update_task_status(task_id: str, status: str) -> Optional[Task]:
         for t in tasks:
             if t.get("id") == task_id:
                 t["status"] = status
+                t.setdefault("metadata", {})
+                t["metadata"]["last_status_change"] = datetime.now(UTC).isoformat()
                 updated_task = t
                 break
         _safe_write_json(TASK_QUEUE_PATH, tasks)
@@ -156,8 +157,6 @@ def all_tasks_completed() -> bool:
         return all(t.get("status") in ("done", "failed") for t in tasks)
 
 
-# ---------- CHAT HISTORY ---------- #
-
 def load_history() -> List[Tuple[str, str]]:
     with _file_lock:
         raw = _safe_read_json(HISTORY_PATH, default=[])
@@ -188,8 +187,6 @@ def append_to_history(role: str, content: str, max_len: int = 100) -> None:
         _safe_write_json(HISTORY_PATH, history)
 
 
-# ---------- TOOL CACHE ---------- #
-
 def load_tool_cache() -> Dict[str, Any]:
     with _file_lock:
         return _safe_read_json(TOOL_CACHE_PATH, default={})
@@ -213,12 +210,7 @@ def set_tool_cache_entry(key: str, value: Any) -> None:
         _safe_write_json(TOOL_CACHE_PATH, cache)
 
 
-# ---------- GLOBAL RESET (for devtools / smoke tests) ---------- #
-
 def reset_state() -> None:
-    """
-    Reset all persisted state so devtools smoke tests always start clean.
-    """
     with _file_lock:
         _safe_write_json(PROJECT_STATE_PATH, {})
         _safe_write_json(TASK_QUEUE_PATH, [])

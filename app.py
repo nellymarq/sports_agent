@@ -12,16 +12,31 @@ print("DEBUG: GROQ_API_KEY =", os.getenv("GROQ_API_KEY"))
 import streamlit as st
 import asyncio
 
-from llm import llm
+from llm import llm as REAL_LLM
+from tests.mock_llm import MockLLM  # S-tier mock for instant responses
+
 from tools import TOOL_REGISTRY
-from orchestrator import run_agent_orchestrator
+from orchestrator import orchestrator
 from router_agent import router_agent
 from state_manager import clear_task_queue, reset_state, load_history, append_to_history
 
 
-# -------------------------
-# PAGE CONFIG
-# -------------------------
+# ============================================================
+# CONFIG: Choose between LIVE (Groq) and TEST (MockLLM)
+# ============================================================
+
+USE_TEST_MODE = False   # <—— CHANGE THIS TO False when you want real Groq calls
+
+if USE_TEST_MODE:
+    ACTIVE_LLM = MockLLM()
+else:
+    ACTIVE_LLM = REAL_LLM
+
+
+# ============================================================
+# STREAMLIT PAGE CONFIG
+# ============================================================
+
 st.set_page_config(
     page_title="UFC Analytics Engine",
     page_icon="🥊",
@@ -29,17 +44,19 @@ st.set_page_config(
 )
 
 
-# -------------------------
+# ============================================================
 # INITIALIZE SESSION STATE
-# -------------------------
+# ============================================================
+
 def init_state():
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
 
-# -------------------------
-# ASYNC PIPELINE
-# -------------------------
+# ============================================================
+# FULL MULTI-AGENT PIPELINE
+# ============================================================
+
 async def _run_full_pipeline(user_input: str) -> str:
     """
     Full multi-agent pipeline:
@@ -48,11 +65,31 @@ async def _run_full_pipeline(user_input: str) -> str:
     - build task plan
     - run orchestrator
     """
-    history = load_history()
 
-    routing = await router_agent(llm, user_input)
+    # Load raw history as (role, content) tuples
+    history_pairs = load_history()
+
+    # Convert to strings for agents that expect text, not tuples
+    history = [f"{role}: {content}" for role, content in history_pairs]
+
+    # Episodic memory as a single text block (router-friendly)
+    episodic_memory_text = "\n".join(history) if history else ""
+
+    # 1. ROUTER
+    routing = await router_agent(
+        llm=ACTIVE_LLM,
+        user_input=user_input,
+        semantic_memory="",          # hook for future semantic memory
+        episodic_memory=episodic_memory_text,
+    )
+
     specialists = routing.get("specialists", [])
 
+    # Safety: In LIVE mode, limit specialists to avoid 429 rate-limit hell
+    if not USE_TEST_MODE:
+        specialists = specialists[:6]  # run only 6 specialists max
+
+    # 2. BUILD TASK PLAN
     tasks = [
         {
             "name": f"{spec}_analysis",
@@ -63,12 +100,19 @@ async def _run_full_pipeline(user_input: str) -> str:
 
     task_plan = {
         "user_input": user_input,
-        "history": history,
+        "history": history,          # list of "role: content" strings
         "retrieved_context": "",
         "tasks": tasks,
     }
 
-    result = await run_agent_orchestrator(llm, TOOL_REGISTRY, task_plan)
+    # 3. ORCHESTRATOR
+    result = await orchestrator(
+        llm=ACTIVE_LLM,
+        tool_registry=TOOL_REGISTRY,
+        task_plan=task_plan,
+        test_mode=USE_TEST_MODE,
+    )
+
     return result
 
 
@@ -81,15 +125,15 @@ def run_orchestrator_sync(user_input: str) -> str:
     return asyncio.run(_run_full_pipeline(user_input))
 
 
-# -------------------------
+# ============================================================
 # HEADER + SIDEBAR
-# -------------------------
+# ============================================================
+
 def render_header():
     st.title("UFC Analytics Engine")
-    st.caption(
-        "UFC-only narrative, form, style, and market sentiment — "
-        "no betting, no wagering, no odds."
-    )
+
+    mode_label = "🧪 TEST MODE (MockLLM)" if USE_TEST_MODE else "⚡ LIVE MODE (Groq API)"
+    st.caption(f"{mode_label} — UFC-only narrative, form, style, and market sentiment.")
 
     with st.sidebar:
         st.subheader("Session Controls")
@@ -108,9 +152,10 @@ def render_header():
         )
 
 
-# -------------------------
+# ============================================================
 # MAIN APP
-# -------------------------
+# ============================================================
+
 def main():
     init_state()
     render_header()
@@ -140,8 +185,9 @@ def main():
             st.markdown(msg)
 
 
-# -------------------------
+# ============================================================
 # ENTRY POINT
-# -------------------------
+# ============================================================
+
 if __name__ == "__main__":
     main()

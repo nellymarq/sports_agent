@@ -1,13 +1,21 @@
+# tests/mock_llm.py
+# S-tier MockLLM that mimics the real LLM interface (supports .content)
+
+class MockMessage:
+    def __init__(self, content: str):
+        self.content = content
+
+
 class MockLLM:
     """
-    A safe, isolated mock LLM for pytest.
-    It never calls Groq and cannot interfere with runtime.
+    Minimal async mock that behaves like the real LLM:
+    - chat() returns an object with .content
+    - complete() returns an object with .content
+    - deterministic output
     """
 
     async def chat(self, messages):
-        # Return a predictable assistant message
-        return {
-            "role": "assistant",
-            "content": "[MOCK RESPONSE]",
-            "tool_calls": []
-        }
+        return MockMessage("Mock response")
+
+    async def complete(self, prompt: str):
+        return MockMessage("Mock completion")

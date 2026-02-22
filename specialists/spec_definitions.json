@@ -1,0 +1,154 @@
+[
+  {
+    "filename": "style_specialist.py",
+    "name": "Style specialist",
+    "specialist_key": "style",
+    "domain_focus": ["striking tendencies", "range management", "weapons", "stance", "positional preferences"],
+    "optional_section_title": "Style Dynamics",
+    "template_type": "full"
+  },
+  {
+    "filename": "form_specialist.py",
+    "name": "Form specialist",
+    "specialist_key": "form",
+    "domain_focus": ["recent performance", "sharpness", "momentum", "consistency"],
+    "optional_section_title": "Form Trends",
+    "template_type": "full"
+  },
+  {
+    "filename": "sentiment_specialist.py",
+    "name": "Sentiment specialist",
+    "specialist_key": "sentiment",
+    "domain_focus": ["public perception", "narratives", "bias", "psychology"],
+    "optional_section_title": "Sentiment Factors",
+    "template_type": "full"
+  },
+  {
+    "filename": "weightcut_specialist.py",
+    "name": "Weightcut specialist",
+    "specialist_key": "weightcut",
+    "domain_focus": ["cut severity", "rehydration", "fatigue risk"],
+    "optional_section_title": "Weightcut Risk",
+    "template_type": "full"
+  },
+  {
+    "filename": "general_specialist.py",
+    "name": "General specialist",
+    "specialist_key": "general",
+    "domain_focus": ["broad tendencies", "overall matchup", "general fight IQ"],
+    "optional_section_title": "General Insights",
+    "template_type": "full"
+  },
+  {
+    "filename": "metadata_specialist.py",
+    "name": "Metadata specialist",
+    "specialist_key": "metadata",
+    "domain_focus": ["identity", "physical attributes", "competitive attributes"],
+    "optional_section_title": "Metadata Notes",
+    "template_type": "full"
+  },
+  {
+    "filename": "pace_specialist.py",
+    "name": "Pace specialist",
+    "specialist_key": "pace",
+    "domain_focus": ["work rate", "tempo", "cardio", "pressure"],
+    "optional_section_title": "Pace Dynamics",
+    "template_type": "full"
+  },
+  {
+    "filename": "grappling_specialist.py",
+    "name": "Grappling specialist",
+    "specialist_key": "grappling",
+    "domain_focus": ["takedowns", "control", "escapes", "submissions"],
+    "optional_section_title": "Grappling Dynamics",
+    "template_type": "full"
+  },
+  {
+    "filename": "fight_iq_specialist.py",
+    "name": "Fight IQ specialist",
+    "specialist_key": "fight_iq",
+    "domain_focus": ["decision-making", "risk management", "adjustments"],
+    "optional_section_title": "Decision Windows",
+    "template_type": "full"
+  },
+  {
+    "filename": "scramble_specialist.py",
+    "name": "Scramble specialist",
+    "specialist_key": "scramble",
+    "domain_focus": ["transitions", "reversals", "chain wrestling"],
+    "optional_section_title": "Scramble Dynamics",
+    "template_type": "full"
+  },
+  {
+    "filename": "damage_specialist.py",
+    "name": "Damage specialist",
+    "specialist_key": "damage",
+    "domain_focus": ["impact", "accumulation", "durability"],
+    "optional_section_title": "Damage Assessment",
+    "template_type": "full"
+  },
+  {
+    "filename": "gameplan_specialist.py",
+    "name": "Gameplan specialist",
+    "specialist_key": "gameplan",
+    "domain_focus": ["strategy", "path to victory", "risk mitigation"],
+    "optional_section_title": "Strategic Levers",
+    "template_type": "full"
+  },
+  {
+    "filename": "judging_specialist.py",
+    "name": "Judging specialist",
+    "specialist_key": "judging",
+    "domain_focus": ["criteria", "optics", "swing rounds"],
+    "optional_section_title": "Judging Edge",
+    "template_type": "full"
+  },
+  {
+    "filename": "knowledge_specialist.py",
+    "name": "Knowledge specialist",
+    "specialist_key": "knowledge",
+    "domain_focus": ["background", "experience", "archetypes"],
+    "optional_section_title": "Knowledge Notes",
+    "template_type": "full"
+  },
+  {
+    "filename": "prediction_specialist.py",
+    "name": "Prediction specialist",
+    "specialist_key": "prediction",
+    "domain_focus": ["probabilistic outcomes", "scenario modeling", "win conditions"],
+    "optional_section_title": "Outcome Scenarios",
+    "template_type": "full"
+  },
+  {
+    "filename": "routing_debug_specialist.py",
+    "name": "Routing Debug Specialist",
+    "specialist_key": "routing_debug",
+    "domain_focus": [],
+    "optional_section_title": "Routing Diagnostics",
+    "template_type": "debug"
+  },
+  {
+    "filename": "coordinator_debug_specialist.py",
+    "name": "Coordinator Debug Specialist",
+    "specialist_key": "coordinator_debug",
+    "domain_focus": [],
+    "optional_section_title": "Coordinator Diagnostics",
+    "template_type": "debug"
+  },
+  {
+    "filename": "critic_debug_specialist.py",
+    "name": "Critic Debug Specialist",
+    "specialist_key": "critic_debug",
+    "domain_focus": [],
+    "optional_section_title": "Critic Diagnostics",
+    "template_type": "debug"
+  },
+  {
+    "filename": "memory_debug_specialist.py",
+    "name": "Memory Debug Specialist",
+    "specialist_key": "memory_debug",
+    "domain_focus": [],
+    "optional_section_title": "Memory Diagnostics",
+    "template_type": "debug"
+  }
+]

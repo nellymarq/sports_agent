@@ -1,43 +1,26 @@
 # retrieval_store.py
+# Simple in-memory retrieval store (used for debugging / local experiments).
 
-import os
-from typing import List, Tuple
-from logger import info, debug, error
-
-# Path: sports_agent/data/knowledge
-DATA_DIR = os.path.join(os.path.dirname(__file__), "data", "knowledge")
+from typing import List, Dict, Any
 
 
-def load_documents() -> List[Tuple[str, str]]:
+class RetrievalStore:
     """
-    Load all text-like documents from data/knowledge.
+    Lightweight in-process document store.
 
-    Returns a list of (filename, content).
+    This is intentionally simple and non-persistent; the real retrieval
+    pipeline should use embeddings + VectorStore. This is mainly useful
+    for tests, debugging, or small ad-hoc experiments.
     """
-    docs: List[Tuple[str, str]] = []
 
-    # Ensure the directory exists
-    if not os.path.isdir(DATA_DIR):
-        info(f"[RetrievalStore] DATA_DIR does not exist: {DATA_DIR}")
-        return docs
+    def __init__(self) -> None:
+        self.docs: List[Dict[str, Any]] = []
 
-    # Iterate through all files in the folder
-    for fname in os.listdir(DATA_DIR):
-        path = os.path.join(DATA_DIR, fname)
+    def add_document(self, text: str, metadata: Dict[str, Any]) -> None:
+        text = (text or "").strip()
+        if not text:
+            return
+        self.docs.append({"text": text, "metadata": metadata or {}})
 
-        # Skip non-files (e.g., subfolders)
-        if not os.path.isfile(path):
-            continue
-
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                content = f.read()
-            docs.append((fname, content))
-        except Exception as e:
-            error(f"[RetrievalStore] Error reading document {path}: {e}")
-
-    # Logging for visibility
-    info(f"[RetrievalStore] Loaded {len(docs)} documents from {DATA_DIR}")
-    debug(f"[RetrievalStore] Document names: {[name for name, _ in docs]}")
-
-    return docs
+    def get_all(self) -> List[Dict[str, Any]]:
+        return list(self.docs)

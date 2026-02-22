@@ -1,0 +1,4439 @@
+[
+  {
+    "name": "Derrick Lewis",
+    "division": "Heavyweight",
+    "country": "United States",
+    "age": "41",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "The Black Beast",
+    "mma_record": "28–13 (1 NC)"
+  },
+  {
+    "name": "Curtis Blaydes",
+    "division": "Heavyweight",
+    "country": "United States",
+    "age": "35",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "Razor",
+    "mma_record": "19–5 (1 NC)"
+  },
+  {
+    "name": "Marcin Tybura",
+    "division": "Heavyweight",
+    "country": "Poland",
+    "age": "40",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "Tybur",
+    "mma_record": "27–10"
+  },
+  {
+    "name": "Alexander Volkov",
+    "division": "Heavyweight",
+    "country": "Russia",
+    "age": "37",
+    "height": "6 ft 7 in (2.01 m)",
+    "nickname": "Drago",
+    "mma_record": "39–11"
+  },
+  {
+    "name": "Tai Tuivasa",
+    "division": "Heavyweight",
+    "country": "Australia",
+    "age": "32",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Bam Bam",
+    "mma_record": "14–9"
+  },
+  {
+    "name": "Ryan Spann",
+    "division": "Heavyweight",
+    "country": "United States",
+    "age": "34",
+    "height": "6 ft 5 in (1.96 m)",
+    "nickname": "Superman",
+    "mma_record": "23–11"
+  },
+  {
+    "name": "Sergei Pavlovich",
+    "division": "Heavyweight",
+    "country": "Russia",
+    "age": "33",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "8–3",
+    "mma_record": "20–3"
+  },
+  {
+    "name": "Kennedy Nzechukwu",
+    "division": "Heavyweight",
+    "country": "Nigeria",
+    "age": "33",
+    "height": "6 ft 5 in (1.96 m)",
+    "nickname": "The African Savage",
+    "mma_record": "14–6–1"
+  },
+  {
+    "name": "Serghei Spivac",
+    "division": "Heavyweight",
+    "country": "Moldova",
+    "age": "31",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "The Polar Bear",
+    "mma_record": "17–6"
+  },
+  {
+    "name": "Ciryl Gane",
+    "division": "Heavyweight",
+    "country": "France",
+    "age": "35",
+    "height": "6 ft 5 in (1.96 m)",
+    "nickname": "Bon Gamin",
+    "mma_record": "12–2 (1 NC)"
+  },
+  {
+    "name": "Tom Aspinall (c)",
+    "division": "Heavyweight",
+    "country": "England",
+    "age": "32",
+    "height": "6 ft 5 in (1.96 m)",
+    "nickname": "8–1 (1 NC)",
+    "mma_record": "15–3 (1 NC)"
+  },
+  {
+    "name": "Waldo Cortes-Acosta",
+    "division": "Heavyweight",
+    "country": "Dominican Republic",
+    "age": "34",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "Salsa Boy",
+    "mma_record": "17–2"
+  },
+  {
+    "name": "Vitor Petrino",
+    "division": "Heavyweight",
+    "country": "Brazil",
+    "age": "28",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Icão",
+    "mma_record": "13–2"
+  },
+  {
+    "name": "Austen Lane",
+    "division": "Heavyweight",
+    "country": "United States",
+    "age": "38",
+    "height": "6 ft 6 in (1.98 m)",
+    "nickname": "UFC Fight Night 270 (London) – Iwo Baraniewski / Moving to Light Heavyweight",
+    "mma_record": "13–7 (1 NC)"
+  },
+  {
+    "name": "Mick Parkin",
+    "division": "Heavyweight",
+    "country": "England",
+    "age": "30",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "UFC Fight Night 270 (London) – Mario Pinto",
+    "mma_record": "10–1"
+  },
+  {
+    "name": "Shamil Gaziev",
+    "division": "Heavyweight",
+    "country": "Bahrain",
+    "age": "36",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "3–2",
+    "mma_record": "14–2"
+  },
+  {
+    "name": "Thomas Petersen",
+    "division": "Heavyweight",
+    "country": "United States",
+    "age": "30",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "The Train",
+    "mma_record": "10–4"
+  },
+  {
+    "name": "Valter Walker",
+    "division": "Heavyweight",
+    "country": "Brazil",
+    "age": "28",
+    "height": "6 ft 6 in (1.98 m)",
+    "nickname": "The Foot Hunter",
+    "mma_record": "15–1"
+  },
+  {
+    "name": "Jhonata Diniz",
+    "division": "Heavyweight",
+    "country": "Brazil",
+    "age": "34",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "3–2",
+    "mma_record": "9–2"
+  },
+  {
+    "name": "Sean Sharaf",
+    "division": "Heavyweight",
+    "country": "United States",
+    "age": "32",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "The Smoke",
+    "mma_record": "4–2"
+  },
+  {
+    "name": "Tallison Teixeira",
+    "division": "Heavyweight",
+    "country": "Brazil",
+    "age": "26",
+    "height": "6 ft 7 in (2.01 m)",
+    "nickname": "Xicao",
+    "mma_record": "9–1"
+  },
+  {
+    "name": "Mário Pinto",
+    "division": "Heavyweight",
+    "country": "Portugal",
+    "age": "27",
+    "height": "6 ft 5 in (1.96 m)",
+    "nickname": "UFC Fight Night 270 (London) – Mick Parkin",
+    "mma_record": "11–0"
+  },
+  {
+    "name": "Rizvan Kuniev",
+    "division": "Heavyweight",
+    "country": "Russia",
+    "age": "33",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "Win – UFC Fight Night 266 (Las Vegas) – Jailton Almeida",
+    "mma_record": "13–3–1 (1 NC)"
+  },
+  {
+    "name": "Marcus Buchecha",
+    "division": "Heavyweight",
+    "country": "Brazil",
+    "age": "36",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "0–1–1",
+    "mma_record": "5–2–1"
+  },
+  {
+    "name": "Ante Delija",
+    "division": "Heavyweight",
+    "country": "Croatia",
+    "age": "35",
+    "height": "6 ft 5 in (1.96 m)",
+    "nickname": "Walking Trouble",
+    "mma_record": "26–7"
+  },
+  {
+    "name": "Brando Peričić",
+    "division": "Heavyweight",
+    "country": "Australia",
+    "age": "31",
+    "height": "6 ft 5 in (1.96 m)",
+    "nickname": "The Balkan Bear",
+    "mma_record": "5–1"
+  },
+  {
+    "name": "Elisha Ellison",
+    "division": "Heavyweight",
+    "country": "United States",
+    "age": "28",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Snack Panther",
+    "mma_record": "5–2"
+  },
+  {
+    "name": "Louie Sutherland",
+    "division": "Heavyweight",
+    "country": "Scotland",
+    "age": "32",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "The Vanilla Gorilla",
+    "mma_record": "10–4"
+  },
+  {
+    "name": "Josh Hokit",
+    "division": "Heavyweight",
+    "country": "United States",
+    "age": "28",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "The Incredible Hok",
+    "mma_record": "8–0"
+  },
+  {
+    "name": "Max Gimenis",
+    "division": "Heavyweight",
+    "country": "Brazil",
+    "age": "32",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "0–1",
+    "mma_record": "6–2"
+  },
+  {
+    "name": "Denzel Freeman",
+    "division": "Heavyweight",
+    "country": "United States",
+    "age": "34",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Luke Fox",
+    "mma_record": "7–2"
+  },
+  {
+    "name": "Guilherme Pat",
+    "division": "Heavyweight",
+    "country": "Brazil",
+    "age": "31",
+    "height": "6 ft 5 in (1.96 m)",
+    "nickname": "Kong",
+    "mma_record": "6–0"
+  },
+  {
+    "name": "Allen Frye",
+    "division": "Heavyweight",
+    "country": "United States",
+    "age": "30",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "AJ",
+    "mma_record": "6–1"
+  },
+  {
+    "name": "Steven Asplund",
+    "division": "Heavyweight",
+    "country": "United States",
+    "age": "27",
+    "height": "6 ft 5 in (1.96 m)",
+    "nickname": "Concrete",
+    "mma_record": "6–1"
+  },
+  {
+    "name": "Dustin Jacoby",
+    "division": "Light Heavyweight",
+    "country": "United States",
+    "age": "37",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "The Hanyak",
+    "mma_record": "22–8–1"
+  },
+  {
+    "name": "Nikita Krylov",
+    "division": "Light Heavyweight",
+    "country": "Russia",
+    "age": "33",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "The Miner",
+    "mma_record": "31–11"
+  },
+  {
+    "name": "Jan Błachowicz",
+    "division": "Light Heavyweight",
+    "country": "Poland",
+    "age": "42",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "12–8–2",
+    "mma_record": "29–11–2"
+  },
+  {
+    "name": "Ion Cuțelaba",
+    "division": "Light Heavyweight",
+    "country": "Moldova",
+    "age": "32",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "The Hulk",
+    "mma_record": "19–11–1 (1 NC)"
+  },
+  {
+    "name": "Khalil Rountree Jr.",
+    "division": "Light Heavyweight",
+    "country": "United States",
+    "age": "36",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "The War Horse",
+    "mma_record": "14–7 (1 NC)"
+  },
+  {
+    "name": "Volkan Oezdemir",
+    "division": "Light Heavyweight",
+    "country": "Switzerland",
+    "age": "36",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "No Time",
+    "mma_record": "21–8"
+  },
+  {
+    "name": "Dominick Reyes",
+    "division": "Light Heavyweight",
+    "country": "United States",
+    "age": "36",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "The Devastator",
+    "mma_record": "15–5"
+  },
+  {
+    "name": "Aleksandar Rakić",
+    "division": "Light Heavyweight",
+    "country": "Austria",
+    "age": "34",
+    "height": "6 ft 5 in (1.96 m)",
+    "nickname": "Rocket",
+    "mma_record": "14–6"
+  },
+  {
+    "name": "Magomed Ankalaev",
+    "division": "Light Heavyweight",
+    "country": "Russia",
+    "age": "33",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "12–2–1 (1 NC)",
+    "mma_record": "21–2–1 (1 NC)"
+  },
+  {
+    "name": "Johnny Walker",
+    "division": "Light Heavyweight",
+    "country": "Brazil",
+    "age": "33",
+    "height": "6 ft 5 in (1.96 m)",
+    "nickname": "UFC 327 (Miami) – Dominick Reyes",
+    "mma_record": "22–9 (1 NC)"
+  },
+  {
+    "name": "Jimmy Crute",
+    "division": "Light Heavyweight",
+    "country": "Australia",
+    "age": "30",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "The Brute",
+    "mma_record": "14–4–2"
+  },
+  {
+    "name": "Alonzo Menifield",
+    "division": "Light Heavyweight",
+    "country": "United States",
+    "age": "38",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Atomic",
+    "mma_record": "17–6–1"
+  },
+  {
+    "name": "Jamahal Hill",
+    "division": "Light Heavyweight",
+    "country": "United States",
+    "age": "34",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "Sweet Dreams",
+    "mma_record": "13–3 (1 NC)"
+  },
+  {
+    "name": "Jiří Procházka",
+    "division": "Light Heavyweight",
+    "country": "Czech Republic",
+    "age": "33",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "BJP",
+    "mma_record": "32–5–1"
+  },
+  {
+    "name": "Modestas Bukauskas",
+    "division": "Light Heavyweight",
+    "country": "Lithuania",
+    "age": "32",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "The Baltic Gladiator",
+    "mma_record": "19–7"
+  },
+  {
+    "name": "Carlos Ulberg",
+    "division": "Light Heavyweight",
+    "country": "New Zealand",
+    "age": "35",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "Black Jag",
+    "mma_record": "13–1"
+  },
+  {
+    "name": "Alex Pereira (c)",
+    "division": "Light Heavyweight",
+    "country": "Brazil",
+    "age": "38",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "Poatan",
+    "mma_record": "13–3"
+  },
+  {
+    "name": "Azamat Murzakanov",
+    "division": "Light Heavyweight",
+    "country": "Russia",
+    "age": "36",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Professional",
+    "mma_record": "16–0"
+  },
+  {
+    "name": "Junior Tafa",
+    "division": "Light Heavyweight",
+    "country": "Australia",
+    "age": "29",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "The Juggernaut",
+    "mma_record": "6–5"
+  },
+  {
+    "name": "Bogdan Guskov",
+    "division": "Light Heavyweight",
+    "country": "Uzbekistan",
+    "age": "33",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "Czarevitch",
+    "mma_record": "18–3–1"
+  },
+  {
+    "name": "Rodolfo Bellato",
+    "division": "Light Heavyweight",
+    "country": "Brazil",
+    "age": "30",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "Trator",
+    "mma_record": "12–3–1 (1 NC)"
+  },
+  {
+    "name": "Zhang Mingyang",
+    "division": "Light Heavyweight",
+    "country": "China",
+    "age": "27",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Mountain Tiger",
+    "mma_record": "19–7"
+  },
+  {
+    "name": "Brendson Ribeiro",
+    "division": "Light Heavyweight",
+    "country": "Brazil",
+    "age": "29",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "The Gorilla",
+    "mma_record": "17–9"
+  },
+  {
+    "name": "İbo Aslan",
+    "division": "Light Heavyweight",
+    "country": "Turkey",
+    "age": "29",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "The Last Ottoman",
+    "mma_record": "14–4"
+  },
+  {
+    "name": "Oumar Sy",
+    "division": "Light Heavyweight",
+    "country": "France",
+    "age": "30",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "UFC Fight Night 269 (Las Vegas) – Ion Cuțelaba",
+    "mma_record": "12–1"
+  },
+  {
+    "name": "Tuco Tokkos",
+    "division": "Light Heavyweight",
+    "country": "England",
+    "age": "35",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "1–2",
+    "mma_record": "11–5"
+  },
+  {
+    "name": "Ivan Erslan",
+    "division": "Light Heavyweight",
+    "country": "Croatia",
+    "age": "34",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "0–3",
+    "mma_record": "14–6"
+  },
+  {
+    "name": "Navajo Stirling",
+    "division": "Light Heavyweight",
+    "country": "New Zealand",
+    "age": "28",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "UFC Fight Night 271 (Seattle) – Bruno Lopes",
+    "mma_record": "8–0"
+  },
+  {
+    "name": "Bruno Lopes",
+    "division": "Light Heavyweight",
+    "country": "Brazil",
+    "age": "32",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Brunão",
+    "mma_record": "14–2"
+  },
+  {
+    "name": "Billy Elekana",
+    "division": "Light Heavyweight",
+    "country": "United States",
+    "age": "30",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "Win – UFC 325 (Sydney) – Junior Tafa",
+    "mma_record": "10–2"
+  },
+  {
+    "name": "Julius Walker",
+    "division": "Light Heavyweight",
+    "country": "United States",
+    "age": "26",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "Juice Box",
+    "mma_record": "7–2"
+  },
+  {
+    "name": "Diyar Nurgozhay",
+    "division": "Light Heavyweight",
+    "country": "Kazakhstan",
+    "age": "28",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "UFC 326 (Las Vegas) – Rafael Tobias",
+    "mma_record": "10–2"
+  },
+  {
+    "name": "Uran Satybaldiev",
+    "division": "Light Heavyweight",
+    "country": "Kyrgyzstan",
+    "age": "31",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "Gorilla",
+    "mma_record": "10–1"
+  },
+  {
+    "name": "Kevin Christian",
+    "division": "Light Heavyweight",
+    "country": "Brazil",
+    "age": "31",
+    "height": "6 ft 7 in (2.01 m)",
+    "nickname": "0–1",
+    "mma_record": "9–3"
+  },
+  {
+    "name": "Abdul-Rakhman Yakhyaev",
+    "division": "Light Heavyweight",
+    "country": "Turkey",
+    "age": "25",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Hunter",
+    "mma_record": "8–0"
+  },
+  {
+    "name": "Iwo Baraniewski",
+    "division": "Light Heavyweight",
+    "country": "Poland",
+    "age": "27",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Rudy",
+    "mma_record": "7–0"
+  },
+  {
+    "name": "Brad Tavares",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "38",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "UFC Fight Night 269 (Las Vegas) – Eryk Anders",
+    "mma_record": "21–11"
+  },
+  {
+    "name": "Robert Whittaker",
+    "division": "Middleweight",
+    "country": "Australia",
+    "age": "35",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "The Reaper",
+    "mma_record": "26–9"
+  },
+  {
+    "name": "Kelvin Gastelum",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "34",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "14–10 (1 NC)",
+    "mma_record": "20–10 (1 NC)"
+  },
+  {
+    "name": "Sean Strickland",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "34",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Tarzan",
+    "mma_record": "29–7"
+  },
+  {
+    "name": "Jared Cannonier",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "41",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Tha Killa Gorilla",
+    "mma_record": "18–9"
+  },
+  {
+    "name": "Marvin Vettori",
+    "division": "Middleweight",
+    "country": "Italy",
+    "age": "32",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "The Italian Dream",
+    "mma_record": "19–9–1"
+  },
+  {
+    "name": "Gerald Meerschaert",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "38",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "GM3",
+    "mma_record": "37–21"
+  },
+  {
+    "name": "Paulo Costa",
+    "division": "Middleweight",
+    "country": "Brazil",
+    "age": "34",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "The Eraser",
+    "mma_record": "15–4"
+  },
+  {
+    "name": "Eryk Anders",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "38",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Ya Boi",
+    "mma_record": "17–9 (1 NC)"
+  },
+  {
+    "name": "Michał Oleksiejczuk",
+    "division": "Middleweight",
+    "country": "Poland",
+    "age": "30",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Hussar",
+    "mma_record": "22–9 (1 NC)"
+  },
+  {
+    "name": "Israel Adesanya",
+    "division": "Middleweight",
+    "country": "Nigeria",
+    "age": "36",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "The Last Stylebender",
+    "mma_record": "24–5"
+  },
+  {
+    "name": "Edmen Shahbazyan",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "28",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "The Golden Boy",
+    "mma_record": "16–5"
+  },
+  {
+    "name": "Anthony Hernandez",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "32",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Fluffy",
+    "mma_record": "15–2 (1 NC)"
+  },
+  {
+    "name": "Ismail Naurdiev",
+    "division": "Middleweight",
+    "country": "Austria",
+    "age": "29",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "The Austrian Wonderboy",
+    "mma_record": "25–8"
+  },
+  {
+    "name": "Marc-André Barriault",
+    "division": "Middleweight",
+    "country": "Canada",
+    "age": "36",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Power Bar",
+    "mma_record": "17–10 (1 NC)"
+  },
+  {
+    "name": "Michel Pereira",
+    "division": "Middleweight",
+    "country": "Brazil",
+    "age": "32",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Demolidor",
+    "mma_record": "31–14 (2 NC)"
+  },
+  {
+    "name": "Rodolfo Vieira",
+    "division": "Middleweight",
+    "country": "Brazil",
+    "age": "36",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Tha Black Belt Hunter",
+    "mma_record": "11–4"
+  },
+  {
+    "name": "Park Jun-yong",
+    "division": "Middleweight",
+    "country": "South Korea",
+    "age": "34",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "The Iron Turtle",
+    "mma_record": "18–8"
+  },
+  {
+    "name": "Brendan Allen",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "30",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "All In",
+    "mma_record": "26–7"
+  },
+  {
+    "name": "Roman Kopylov",
+    "division": "Middleweight",
+    "country": "Russia",
+    "age": "34",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "6–5",
+    "mma_record": "14–5"
+  },
+  {
+    "name": "Kyle Daukaus",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "32",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "The D'Arce Knight",
+    "mma_record": "17–4 (1 NC)"
+  },
+  {
+    "name": "Khamzat Chimaev (c)",
+    "division": "Middleweight",
+    "country": "United Arab Emirates",
+    "age": "31",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Borz",
+    "mma_record": "15–0"
+  },
+  {
+    "name": "Roman Dolidze",
+    "division": "Middleweight",
+    "country": "Georgia (country)",
+    "age": "37",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "Bazooka",
+    "mma_record": "15–4"
+  },
+  {
+    "name": "Nassourdine Imavov",
+    "division": "Middleweight",
+    "country": "France",
+    "age": "30",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "9–2 (1 NC)",
+    "mma_record": "17–4 (1 NC)"
+  },
+  {
+    "name": "Duško Todorović",
+    "division": "Middleweight",
+    "country": "Serbia",
+    "age": "31",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Thunder",
+    "mma_record": "13–6"
+  },
+  {
+    "name": "Dricus du Plessis",
+    "division": "Middleweight",
+    "country": "South Africa",
+    "age": "32",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Stillknocks",
+    "mma_record": "23–3"
+  },
+  {
+    "name": "Cody Brundage",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "31",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "UFC 326 (Las Vegas) – Donte Johnson",
+    "mma_record": "11–8–1 (1 NC)"
+  },
+  {
+    "name": "Jacob Malkoun",
+    "division": "Middleweight",
+    "country": "Australia",
+    "age": "30",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Mamba",
+    "mma_record": "9–3"
+  },
+  {
+    "name": "Dustin Stoltzfus",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "34",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "3–7",
+    "mma_record": "16–8"
+  },
+  {
+    "name": "Gregory Rodrigues",
+    "division": "Middleweight",
+    "country": "Brazil",
+    "age": "34",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "Robocop",
+    "mma_record": "18–6"
+  },
+  {
+    "name": "Andre Petroski",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "34",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "8–4",
+    "mma_record": "13–5"
+  },
+  {
+    "name": "Tresean Gore",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "31",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Mr. Vicious",
+    "mma_record": "5–4"
+  },
+  {
+    "name": "Caio Borralho",
+    "division": "Middleweight",
+    "country": "Brazil",
+    "age": "33",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Natural",
+    "mma_record": "17–2 (1 NC)"
+  },
+  {
+    "name": "Abusupiyan Magomedov",
+    "division": "Middleweight",
+    "country": "Germany",
+    "age": "35",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Abus",
+    "mma_record": "28–7–1"
+  },
+  {
+    "name": "Joe Pyfer",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "29",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Bodybagz",
+    "mma_record": "15–3"
+  },
+  {
+    "name": "Brunno Ferreira",
+    "division": "Middleweight",
+    "country": "Brazil",
+    "age": "33",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Hulk",
+    "mma_record": "15–2"
+  },
+  {
+    "name": "Bo Nickal",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "30",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "5–1",
+    "mma_record": "8–1"
+  },
+  {
+    "name": "Sedriques Dumas",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "30",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "The Reaper",
+    "mma_record": "10–4 (1 NC)"
+  },
+  {
+    "name": "Christian Leroy Duncan",
+    "division": "Middleweight",
+    "country": "England",
+    "age": "30",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "UFC Fight Night 270 (London) – Roman Dolidze",
+    "mma_record": "13–2"
+  },
+  {
+    "name": "Ikram Aliskerov",
+    "division": "Middleweight",
+    "country": "Russia",
+    "age": "33",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "4–1",
+    "mma_record": "17–2"
+  },
+  {
+    "name": "Nursulton Ruziboev",
+    "division": "Middleweight",
+    "country": "Uzbekistan",
+    "age": "32",
+    "height": "6 ft 5 in (1.96 m)",
+    "nickname": "Black",
+    "mma_record": "36–9–2 (2 NC)"
+  },
+  {
+    "name": "Sharabutdin Magomedov",
+    "division": "Middleweight",
+    "country": "Russia",
+    "age": "31",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Bullet",
+    "mma_record": "16–1"
+  },
+  {
+    "name": "Zachary Reese",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "31",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "Savage",
+    "mma_record": "10–2 (1 NC)"
+  },
+  {
+    "name": "Robert Bryczek",
+    "division": "Middleweight",
+    "country": "Poland",
+    "age": "35",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "1–1",
+    "mma_record": "18–6"
+  },
+  {
+    "name": "Michael Page",
+    "division": "Middleweight",
+    "country": "England",
+    "age": "38",
+    "height": "6 ft 3 in (1.93 m)",
+    "nickname": "Venom",
+    "mma_record": "24–3"
+  },
+  {
+    "name": "César Almeida",
+    "division": "Middleweight",
+    "country": "Brazil",
+    "age": "37",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Cesinha",
+    "mma_record": "7–2"
+  },
+  {
+    "name": "Antonio Trócoli",
+    "division": "Middleweight",
+    "country": "Brazil",
+    "age": "35",
+    "height": "6 ft 5 in (1.96 m)",
+    "nickname": "Malvado",
+    "mma_record": "12–7"
+  },
+  {
+    "name": "José Medina",
+    "division": "Middleweight",
+    "country": "Bolivia",
+    "age": "34",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Chicho",
+    "mma_record": "11–6"
+  },
+  {
+    "name": "Robert Valentin",
+    "division": "Middleweight",
+    "country": "Switzerland",
+    "age": "30",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Robzilla",
+    "mma_record": "10–6"
+  },
+  {
+    "name": "Ryan Loder",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "34",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Man of Steel",
+    "mma_record": "7–3"
+  },
+  {
+    "name": "Mansur Abdul-Malik",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "28",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "UFC Fight Night 271 (Seattle) – Yousri Belgaroui",
+    "mma_record": "10–0–1"
+  },
+  {
+    "name": "Reinier de Ridder",
+    "division": "Middleweight",
+    "country": "Netherlands",
+    "age": "35",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "The Dutch Knight",
+    "mma_record": "21–3"
+  },
+  {
+    "name": "Osman Diaz",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "35",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "Ozzy",
+    "mma_record": "10–3"
+  },
+  {
+    "name": "Marco Tulio",
+    "division": "Middleweight",
+    "country": "Brazil",
+    "age": "31",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Matuto",
+    "mma_record": "14–2"
+  },
+  {
+    "name": "Azamat Bekoev",
+    "division": "Middleweight",
+    "country": "Russia",
+    "age": "30",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Iron",
+    "mma_record": "20–4"
+  },
+  {
+    "name": "Eric McConico",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "35",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "1–2",
+    "mma_record": "10–4–1"
+  },
+  {
+    "name": "Nick Klein",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "30",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Blue Collar",
+    "mma_record": "6–3"
+  },
+  {
+    "name": "Djorden Ribeiro dos Santos",
+    "division": "Middleweight",
+    "country": "Brazil",
+    "age": "28",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Shakur",
+    "mma_record": "11–2"
+  },
+  {
+    "name": "Andrey Pulyaev",
+    "division": "Middleweight",
+    "country": "Russia",
+    "age": "28",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "Loss – UFC 324 (Las Vegas) – Ateba Gautier",
+    "mma_record": "10–4"
+  },
+  {
+    "name": "Ateba Gautier",
+    "division": "Middleweight",
+    "country": "Cameroon",
+    "age": "23",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "The Silent Assassin",
+    "mma_record": "10–1"
+  },
+  {
+    "name": "Torrez Finney",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "27",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "The Punisher",
+    "mma_record": "11–1"
+  },
+  {
+    "name": "Jackson McVey",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "26",
+    "height": "6 ft 4 in (1.93 m)",
+    "nickname": "The Moose",
+    "mma_record": "6–2"
+  },
+  {
+    "name": "Baisangur Susurkaev",
+    "division": "Middleweight",
+    "country": "Russia",
+    "age": "25",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Hunter",
+    "mma_record": "11–0"
+  },
+  {
+    "name": "Eric Nolan",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "28",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Night Time",
+    "mma_record": "8–4"
+  },
+  {
+    "name": "Cameron Rowston",
+    "division": "Middleweight",
+    "country": "Australia",
+    "age": "31",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "Battle Giraffe",
+    "mma_record": "14–3"
+  },
+  {
+    "name": "Tre'ston Vines",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "29",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "The Black Mamba",
+    "mma_record": "10–4"
+  },
+  {
+    "name": "Yousri Belgaroui",
+    "division": "Middleweight",
+    "country": "Netherlands",
+    "age": "33",
+    "height": "6 ft 5 in (1.96 m)",
+    "nickname": "Baby Face Assassin",
+    "mma_record": "9–3"
+  },
+  {
+    "name": "Donte Johnson",
+    "division": "Middleweight",
+    "country": "United States",
+    "age": "27",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Lockjaw",
+    "mma_record": "7–0"
+  },
+  {
+    "name": "Cezary Oleksiejczuk",
+    "division": "Middleweight",
+    "country": "Poland",
+    "age": "26",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "1–0",
+    "mma_record": "17–3"
+  },
+  {
+    "name": "Rafael dos Anjos",
+    "division": "Welterweight",
+    "country": "Brazil",
+    "age": "41",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "21–15",
+    "mma_record": "32–17"
+  },
+  {
+    "name": "Court McGee",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "41",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Crusher",
+    "mma_record": "22–14"
+  },
+  {
+    "name": "Stephen Thompson",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "43",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Wonderboy",
+    "mma_record": "17–9–1"
+  },
+  {
+    "name": "Tim Means",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "42",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "The Dirty Bird",
+    "mma_record": "33–17–1 (1 NC)"
+  },
+  {
+    "name": "Michael Chiesa",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "38",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Maverick",
+    "mma_record": "21–7"
+  },
+  {
+    "name": "Gunnar Nelson",
+    "division": "Welterweight",
+    "country": "Iceland",
+    "age": "37",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Gunni",
+    "mma_record": "19–6–1"
+  },
+  {
+    "name": "Neil Magny",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "38",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "The Haitian Sensation",
+    "mma_record": "31–14"
+  },
+  {
+    "name": "Santiago Ponzinibbio",
+    "division": "Welterweight",
+    "country": "Argentina",
+    "age": "39",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Gente Boa",
+    "mma_record": "30–9"
+  },
+  {
+    "name": "Li Jingliang",
+    "division": "Welterweight",
+    "country": "China",
+    "age": "37",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "The Leech",
+    "mma_record": "19–9"
+  },
+  {
+    "name": "Jake Matthews",
+    "division": "Welterweight",
+    "country": "Australia",
+    "age": "31",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Celtic Kid",
+    "mma_record": "22–8"
+  },
+  {
+    "name": "Gilbert Burns",
+    "division": "Welterweight",
+    "country": "Brazil",
+    "age": "39",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Durinho",
+    "mma_record": "22–9"
+  },
+  {
+    "name": "Colby Covington",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "37",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Chaos",
+    "mma_record": "17–5"
+  },
+  {
+    "name": "Leon Edwards",
+    "division": "Welterweight",
+    "country": "England",
+    "age": "34",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Rocky",
+    "mma_record": "22–6 (1 NC)"
+  },
+  {
+    "name": "Islam Makhachev (c)",
+    "division": "Welterweight",
+    "country": "Russia",
+    "age": "34",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "17–1",
+    "mma_record": "28–1"
+  },
+  {
+    "name": "Nicolas Dalby",
+    "division": "Welterweight",
+    "country": "Denmark",
+    "age": "41",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Lokomotivo",
+    "mma_record": "24–6–1 (2 NC)"
+  },
+  {
+    "name": "Vicente Luque",
+    "division": "Welterweight",
+    "country": "Brazil",
+    "age": "34",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Silent Assassin",
+    "mma_record": "23–12–1"
+  },
+  {
+    "name": "Kamaru Usman",
+    "division": "Welterweight",
+    "country": "Nigeria",
+    "age": "38",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "The Nigerian Nightmare",
+    "mma_record": "21–4"
+  },
+  {
+    "name": "Randy Brown",
+    "division": "Welterweight",
+    "country": "Jamaica",
+    "age": "35",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "Rude Boy",
+    "mma_record": "20–7"
+  },
+  {
+    "name": "Mickey Gall",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "34",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "6–7",
+    "mma_record": "7–7"
+  },
+  {
+    "name": "Belal Muhammad",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "37",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Remember the Name",
+    "mma_record": "24–5 (1 NC)"
+  },
+  {
+    "name": "Max Griffin",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "40",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Pain",
+    "mma_record": "20–12"
+  },
+  {
+    "name": "Jack Hermansson",
+    "division": "Welterweight",
+    "country": "Norway",
+    "age": "37",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "The Joker",
+    "mma_record": "24–10"
+  },
+  {
+    "name": "Niko Price",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "36",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "The Hybrid",
+    "mma_record": "16–10 (2 NC)"
+  },
+  {
+    "name": "Song Kenan",
+    "division": "Welterweight",
+    "country": "China",
+    "age": "35",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "The Assassin",
+    "mma_record": "22–9"
+  },
+  {
+    "name": "Muslim Salikhov",
+    "division": "Welterweight",
+    "country": "Russia",
+    "age": "41",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "King of Kung Fu",
+    "mma_record": "22–6"
+  },
+  {
+    "name": "Geoff Neal",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "35",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Handz of Steel",
+    "mma_record": "16–7"
+  },
+  {
+    "name": "Kevin Holland",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "33",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "Trailblazer",
+    "mma_record": "28–15 (1 NC)"
+  },
+  {
+    "name": "Joel Álvarez",
+    "division": "Welterweight",
+    "country": "Spain",
+    "age": "32",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "El Fenomeno",
+    "mma_record": "23–3"
+  },
+  {
+    "name": "Sean Brady",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "33",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "8–2",
+    "mma_record": "18–2"
+  },
+  {
+    "name": "Punahele Soriano",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "33",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Story Time",
+    "mma_record": "12–4"
+  },
+  {
+    "name": "Khaos Williams",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "31",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Khaos The Ox Fighter",
+    "mma_record": "15–5"
+  },
+  {
+    "name": "Joaquin Buckley",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "31",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "New Mansa",
+    "mma_record": "21–7"
+  },
+  {
+    "name": "Daniel Rodriguez",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "39",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "D-Rod",
+    "mma_record": "20–5"
+  },
+  {
+    "name": "Shavkat Rakhmonov",
+    "division": "Welterweight",
+    "country": "Kazakhstan",
+    "age": "31",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Nomad",
+    "mma_record": "19–0"
+  },
+  {
+    "name": "Ramiz Brahimaj",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "33",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "UFC Fight Night 267 (Houston) – Punahele Soriano",
+    "mma_record": "13–5"
+  },
+  {
+    "name": "Philip Rowe",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "35",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "The Fresh Prince",
+    "mma_record": "11–6"
+  },
+  {
+    "name": "Uroš Medić",
+    "division": "Welterweight",
+    "country": "Serbia",
+    "age": "32",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "The Doctor",
+    "mma_record": "12–3"
+  },
+  {
+    "name": "Carlston Harris",
+    "division": "Welterweight",
+    "country": "Guyana",
+    "age": "38",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Moçambique",
+    "mma_record": "19–7"
+  },
+  {
+    "name": "Jeremiah Wells",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "39",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "5–2",
+    "mma_record": "13–4–1"
+  },
+  {
+    "name": "Gilbert Urbina",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "29",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "1–3",
+    "mma_record": "7–4"
+  },
+  {
+    "name": "Chris Curtis",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "38",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Action Man",
+    "mma_record": "32–12 (1 NC)"
+  },
+  {
+    "name": "Ian Machado Garry",
+    "division": "Welterweight",
+    "country": "Republic of Ireland",
+    "age": "28",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "The Future",
+    "mma_record": "17–1"
+  },
+  {
+    "name": "Jack Della Maddalena",
+    "division": "Welterweight",
+    "country": "Australia",
+    "age": "29",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "8–1",
+    "mma_record": "18–3"
+  },
+  {
+    "name": "Michael Morales",
+    "division": "Welterweight",
+    "country": "Ecuador",
+    "age": "26",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "7–0",
+    "mma_record": "19–0"
+  },
+  {
+    "name": "Chidi Njokuani",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "37",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "Chidi Bang Bang",
+    "mma_record": "25–11 (1 NC)"
+  },
+  {
+    "name": "Mike Malott",
+    "division": "Welterweight",
+    "country": "Canada",
+    "age": "34",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Proper",
+    "mma_record": "13–2–1"
+  },
+  {
+    "name": "Gabriel Bonfim",
+    "division": "Welterweight",
+    "country": "Brazil",
+    "age": "28",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Marretinha",
+    "mma_record": "19–1"
+  },
+  {
+    "name": "Francisco Prado",
+    "division": "Welterweight",
+    "country": "Argentina",
+    "age": "23",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "1–4",
+    "mma_record": "12–4"
+  },
+  {
+    "name": "Themba Gorimbo",
+    "division": "Welterweight",
+    "country": "Zimbabwe",
+    "age": "35",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "The Answer",
+    "mma_record": "14–6"
+  },
+  {
+    "name": "Sam Patterson",
+    "division": "Welterweight",
+    "country": "England",
+    "age": "29",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "The Future",
+    "mma_record": "14–2–1"
+  },
+  {
+    "name": "Trey Waters",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "31",
+    "height": "6 ft 5 in (1.96 m)",
+    "nickname": "The Truth",
+    "mma_record": "9–2"
+  },
+  {
+    "name": "Bassil Hafez",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "34",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Habibi",
+    "mma_record": "9–5–1"
+  },
+  {
+    "name": "Billy Ray Goff",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "27",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "1–2",
+    "mma_record": "9–4"
+  },
+  {
+    "name": "Charlie Radtke",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "35",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Chuck Buffalo",
+    "mma_record": "11–5"
+  },
+  {
+    "name": "Myktybek Orolbai",
+    "division": "Welterweight",
+    "country": "Kyrgyzstan",
+    "age": "28",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Kyrgyz",
+    "mma_record": "15–2–1"
+  },
+  {
+    "name": "Carlos Prates",
+    "division": "Welterweight",
+    "country": "Brazil",
+    "age": "32",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Carlão",
+    "mma_record": "23–7"
+  },
+  {
+    "name": "Oban Elliott",
+    "division": "Welterweight",
+    "country": "Wales",
+    "age": "28",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "The Welsh Gangster",
+    "mma_record": "12–4"
+  },
+  {
+    "name": "Nikolay Veretennikov",
+    "division": "Welterweight",
+    "country": "Kazakhstan",
+    "age": "36",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Win – UFC Fight Night 266 (Las Vegas) – Niko Price",
+    "mma_record": "14–7"
+  },
+  {
+    "name": "Carlos Leal Miranda",
+    "division": "Welterweight",
+    "country": "Brazil",
+    "age": "31",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Lion",
+    "mma_record": "22–7"
+  },
+  {
+    "name": "Jacobe Smith",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "30",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Cobe",
+    "mma_record": "11–0"
+  },
+  {
+    "name": "Jonathan Micallef",
+    "division": "Welterweight",
+    "country": "Australia",
+    "age": "26",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "The Captain",
+    "mma_record": "9–1"
+  },
+  {
+    "name": "Austin Vanderford",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "35",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Gentleman",
+    "mma_record": "13–3"
+  },
+  {
+    "name": "Daniel Frunza",
+    "division": "Welterweight",
+    "country": "Romania",
+    "age": "31",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Tigano",
+    "mma_record": "9–4"
+  },
+  {
+    "name": "Andreas Gustafsson",
+    "division": "Welterweight",
+    "country": "Sweden",
+    "age": "35",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Bane",
+    "mma_record": "12–3"
+  },
+  {
+    "name": "Ko Seok-hyeon",
+    "division": "Welterweight",
+    "country": "South Korea",
+    "age": "32",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Korean Tyson",
+    "mma_record": "13–2"
+  },
+  {
+    "name": "Islam Dulatov",
+    "division": "Welterweight",
+    "country": "Germany",
+    "age": "27",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "The Ripper",
+    "mma_record": "12–1"
+  },
+  {
+    "name": "Taiyilake Nueraji",
+    "division": "Welterweight",
+    "country": "China",
+    "age": "25",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Super Saiyan",
+    "mma_record": "12–1 (1 NC)"
+  },
+  {
+    "name": "Axel Sola",
+    "division": "Welterweight",
+    "country": "France",
+    "age": "28",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "UFC Fight Night 270 (London) – Mason Jones / Moving to Lightweight",
+    "mma_record": "11–0–1"
+  },
+  {
+    "name": "Rodrigo Sezinando",
+    "division": "Welterweight",
+    "country": "Brazil",
+    "age": "28",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "0–1",
+    "mma_record": "8–2"
+  },
+  {
+    "name": "Daniil Donchenko",
+    "division": "Welterweight",
+    "country": "Ukraine",
+    "age": "24",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Win – UFC Fight Night 266 (Las Vegas) – Alex Morono",
+    "mma_record": "13–2"
+  },
+  {
+    "name": "Saygid Izagakhmaev",
+    "division": "Welterweight",
+    "country": "Russia",
+    "age": "34",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "0–1",
+    "mma_record": "22–3"
+  },
+  {
+    "name": "Yaroslav Amosov",
+    "division": "Welterweight",
+    "country": "Ukraine",
+    "age": "32",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Dynamo",
+    "mma_record": "29–1"
+  },
+  {
+    "name": "Ty Miller",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "25",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "Thriller",
+    "mma_record": "7–0"
+  },
+  {
+    "name": "Jean-Paul Lebosnoyani",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "27",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Mufasa",
+    "mma_record": "9–2"
+  },
+  {
+    "name": "Josiah Harrell",
+    "division": "Welterweight",
+    "country": "United States",
+    "age": "27",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Muscle Hamster",
+    "mma_record": "11–0"
+  },
+  {
+    "name": "Jeremy Stephens",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "39",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Lil Heathen",
+    "mma_record": "29–22 (1 NC)"
+  },
+  {
+    "name": "Jim Miller",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "42",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "A-10",
+    "mma_record": "38–19 (1 NC)"
+  },
+  {
+    "name": "Charles Oliveira",
+    "division": "Lightweight",
+    "country": "Brazil",
+    "age": "36",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Do Bronx",
+    "mma_record": "36–11 (1 NC)"
+  },
+  {
+    "name": "Edson Barboza",
+    "division": "Lightweight",
+    "country": "Brazil",
+    "age": "40",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Junior",
+    "mma_record": "24–14"
+  },
+  {
+    "name": "Michael Johnson",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "39",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "The Menace",
+    "mma_record": "24–19"
+  },
+  {
+    "name": "Max Holloway",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "34",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Blessed",
+    "mma_record": "27–8"
+  },
+  {
+    "name": "King Green *",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "39",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "King",
+    "mma_record": "33–17–1 (1 NC)"
+  },
+  {
+    "name": "Drew Dober",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "37",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "UFC 326 (Las Vegas) – Michael Johnson",
+    "mma_record": "28–15 (1 NC)"
+  },
+  {
+    "name": "Beneil Dariush",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "36",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "17–7–1",
+    "mma_record": "23–7–1"
+  },
+  {
+    "name": "Dan Hooker",
+    "division": "Lightweight",
+    "country": "New Zealand",
+    "age": "36",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "The Hangman",
+    "mma_record": "24–14"
+  },
+  {
+    "name": "Carlos Diego Ferreira",
+    "division": "Lightweight",
+    "country": "Brazil",
+    "age": "41",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "10–7",
+    "mma_record": "19–7"
+  },
+  {
+    "name": "Renato Moicano",
+    "division": "Lightweight",
+    "country": "Brazil",
+    "age": "36",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Money Moicano",
+    "mma_record": "20–7–1"
+  },
+  {
+    "name": "Joaquim Silva",
+    "division": "Lightweight",
+    "country": "Brazil",
+    "age": "37",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Netto BJJ",
+    "mma_record": "14–5"
+  },
+  {
+    "name": "Damir Hadžović",
+    "division": "Lightweight",
+    "country": "Denmark",
+    "age": "39",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Bosnian Bomber",
+    "mma_record": "14–8"
+  },
+  {
+    "name": "Claudio Puelles",
+    "division": "Lightweight",
+    "country": "Peru",
+    "age": "29",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Prince of Peru",
+    "mma_record": "12–5"
+  },
+  {
+    "name": "Drakkar Klose",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "37",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "10–3",
+    "mma_record": "16–3–1"
+  },
+  {
+    "name": "Jared Gordon",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "37",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Flash",
+    "mma_record": "21–8 (1 NC)"
+  },
+  {
+    "name": "Justin Gaethje (ic)",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "37",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Highlight",
+    "mma_record": "27–5"
+  },
+  {
+    "name": "Alex Reyes",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "39",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Executioner",
+    "mma_record": "13–5"
+  },
+  {
+    "name": "Nasrat Haqparast",
+    "division": "Lightweight",
+    "country": "Germany",
+    "age": "30",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "10–5",
+    "mma_record": "18–6"
+  },
+  {
+    "name": "Matt Frevola",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "35",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Steamrolla",
+    "mma_record": "11–6–1"
+  },
+  {
+    "name": "Alexander Hernandez",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "33",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "The Great",
+    "mma_record": "18–8"
+  },
+  {
+    "name": "Jalin Turner",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "30",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "8–6",
+    "mma_record": "15–9"
+  },
+  {
+    "name": "Thiago Moisés",
+    "division": "Lightweight",
+    "country": "Brazil",
+    "age": "30",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "8–7",
+    "mma_record": "19–9"
+  },
+  {
+    "name": "Sodiq Yusuff",
+    "division": "Lightweight",
+    "country": "Nigeria",
+    "age": "32",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Super",
+    "mma_record": "13–5"
+  },
+  {
+    "name": "Kyle Nelson",
+    "division": "Lightweight",
+    "country": "Canada",
+    "age": "34",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Monster",
+    "mma_record": "17–6–1"
+  },
+  {
+    "name": "Grant Dawson",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "32",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Prophet",
+    "mma_record": "23–3–1"
+  },
+  {
+    "name": "Rafael Fiziev",
+    "division": "Lightweight",
+    "country": "Azerbaijan",
+    "age": "32",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Ataman",
+    "mma_record": "13–5"
+  },
+  {
+    "name": "Arman Tsarukyan",
+    "division": "Lightweight",
+    "country": "Armenia",
+    "age": "29",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Ahalkalakets",
+    "mma_record": "23–3"
+  },
+  {
+    "name": "Mike Davis",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "33",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Beast Boy",
+    "mma_record": "12–3"
+  },
+  {
+    "name": "Kyle Prepolec",
+    "division": "Lightweight",
+    "country": "Canada",
+    "age": "36",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Kill Shot",
+    "mma_record": "18–10"
+  },
+  {
+    "name": "Farès Ziam",
+    "division": "Lightweight",
+    "country": "France",
+    "age": "28",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Smile Killer",
+    "mma_record": "18–4"
+  },
+  {
+    "name": "Jamie Mullarkey",
+    "division": "Lightweight",
+    "country": "Australia",
+    "age": "31",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Loss – UFC 325 (Sydney) – Quillan Salkilld",
+    "mma_record": "18–9"
+  },
+  {
+    "name": "Ottman Azaitar",
+    "division": "Lightweight",
+    "country": "Germany",
+    "age": "36",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Bulldozer",
+    "mma_record": "13–3"
+  },
+  {
+    "name": "Chase Hooper",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "26",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "The Dream",
+    "mma_record": "16–4–1"
+  },
+  {
+    "name": "Gabriel Green",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "32",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Gifted",
+    "mma_record": "12–5"
+  },
+  {
+    "name": "Jai Herbert",
+    "division": "Lightweight",
+    "country": "England",
+    "age": "37",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "The Black Country Banger",
+    "mma_record": "13–6–1"
+  },
+  {
+    "name": "Ľudovít Klein",
+    "division": "Lightweight",
+    "country": "Slovakia",
+    "age": "30",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Mr. Highlight",
+    "mma_record": "24–5–1"
+  },
+  {
+    "name": "Ilia Topuria (c)",
+    "division": "Lightweight",
+    "country": "Spain",
+    "age": "29",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "El Matador",
+    "mma_record": "17–0"
+  },
+  {
+    "name": "Mateusz Gamrot",
+    "division": "Lightweight",
+    "country": "Poland",
+    "age": "35",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Gamer",
+    "mma_record": "25–4 (1 NC)"
+  },
+  {
+    "name": "Michael Chandler",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "39",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Iron",
+    "mma_record": "23–10"
+  },
+  {
+    "name": "Rafa García",
+    "division": "Lightweight",
+    "country": "Mexico",
+    "age": "31",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Gifted",
+    "mma_record": "17–4"
+  },
+  {
+    "name": "Ignacio Bahamondes",
+    "division": "Lightweight",
+    "country": "Chile",
+    "age": "28",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "La Jaula",
+    "mma_record": "17–6"
+  },
+  {
+    "name": "Rong Zhu",
+    "division": "Lightweight",
+    "country": "China",
+    "age": "25",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "(January 8, 2026) – Unknown reasons – Out of UFC 325 (Sydney) – Quillan Salkilld",
+    "mma_record": "27–6"
+  },
+  {
+    "name": "Terrance McKinney",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "31",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "T.Wrecks",
+    "mma_record": "17–8"
+  },
+  {
+    "name": "Mason Jones",
+    "division": "Lightweight",
+    "country": "Wales",
+    "age": "30",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Dragon",
+    "mma_record": "16–3 (1 NC)"
+  },
+  {
+    "name": "Paddy Pimblett",
+    "division": "Lightweight",
+    "country": "England",
+    "age": "31",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Baddy",
+    "mma_record": "23–4"
+  },
+  {
+    "name": "Benoît Saint Denis",
+    "division": "Lightweight",
+    "country": "France",
+    "age": "30",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "God of War",
+    "mma_record": "17–3 (1 NC)"
+  },
+  {
+    "name": "Nikolas Motta",
+    "division": "Lightweight",
+    "country": "Brazil",
+    "age": "33",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Iron",
+    "mma_record": "15–6 (1 NC)"
+  },
+  {
+    "name": "Trey Ogden",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "36",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Shamurai",
+    "mma_record": "17–7 (1 NC)"
+  },
+  {
+    "name": "Evan Elder",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "28",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Phenom",
+    "mma_record": "10–2"
+  },
+  {
+    "name": "Manuel Torres",
+    "division": "Lightweight",
+    "country": "Mexico",
+    "age": "30",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "El Loco",
+    "mma_record": "17–3"
+  },
+  {
+    "name": "Daniel Zellhuber",
+    "division": "Lightweight",
+    "country": "Mexico",
+    "age": "26",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Golden Boy",
+    "mma_record": "15–3"
+  },
+  {
+    "name": "Mateusz Rębecki",
+    "division": "Lightweight",
+    "country": "Poland",
+    "age": "33",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Chińczyk",
+    "mma_record": "20–4"
+  },
+  {
+    "name": "Ismael Bonfim",
+    "division": "Lightweight",
+    "country": "Brazil",
+    "age": "30",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Marreta",
+    "mma_record": "20–6"
+  },
+  {
+    "name": "Anshul Jubli",
+    "division": "Lightweight",
+    "country": "India",
+    "age": "31",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "King of Lions",
+    "mma_record": "7–2"
+  },
+  {
+    "name": "Elves Brener",
+    "division": "Lightweight",
+    "country": "Brazil",
+    "age": "28",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "3–3",
+    "mma_record": "16–6"
+  },
+  {
+    "name": "Nazim Sadykhov",
+    "division": "Lightweight",
+    "country": "Azerbaijan",
+    "age": "31",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Black Wolf",
+    "mma_record": "11–2–1"
+  },
+  {
+    "name": "Nurullo Aliev",
+    "division": "Lightweight",
+    "country": "Tajikistan",
+    "age": "26",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Tajik Eagle",
+    "mma_record": "10–0"
+  },
+  {
+    "name": "Victor Martinez",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "34",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "The Brick",
+    "mma_record": "13–6"
+  },
+  {
+    "name": "Trevor Peek",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "31",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "2–3",
+    "mma_record": "9–3 (1 NC)"
+  },
+  {
+    "name": "Esteban Ribovics",
+    "division": "Lightweight",
+    "country": "Argentina",
+    "age": "29",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Gringo",
+    "mma_record": "15–2"
+  },
+  {
+    "name": "Chris Duncan",
+    "division": "Lightweight",
+    "country": "Scotland",
+    "age": "32",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Problem",
+    "mma_record": "15–1"
+  },
+  {
+    "name": "Dennis Buzukja",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "28",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Great",
+    "mma_record": "12–5"
+  },
+  {
+    "name": "Charlie Campbell",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "30",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "The Cannibel",
+    "mma_record": "9–3"
+  },
+  {
+    "name": "Kauê Fernandes",
+    "division": "Lightweight",
+    "country": "Brazil",
+    "age": "30",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "3–1",
+    "mma_record": "11–2"
+  },
+  {
+    "name": "Tom Nolan",
+    "division": "Lightweight",
+    "country": "Australia",
+    "age": "25",
+    "height": "6 ft 3 in (1.91 m)",
+    "nickname": "Big Train",
+    "mma_record": "10–1"
+  },
+  {
+    "name": "MarQuel Mederos",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "29",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "3–0",
+    "mma_record": "11–1"
+  },
+  {
+    "name": "Bolaji Oki",
+    "division": "Lightweight",
+    "country": "Belgium",
+    "age": "30",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Zulu Warrior",
+    "mma_record": "10–3"
+  },
+  {
+    "name": "Abdul-Kareem Al-Selwady",
+    "division": "Lightweight",
+    "country": "Palestine",
+    "age": "30",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Pride of Palestine",
+    "mma_record": "15–4"
+  },
+  {
+    "name": "Mitch Ramirez",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "33",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Fight Stalker",
+    "mma_record": "8–3"
+  },
+  {
+    "name": "Chris Padilla",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "30",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Taco",
+    "mma_record": "17–6"
+  },
+  {
+    "name": "Maurício Ruffy",
+    "division": "Lightweight",
+    "country": "Brazil",
+    "age": "29",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Win – UFC 325 (Sydney) – Rafael Fiziev",
+    "mma_record": "13–2"
+  },
+  {
+    "name": "Quillan Salkilld",
+    "division": "Lightweight",
+    "country": "Australia",
+    "age": "26",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Win – UFC 325 (Sydney) – Jamie Mullarkey",
+    "mma_record": "11–1"
+  },
+  {
+    "name": "Kody Steele",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "30",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "0–1",
+    "mma_record": "7–1"
+  },
+  {
+    "name": "Gauge Young",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "25",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Gee Money",
+    "mma_record": "10–3"
+  },
+  {
+    "name": "Matheus Camilo",
+    "division": "Lightweight",
+    "country": "Brazil",
+    "age": "25",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "1–1",
+    "mma_record": "9–3"
+  },
+  {
+    "name": "Mark Choinski",
+    "division": "Lightweight",
+    "country": "United States",
+    "age": "30",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "The Shark",
+    "mma_record": "7–1"
+  },
+  {
+    "name": "Tofiq Musayev",
+    "division": "Lightweight",
+    "country": "Azerbaijan",
+    "age": "36",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "UFC Fight Night 272 (Las Vegas) – Samuel Sanches",
+    "mma_record": "22–6"
+  },
+  {
+    "name": "Harry Hardwick",
+    "division": "Lightweight",
+    "country": "England",
+    "age": "31",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Houdini",
+    "mma_record": "13–4–1"
+  },
+  {
+    "name": "Shaqueme Rock",
+    "division": "Lightweight",
+    "country": "England",
+    "age": "32",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Shem",
+    "mma_record": "11–2–1"
+  },
+  {
+    "name": "Lance Gibson Jr.",
+    "division": "Lightweight",
+    "country": "Canada",
+    "age": "31",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Fearless",
+    "mma_record": "9–2"
+  },
+  {
+    "name": "Dom Mar Fan",
+    "division": "Lightweight",
+    "country": "Australia",
+    "age": "25",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Street Buddha",
+    "mma_record": "9–2"
+  },
+  {
+    "name": "Kim Sang-wook",
+    "division": "Lightweight",
+    "country": "South Korea",
+    "age": "32",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Frogman",
+    "mma_record": "13–4"
+  },
+  {
+    "name": "Cub Swanson *",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "42",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Killer",
+    "mma_record": "30–14"
+  },
+  {
+    "name": "Darren Elkins",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "41",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Damage",
+    "mma_record": "29–12"
+  },
+  {
+    "name": "Andre Fili",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "35",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Touchy",
+    "mma_record": "25–12 (1 NC)"
+  },
+  {
+    "name": "Aljamain Sterling",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "36",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Funk Master",
+    "mma_record": "25–5"
+  },
+  {
+    "name": "Brian Ortega",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "35",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "T-City",
+    "mma_record": "16–5 (1 NC)"
+  },
+  {
+    "name": "Yair Rodríguez",
+    "division": "Featherweight",
+    "country": "Mexico",
+    "age": "33",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "El Pantera",
+    "mma_record": "16–5 (1 NC)"
+  },
+  {
+    "name": "Choi Doo-ho",
+    "division": "Featherweight",
+    "country": "South Korea",
+    "age": "34",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Korean Superboy",
+    "mma_record": "16–4–1"
+  },
+  {
+    "name": "Arnold Allen",
+    "division": "Featherweight",
+    "country": "England",
+    "age": "32",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Almighty",
+    "mma_record": "20–4"
+  },
+  {
+    "name": "Julian Erosa",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "36",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "Juicy J",
+    "mma_record": "31–12"
+  },
+  {
+    "name": "Josh Emmett",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "40",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "CC0",
+    "mma_record": "19–6"
+  },
+  {
+    "name": "Alexander Volkanovski (c)",
+    "division": "Featherweight",
+    "country": "Australia",
+    "age": "37",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "The Great",
+    "mma_record": "28–4"
+  },
+  {
+    "name": "Gavin Tucker",
+    "division": "Featherweight",
+    "country": "Canada",
+    "age": "39",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "The Newfoundland Terror",
+    "mma_record": "13–3"
+  },
+  {
+    "name": "Calvin Kattar",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "37",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Boston Finisher",
+    "mma_record": "23–9"
+  },
+  {
+    "name": "Dan Ige",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "34",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "50k",
+    "mma_record": "19–10"
+  },
+  {
+    "name": "Nathaniel Wood",
+    "division": "Featherweight",
+    "country": "England",
+    "age": "32",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "The Prospect",
+    "mma_record": "23–6"
+  },
+  {
+    "name": "Movsar Evloev",
+    "division": "Featherweight",
+    "country": "Russia",
+    "age": "33",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "UFC Fight Night 270 (London) – Lerone Murphy",
+    "mma_record": "19–0"
+  },
+  {
+    "name": "Lerone Murphy",
+    "division": "Featherweight",
+    "country": "England",
+    "age": "34",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Miracle",
+    "mma_record": "17–0–1"
+  },
+  {
+    "name": "Giga Chikadze",
+    "division": "Featherweight",
+    "country": "Georgia (country)",
+    "age": "37",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Ninja",
+    "mma_record": "15–6"
+  },
+  {
+    "name": "Sean Woodson",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "33",
+    "height": "6 ft 2 in (1.88 m)",
+    "nickname": "The Sniper",
+    "mma_record": "13–2–1"
+  },
+  {
+    "name": "Billy Quarantillo",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "37",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "6–5",
+    "mma_record": "18–7"
+  },
+  {
+    "name": "Nate Landwehr",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "37",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "The Train",
+    "mma_record": "18–7"
+  },
+  {
+    "name": "Youssef Zalal",
+    "division": "Featherweight",
+    "country": "Morocco",
+    "age": "29",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Moroccan Devil",
+    "mma_record": "18–5–1"
+  },
+  {
+    "name": "Steve Garcia",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "33",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "Mean Machine",
+    "mma_record": "19–5"
+  },
+  {
+    "name": "Jamall Emmers",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "36",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Pretty Boy",
+    "mma_record": "22–8"
+  },
+  {
+    "name": "John Castañeda",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "34",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Sexi Mexi",
+    "mma_record": "21–8"
+  },
+  {
+    "name": "Jordan Leavitt",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "30",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Monkey King",
+    "mma_record": "12–3"
+  },
+  {
+    "name": "Pat Sabatini",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "35",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "8–2",
+    "mma_record": "21–5"
+  },
+  {
+    "name": "Shayilan Nuerdanbieke",
+    "division": "Featherweight",
+    "country": "China",
+    "age": "31",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Wolverine",
+    "mma_record": "39–12"
+  },
+  {
+    "name": "Melsik Baghdasaryan",
+    "division": "Featherweight",
+    "country": "Armenia",
+    "age": "34",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "The Gun",
+    "mma_record": "8–3"
+  },
+  {
+    "name": "David Onama",
+    "division": "Featherweight",
+    "country": "Uganda",
+    "age": "31",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Silent Assassin",
+    "mma_record": "14–3"
+  },
+  {
+    "name": "Joanderson Brito",
+    "division": "Featherweight",
+    "country": "Brazil",
+    "age": "31",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Tubarão",
+    "mma_record": "18–5–1"
+  },
+  {
+    "name": "Christian Rodriguez",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "28",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "CeeRod",
+    "mma_record": "12–4"
+  },
+  {
+    "name": "Daniel Santos",
+    "division": "Featherweight",
+    "country": "Brazil",
+    "age": "30",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Willycat",
+    "mma_record": "13–2"
+  },
+  {
+    "name": "William Gomis",
+    "division": "Featherweight",
+    "country": "France",
+    "age": "28",
+    "height": "6 ft 0 in (1.83 m)",
+    "nickname": "The Jaguar",
+    "mma_record": "15–3"
+  },
+  {
+    "name": "Francis Marshall",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "26",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Fire",
+    "mma_record": "8–3"
+  },
+  {
+    "name": "Erik Silva",
+    "division": "Featherweight",
+    "country": "Venezuela",
+    "age": "38",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "King",
+    "mma_record": "9–3"
+  },
+  {
+    "name": "Melquizael Costa",
+    "division": "Featherweight",
+    "country": "Brazil",
+    "age": "29",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Melk Kaut",
+    "mma_record": "25–7"
+  },
+  {
+    "name": "Lee Jeong-yeong",
+    "division": "Featherweight",
+    "country": "South Korea",
+    "age": "30",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Korean Tiger",
+    "mma_record": "11–2"
+  },
+  {
+    "name": "Yi Zha",
+    "division": "Featherweight",
+    "country": "China",
+    "age": "29",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Loss – UFC 325 (Sydney) – Kaan Ofli",
+    "mma_record": "26–6"
+  },
+  {
+    "name": "Jack Jenkins",
+    "division": "Featherweight",
+    "country": "Australia",
+    "age": "32",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Phar",
+    "mma_record": "14–4"
+  },
+  {
+    "name": "Gabriel Santos",
+    "division": "Featherweight",
+    "country": "Brazil",
+    "age": "29",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Mosquitinho",
+    "mma_record": "12–2"
+  },
+  {
+    "name": "Fernando Padilla",
+    "division": "Featherweight",
+    "country": "Mexico",
+    "age": "29",
+    "height": "6 ft 1 in (1.85 m)",
+    "nickname": "The Brave",
+    "mma_record": "16–6"
+  },
+  {
+    "name": "Diego Lopes",
+    "division": "Featherweight",
+    "country": "Brazil",
+    "age": "31",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Loss – UFC 325 (Sydney) – Alexander Volkanovski",
+    "mma_record": "27–8"
+  },
+  {
+    "name": "Muhammad Naimov",
+    "division": "Featherweight",
+    "country": "Tajikistan",
+    "age": "31",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Hillman",
+    "mma_record": "13–4"
+  },
+  {
+    "name": "Chepe Mariscal",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "33",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Machine Gun",
+    "mma_record": "18–7"
+  },
+  {
+    "name": "Morgan Charrière",
+    "division": "Featherweight",
+    "country": "France",
+    "age": "30",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "The Last Pirate",
+    "mma_record": "21–12–1"
+  },
+  {
+    "name": "Manolo Zecchini",
+    "division": "Featherweight",
+    "country": "Italy",
+    "age": "29",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Angelo Veneziano",
+    "mma_record": "11–4"
+  },
+  {
+    "name": "Jean Silva",
+    "division": "Featherweight",
+    "country": "Brazil",
+    "age": "29",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Lord",
+    "mma_record": "17–3"
+  },
+  {
+    "name": "Ramon Taveras",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "32",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "The Savage",
+    "mma_record": "10–4"
+  },
+  {
+    "name": "Hyder Amil",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "35",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "The Hurricane",
+    "mma_record": "11–2"
+  },
+  {
+    "name": "Danny Silva",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "29",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "El Puma",
+    "mma_record": "10–2"
+  },
+  {
+    "name": "Steven Nguyen",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "32",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Ninja",
+    "mma_record": "10–2"
+  },
+  {
+    "name": "Mairon Santos",
+    "division": "Featherweight",
+    "country": "Brazil",
+    "age": "25",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "A Lenda",
+    "mma_record": "17–1"
+  },
+  {
+    "name": "Kaan Ofli",
+    "division": "Featherweight",
+    "country": "Australia",
+    "age": "32",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Genghis",
+    "mma_record": "13–4–1"
+  },
+  {
+    "name": "Roberto Romero",
+    "division": "Featherweight",
+    "country": "Mexico",
+    "age": "26",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "El Charro Negro",
+    "mma_record": "8–5–1"
+  },
+  {
+    "name": "Austin Bashi",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "24",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "1–1",
+    "mma_record": "14–1"
+  },
+  {
+    "name": "Bogdan Grad",
+    "division": "Featherweight",
+    "country": "Austria",
+    "age": "30",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "The Unleashed",
+    "mma_record": "15–4"
+  },
+  {
+    "name": "Jose Miguel Delgado",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "27",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "UFC Fight Night 269 (Las Vegas) – Andre Fili",
+    "mma_record": "10–2"
+  },
+  {
+    "name": "Kevin Vallejos",
+    "division": "Featherweight",
+    "country": "Argentina",
+    "age": "24",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "El Chino",
+    "mma_record": "17–1"
+  },
+  {
+    "name": "Patrício Pitbull",
+    "division": "Featherweight",
+    "country": "Brazil",
+    "age": "38",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "1–1",
+    "mma_record": "37–8"
+  },
+  {
+    "name": "Malcolm Wellmaker",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "31",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "The Machine",
+    "mma_record": "10–1"
+  },
+  {
+    "name": "Yadier del Valle",
+    "division": "Featherweight",
+    "country": "Cuba",
+    "age": "29",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "The Cuban Problem",
+    "mma_record": "9–0"
+  },
+  {
+    "name": "Michael Aswell",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "25",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "The Texas Kid",
+    "mma_record": "11–3"
+  },
+  {
+    "name": "Yoo Joo-sang",
+    "division": "Featherweight",
+    "country": "South Korea",
+    "age": "32",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Zombie Jr.",
+    "mma_record": "9–1"
+  },
+  {
+    "name": "John Yannis",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "31",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Angel",
+    "mma_record": "9–4"
+  },
+  {
+    "name": "Aaron Pico",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "29",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "0–1",
+    "mma_record": "13–5"
+  },
+  {
+    "name": "Robert Ruchała",
+    "division": "Featherweight",
+    "country": "Poland",
+    "age": "27",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Faker",
+    "mma_record": "11–2"
+  },
+  {
+    "name": "Ethyn Ewing",
+    "division": "Featherweight",
+    "country": "United States",
+    "age": "28",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "The Professor Finesser",
+    "mma_record": "9–2"
+  },
+  {
+    "name": "Luke Riley",
+    "division": "Featherweight",
+    "country": "England",
+    "age": "26",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "UFC Fight Night 270 (London) – Michael Aswell",
+    "mma_record": "12–0"
+  },
+  {
+    "name": "Isaac Thomson",
+    "division": "Featherweight",
+    "country": "Australia",
+    "age": "23",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "0–1",
+    "mma_record": "9–3"
+  },
+  {
+    "name": "Sebastian Szalay",
+    "division": "Featherweight",
+    "country": "Australia",
+    "age": "32",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "Seb",
+    "mma_record": "10–2"
+  },
+  {
+    "name": "Keiichiro Nakamura",
+    "division": "Featherweight",
+    "country": "Japan",
+    "age": "27",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Win – UFC 325 (Sydney) – Sebastian Szalay",
+    "mma_record": "8–1"
+  },
+  {
+    "name": "Rani Yahya *",
+    "division": "Bantamweight",
+    "country": "Brazil",
+    "age": "41",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "13–6–1 (1 NC)",
+    "mma_record": "28–12–1 (1 NC)"
+  },
+  {
+    "name": "Davey Grant",
+    "division": "Bantamweight",
+    "country": "England",
+    "age": "40",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Dangerous",
+    "mma_record": "17–8"
+  },
+  {
+    "name": "Douglas Silva de Andrade",
+    "division": "Bantamweight",
+    "country": "Brazil",
+    "age": "40",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "D'Silva",
+    "mma_record": "29–6 (1 NC)"
+  },
+  {
+    "name": "Cody Gibson",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "38",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "The Renegade",
+    "mma_record": "21–12"
+  },
+  {
+    "name": "Pedro Munhoz",
+    "division": "Bantamweight",
+    "country": "Brazil",
+    "age": "39",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "The Young Punisher",
+    "mma_record": "20–10 (2 NC)"
+  },
+  {
+    "name": "Rob Font",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "38",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "UFC 326 (Las Vegas) – Raul Rosas Jr.",
+    "mma_record": "22–9"
+  },
+  {
+    "name": "Marlon Vera",
+    "division": "Bantamweight",
+    "country": "Ecuador",
+    "age": "33",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Chito",
+    "mma_record": "23–11–1"
+  },
+  {
+    "name": "Cody Garbrandt",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "34",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "No Love",
+    "mma_record": "14–7"
+  },
+  {
+    "name": "Aiemann Zahabi",
+    "division": "Bantamweight",
+    "country": "Canada",
+    "age": "38",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "8–2",
+    "mma_record": "14–2"
+  },
+  {
+    "name": "Deiveson Figueiredo",
+    "division": "Bantamweight",
+    "country": "Brazil",
+    "age": "38",
+    "height": "5 ft 5 in (1.65 m)",
+    "nickname": "Deus da Guerra",
+    "mma_record": "25–6–1"
+  },
+  {
+    "name": "Song Yadong",
+    "division": "Bantamweight",
+    "country": "China",
+    "age": "28",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "Kung Fu Kid",
+    "mma_record": "22–9–1 (1 NC)"
+  },
+  {
+    "name": "Sean O'Malley",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "31",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "Sugar",
+    "mma_record": "19–3 (1 NC)"
+  },
+  {
+    "name": "Merab Dvalishvili",
+    "division": "Bantamweight",
+    "country": "Georgia (country)",
+    "age": "35",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "The Machine",
+    "mma_record": "21–5"
+  },
+  {
+    "name": "Cory Sandhagen",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "33",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "The Sandman",
+    "mma_record": "18–6"
+  },
+  {
+    "name": "Ricky Simón",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "33",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "10–6",
+    "mma_record": "22–7"
+  },
+  {
+    "name": "Bryce Mitchell",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "31",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Thug Nasty",
+    "mma_record": "18–3"
+  },
+  {
+    "name": "Raoni Barcelos",
+    "division": "Bantamweight",
+    "country": "Brazil",
+    "age": "38",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "10–4",
+    "mma_record": "21–5"
+  },
+  {
+    "name": "Petr Yan (c)",
+    "division": "Bantamweight",
+    "country": "Russia",
+    "age": "33",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "No Mercy",
+    "mma_record": "20–5"
+  },
+  {
+    "name": "Said Nurmagomedov",
+    "division": "Bantamweight",
+    "country": "Russia",
+    "age": "33",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "(February 5, 2026) – Visa issues – Out of UFC Fight Night 266 (Las Vegas) – Javid Basharat",
+    "mma_record": "18–5"
+  },
+  {
+    "name": "Montel Jackson",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "33",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Quik",
+    "mma_record": "15–3"
+  },
+  {
+    "name": "Chris Gutiérrez",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "34",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "El Guapo",
+    "mma_record": "22–7–2"
+  },
+  {
+    "name": "Jonathan Martinez",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "31",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Dragon",
+    "mma_record": "19–6"
+  },
+  {
+    "name": "Vince Morales",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "35",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Vandetta",
+    "mma_record": "16–10"
+  },
+  {
+    "name": "Mario Bautista",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "32",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Win – UFC Fight Night 266 (Las Vegas) – Vinicius Oliveira",
+    "mma_record": "17–3"
+  },
+  {
+    "name": "Charles Jourdain",
+    "division": "Bantamweight",
+    "country": "Canada",
+    "age": "30",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Air",
+    "mma_record": "17–8–1"
+  },
+  {
+    "name": "Alateng Heili",
+    "division": "Bantamweight",
+    "country": "China",
+    "age": "34",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "5–3–1",
+    "mma_record": "17–10–2"
+  },
+  {
+    "name": "Miles Johns",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "31",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Chapo",
+    "mma_record": "15–5 (1 NC)"
+  },
+  {
+    "name": "Kyler Phillips",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "30",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "The Matrix",
+    "mma_record": "12–4"
+  },
+  {
+    "name": "Adrian Yañez",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "32",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "6–3",
+    "mma_record": "17–6"
+  },
+  {
+    "name": "Umar Nurmagomedov",
+    "division": "Bantamweight",
+    "country": "Russia",
+    "age": "30",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Win – UFC 324 (Las Vegas) – Deiveson Figueiredo",
+    "mma_record": "20–1"
+  },
+  {
+    "name": "Aori Qileng",
+    "division": "Bantamweight",
+    "country": "China",
+    "age": "32",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Mongolian Murderer",
+    "mma_record": "26–12 (1 NC)"
+  },
+  {
+    "name": "Kris Moutinho",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "33",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "UFC Fight Night 268 (Mexico City) – Christian Quiñonez",
+    "mma_record": "14–7"
+  },
+  {
+    "name": "Ricky Turcios",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "32",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Pretty Ricky",
+    "mma_record": "12–5"
+  },
+  {
+    "name": "Brady Hiestand",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "26",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Bam Bam",
+    "mma_record": "8–2"
+  },
+  {
+    "name": "Saimon Oliveira",
+    "division": "Bantamweight",
+    "country": "Brazil",
+    "age": "34",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "0–4",
+    "mma_record": "18–7"
+  },
+  {
+    "name": "Victor Henry",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "38",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "La Mangosta",
+    "mma_record": "25–7 (1 NC)"
+  },
+  {
+    "name": "Chad Anheliger",
+    "division": "Bantamweight",
+    "country": "Canada",
+    "age": "39",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "The Monster",
+    "mma_record": "13–8"
+  },
+  {
+    "name": "Garrett Armfield",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "29",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "2–3",
+    "mma_record": "10–5"
+  },
+  {
+    "name": "Da'Mon Blackshear",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "31",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "Da Monster",
+    "mma_record": "17–8–1"
+  },
+  {
+    "name": "Cristian Quiñónez",
+    "division": "Bantamweight",
+    "country": "Mexico",
+    "age": "29",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Problema",
+    "mma_record": "18–5"
+  },
+  {
+    "name": "Cameron Saaiman",
+    "division": "Bantamweight",
+    "country": "South Africa",
+    "age": "25",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "3–3",
+    "mma_record": "9–3"
+  },
+  {
+    "name": "Raul Rosas Jr.",
+    "division": "Bantamweight",
+    "country": "Mexico",
+    "age": "21",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "El Niño Problema",
+    "mma_record": "11–1"
+  },
+  {
+    "name": "Daniel Marcos",
+    "division": "Bantamweight",
+    "country": "Peru",
+    "age": "32",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Soncora",
+    "mma_record": "18–1 (1 NC)"
+  },
+  {
+    "name": "Luan Lacerda",
+    "division": "Bantamweight",
+    "country": "Brazil",
+    "age": "33",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "UFC Fight Night 269 (Las Vegas) – Hecher Sosa",
+    "mma_record": "13–3"
+  },
+  {
+    "name": "Rinya Nakamura",
+    "division": "Bantamweight",
+    "country": "Japan",
+    "age": "30",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Hybrid",
+    "mma_record": "10–1"
+  },
+  {
+    "name": "Toshiomi Kazama",
+    "division": "Bantamweight",
+    "country": "Japan",
+    "age": "28",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Silent Finisher",
+    "mma_record": "11–5"
+  },
+  {
+    "name": "Farid Basharat",
+    "division": "Bantamweight",
+    "country": "Islamic Republic of Afghanistan",
+    "age": "28",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Ferocious",
+    "mma_record": "15–0"
+  },
+  {
+    "name": "Gaston Bolaños",
+    "division": "Bantamweight",
+    "country": "Peru",
+    "age": "33",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "The Dreamkiller",
+    "mma_record": "8–5"
+  },
+  {
+    "name": "Marcus McGhee",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "35",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "The Maniac",
+    "mma_record": "10–2"
+  },
+  {
+    "name": "Muin Gafurov",
+    "division": "Bantamweight",
+    "country": "Tajikistan",
+    "age": "29",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Tajik",
+    "mma_record": "20–7"
+  },
+  {
+    "name": "Steve Erceg",
+    "division": "Bantamweight",
+    "country": "Australia",
+    "age": "30",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Astro Boy",
+    "mma_record": "13–4"
+  },
+  {
+    "name": "Payton Talbott",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "27",
+    "height": "5 ft 10 in (1.78 m)",
+    "nickname": "5–1",
+    "mma_record": "11–1"
+  },
+  {
+    "name": "Serhiy Sidey",
+    "division": "Bantamweight",
+    "country": "Canada",
+    "age": "29",
+    "height": "5 ft 11 in (1.80 m)",
+    "nickname": "2–1",
+    "mma_record": "12–2"
+  },
+  {
+    "name": "Timothy Cuamba",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "27",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Twilight Timmy",
+    "mma_record": "10–3"
+  },
+  {
+    "name": "Carlos Vera",
+    "division": "Bantamweight",
+    "country": "Ecuador",
+    "age": "38",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "Pequeno",
+    "mma_record": "12–4"
+  },
+  {
+    "name": "Vinicius Oliveira",
+    "division": "Bantamweight",
+    "country": "Brazil",
+    "age": "30",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Lok Dog",
+    "mma_record": "23–4"
+  },
+  {
+    "name": "Bernardo Sopaj",
+    "division": "Bantamweight",
+    "country": "Albania",
+    "age": "25",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "The Lion King",
+    "mma_record": "12–3"
+  },
+  {
+    "name": "Bekzat Almakhan",
+    "division": "Bantamweight",
+    "country": "Kazakhstan",
+    "age": "28",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "The Turan Warrior",
+    "mma_record": "12–3"
+  },
+  {
+    "name": "Angel Pacheco",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "34",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "UFC Fight Night 268 (Mexico City) – Santiago Luna",
+    "mma_record": "7–3"
+  },
+  {
+    "name": "Jean Matsumoto",
+    "division": "Bantamweight",
+    "country": "Brazil",
+    "age": "26",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "Loss – UFC Fight Night 266 (Las Vegas) – Farid Basharat",
+    "mma_record": "17–2"
+  },
+  {
+    "name": "Felipe Lima",
+    "division": "Bantamweight",
+    "country": "Brazil",
+    "age": "27",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "D'Ouro",
+    "mma_record": "14–2"
+  },
+  {
+    "name": "Lee Chang-ho",
+    "division": "Bantamweight",
+    "country": "South Korea",
+    "age": "31",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "2–1",
+    "mma_record": "11–2"
+  },
+  {
+    "name": "Xiao Long",
+    "division": "Bantamweight",
+    "country": "China",
+    "age": "27",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "UFC 326 (Las Vegas) – Cody Garbrandt",
+    "mma_record": "27–10"
+  },
+  {
+    "name": "Nathan Fletcher",
+    "division": "Bantamweight",
+    "country": "England",
+    "age": "28",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "1–2",
+    "mma_record": "9–3"
+  },
+  {
+    "name": "Cody Haddon",
+    "division": "Bantamweight",
+    "country": "Australia",
+    "age": "27",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "1–0",
+    "mma_record": "8–1"
+  },
+  {
+    "name": "Cameron Smotherman",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "28",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "The Baby-Faced Killer",
+    "mma_record": "12–6"
+  },
+  {
+    "name": "You Su-young",
+    "division": "Bantamweight",
+    "country": "South Korea",
+    "age": "30",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "You-Jitsu",
+    "mma_record": "16–3 (2 NC)"
+  },
+  {
+    "name": "Colby Thicknesse",
+    "division": "Bantamweight",
+    "country": "Australia",
+    "age": "26",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Slickness",
+    "mma_record": "8–1"
+  },
+  {
+    "name": "Aleksandre Topuria",
+    "division": "Bantamweight",
+    "country": "Georgia (country)",
+    "age": "30",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "El Conquistador",
+    "mma_record": "7–1"
+  },
+  {
+    "name": "Elijah Smith",
+    "division": "Bantamweight",
+    "country": "United States",
+    "age": "23",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Swift",
+    "mma_record": "9–1"
+  },
+  {
+    "name": "Josias Musasa",
+    "division": "Bantamweight",
+    "country": "Democratic Republic of the Congo",
+    "age": "27",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "The K.O. Wizard",
+    "mma_record": "8–2"
+  },
+  {
+    "name": "David Martínez",
+    "division": "Bantamweight",
+    "country": "Mexico",
+    "age": "27",
+    "height": "5 ft 5 in (1.65 m)",
+    "nickname": "Black Spartan",
+    "mma_record": "13–1"
+  },
+  {
+    "name": "Santiago Luna",
+    "division": "Bantamweight",
+    "country": "Mexico",
+    "age": "21",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Border Boy",
+    "mma_record": "7–0"
+  },
+  {
+    "name": "Jakub Wikłacz",
+    "division": "Bantamweight",
+    "country": "Poland",
+    "age": "29",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Masa",
+    "mma_record": "17–3–2"
+  },
+  {
+    "name": "Sulang Rangbo",
+    "division": "Bantamweight",
+    "country": "China",
+    "age": "20",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Loss – UFC 325 (Sydney) – Lawrence Lui",
+    "mma_record": "10–4"
+  },
+  {
+    "name": "Lawrence Lui",
+    "division": "Bantamweight",
+    "country": "New Zealand",
+    "age": "29",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Lok Yin / Lozza",
+    "mma_record": "8–1"
+  },
+  {
+    "name": "Gianni Vázquez",
+    "division": "Bantamweight",
+    "country": "Mexico",
+    "age": "31",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Kryptonia",
+    "mma_record": "13–6"
+  },
+  {
+    "name": "Tim Elliott",
+    "division": "Flyweight",
+    "country": "United States",
+    "age": "39",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "10–11",
+    "mma_record": "20–14–1"
+  },
+  {
+    "name": "Kyoji Horiguchi",
+    "division": "Flyweight",
+    "country": "Japan",
+    "age": "32",
+    "height": "5 ft 5 in (1.65 m)",
+    "nickname": "Karate Kid",
+    "mma_record": "36–5 (1 NC)"
+  },
+  {
+    "name": "Brandon Moreno",
+    "division": "Flyweight",
+    "country": "Mexico",
+    "age": "32",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "The Assassin Baby",
+    "mma_record": "23–9–2"
+  },
+  {
+    "name": "Matt Schnell",
+    "division": "Flyweight",
+    "country": "United States",
+    "age": "36",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Danger",
+    "mma_record": "17–10 (1 NC)"
+  },
+  {
+    "name": "Alexandre Pantoja",
+    "division": "Flyweight",
+    "country": "Brazil",
+    "age": "35",
+    "height": "5 ft 5 in (1.65 m)",
+    "nickname": "The Cannibal",
+    "mma_record": "30–6"
+  },
+  {
+    "name": "Joseph Morales",
+    "division": "Flyweight",
+    "country": "United States",
+    "age": "31",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "Bopo",
+    "mma_record": "14–2"
+  },
+  {
+    "name": "Alex Perez",
+    "division": "Flyweight",
+    "country": "United States",
+    "age": "33",
+    "height": "5 ft 4 in (1.63 m)",
+    "nickname": "Win – UFC 324 (Las Vegas) – Charles Johnson",
+    "mma_record": "26–10"
+  },
+  {
+    "name": "Su Mudaerji",
+    "division": "Flyweight",
+    "country": "China",
+    "age": "30",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "The Tibetan Eagle",
+    "mma_record": "18–7"
+  },
+  {
+    "name": "Kai Kara-France",
+    "division": "Flyweight",
+    "country": "New Zealand",
+    "age": "32",
+    "height": "5 ft 5 in (1.65 m)",
+    "nickname": "Don't Blink",
+    "mma_record": "25–12 (1 NC)"
+  },
+  {
+    "name": "Bruno Gustavo da Silva",
+    "division": "Flyweight",
+    "country": "Brazil",
+    "age": "35",
+    "height": "5 ft 4 in (1.63 m)",
+    "nickname": "Bulldog",
+    "mma_record": "15–7–2 (1 NC)"
+  },
+  {
+    "name": "Ode' Osbourne",
+    "division": "Flyweight",
+    "country": "Jamaica",
+    "age": "34",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "The Oddity",
+    "mma_record": "13–9 (1 NC)"
+  },
+  {
+    "name": "Brandon Royval",
+    "division": "Flyweight",
+    "country": "United States",
+    "age": "33",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Raw Dawg",
+    "mma_record": "17–9"
+  },
+  {
+    "name": "Amir Albazi",
+    "division": "Flyweight",
+    "country": "Iraq",
+    "age": "32",
+    "height": "5 ft 5 in (1.65 m)",
+    "nickname": "The Prince",
+    "mma_record": "17–3"
+  },
+  {
+    "name": "Cody Durden",
+    "division": "Flyweight",
+    "country": "United States",
+    "age": "34",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "UFC 326 (Las Vegas) – Nyamjargal Tumendemberel",
+    "mma_record": "17–9–1"
+  },
+  {
+    "name": "Tagir Ulanbekov",
+    "division": "Flyweight",
+    "country": "Russia",
+    "age": "32",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "Gifted",
+    "mma_record": "17–3"
+  },
+  {
+    "name": "Manel Kape",
+    "division": "Flyweight",
+    "country": "Angola",
+    "age": "32",
+    "height": "5 ft 5 in (1.65 m)",
+    "nickname": "Starboy",
+    "mma_record": "22–7"
+  },
+  {
+    "name": "Allan Nascimento",
+    "division": "Flyweight",
+    "country": "Brazil",
+    "age": "34",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "Puro Osso",
+    "mma_record": "22–6"
+  },
+  {
+    "name": "Tatsuro Taira",
+    "division": "Flyweight",
+    "country": "Japan",
+    "age": "26",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "UFC 327 (Miami) – Joshua Van",
+    "mma_record": "18–1"
+  },
+  {
+    "name": "Charles Johnson",
+    "division": "Flyweight",
+    "country": "United States",
+    "age": "35",
+    "height": "5 ft 9 in (1.75 m)",
+    "nickname": "InnerG",
+    "mma_record": "18–8"
+  },
+  {
+    "name": "Alessandro Costa",
+    "division": "Flyweight",
+    "country": "Brazil",
+    "age": "30",
+    "height": "5 ft 4 in (1.63 m)",
+    "nickname": "Nono",
+    "mma_record": "14–5"
+  },
+  {
+    "name": "Jesús Santos Aguilar",
+    "division": "Flyweight",
+    "country": "Mexico",
+    "age": "29",
+    "height": "5 ft 4 in (1.63 m)",
+    "nickname": "UFC 326 (Las Vegas) – Su Mudaerji",
+    "mma_record": "12–3"
+  },
+  {
+    "name": "Park Hyun-sung",
+    "division": "Flyweight",
+    "country": "South Korea",
+    "age": "30",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Peace of Mind",
+    "mma_record": "10–2"
+  },
+  {
+    "name": "Clayton Carpenter",
+    "division": "Flyweight",
+    "country": "United States",
+    "age": "29",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "Concrete",
+    "mma_record": "8–2"
+  },
+  {
+    "name": "Jafel Filho",
+    "division": "Flyweight",
+    "country": "Brazil",
+    "age": "32",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Pastor",
+    "mma_record": "17–4"
+  },
+  {
+    "name": "Joshua Van (c)",
+    "division": "Flyweight",
+    "country": "Myanmar",
+    "age": "24",
+    "height": "5 ft 5 in (1.65 m)",
+    "nickname": "The Fearless",
+    "mma_record": "16–2"
+  },
+  {
+    "name": "Édgar Cháirez",
+    "division": "Flyweight",
+    "country": "Mexico",
+    "age": "30",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Pitbull",
+    "mma_record": "12–6"
+  },
+  {
+    "name": "Daniel Barez",
+    "division": "Flyweight",
+    "country": "Spain",
+    "age": "37",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "1–2",
+    "mma_record": "17–7"
+  },
+  {
+    "name": "Asu Almabayev",
+    "division": "Flyweight",
+    "country": "Kazakhstan",
+    "age": "32",
+    "height": "5 ft 4 in (1.63 m)",
+    "nickname": "Zulfikar",
+    "mma_record": "23–3"
+  },
+  {
+    "name": "Kevin Borjas",
+    "division": "Flyweight",
+    "country": "Peru",
+    "age": "28",
+    "height": "5 ft 5 in (1.65 m)",
+    "nickname": "El Gallo Negro",
+    "mma_record": "10–4"
+  },
+  {
+    "name": "Rafael Estevam",
+    "division": "Flyweight",
+    "country": "Brazil",
+    "age": "29",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Macapá",
+    "mma_record": "14–0"
+  },
+  {
+    "name": "Felipe Bunes",
+    "division": "Flyweight",
+    "country": "Brazil",
+    "age": "36",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Felipinho",
+    "mma_record": "14–8"
+  },
+  {
+    "name": "Ronaldo Rodríguez",
+    "division": "Flyweight",
+    "country": "Mexico",
+    "age": "26",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "Lazy Boy",
+    "mma_record": "18–3"
+  },
+  {
+    "name": "André Lima",
+    "division": "Flyweight",
+    "country": "Brazil",
+    "age": "27",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Mascote",
+    "mma_record": "11–0"
+  },
+  {
+    "name": "Mitch Raposo",
+    "division": "Flyweight",
+    "country": "United States",
+    "age": "27",
+    "height": "5 ft 5 in (1.65 m)",
+    "nickname": "UFC Fight Night 273 (Winnipeg) – Allan Nascimento",
+    "mma_record": "10–2"
+  },
+  {
+    "name": "Rei Tsuruya",
+    "division": "Flyweight",
+    "country": "Japan",
+    "age": "23",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "1–1",
+    "mma_record": "10–1"
+  },
+  {
+    "name": "Stewart Nicoll",
+    "division": "Flyweight",
+    "country": "Australia",
+    "age": "31",
+    "height": "5 ft 5 in (1.65 m)",
+    "nickname": "UFC Fight Night 272 (Las Vegas) – Alessandro Costa",
+    "mma_record": "8–2"
+  },
+  {
+    "name": "Lucas Rocha",
+    "division": "Flyweight",
+    "country": "Brazil",
+    "age": "25",
+    "height": "5 ft 4 in (1.63 m)",
+    "nickname": "Fenomeno",
+    "mma_record": "18–2"
+  },
+  {
+    "name": "Ramazan Temirov",
+    "division": "Flyweight",
+    "country": "Uzbekistan",
+    "age": "29",
+    "height": "5 ft 5 in (1.65 m)",
+    "nickname": "Temurlan",
+    "mma_record": "17–2"
+  },
+  {
+    "name": "Lone'er Kavanagh",
+    "division": "Flyweight",
+    "country": "England",
+    "age": "26",
+    "height": "5 ft 4 in (1.63 m)",
+    "nickname": "UFC Fight Night 268 (Mexico City) – Brandon Moreno",
+    "mma_record": "9–1"
+  },
+  {
+    "name": "Jose Ochoa",
+    "division": "Flyweight",
+    "country": "Peru",
+    "age": "25",
+    "height": "5 ft 4 in (1.63 m)",
+    "nickname": "Kalzifer",
+    "mma_record": "8–2"
+  },
+  {
+    "name": "Nyamjargal Tumendemberel",
+    "division": "Flyweight",
+    "country": "Mongolia",
+    "age": "27",
+    "height": "5 ft 7 in (1.70 m)",
+    "nickname": "Art of Knockout",
+    "mma_record": "9–1"
+  },
+  {
+    "name": "Choi Dong-Hun",
+    "division": "Flyweight",
+    "country": "South Korea",
+    "age": "27",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "UFC Fight Night 273 (Winnipeg) – André Lima",
+    "mma_record": "9–0"
+  },
+  {
+    "name": "Kai Asakura",
+    "division": "Flyweight",
+    "country": "Japan",
+    "age": "32",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "0–2",
+    "mma_record": "21–6"
+  },
+  {
+    "name": "Luis Gurule",
+    "division": "Flyweight",
+    "country": "United States",
+    "age": "32",
+    "height": "5 ft 5 in (1.65 m)",
+    "nickname": "Grim",
+    "mma_record": "10–2"
+  },
+  {
+    "name": "Alibi Idiris",
+    "division": "Flyweight",
+    "country": "Kazakhstan",
+    "age": "31",
+    "height": "5 ft 6 in (1.68 m)",
+    "nickname": "UFC Fight Night 267 (Houston) – Ode' Osbourne",
+    "mma_record": "10–1"
+  },
+  {
+    "name": "Alden Coria",
+    "division": "Flyweight",
+    "country": "United States",
+    "age": "27",
+    "height": "5 ft 8 in (1.73 m)",
+    "nickname": "Cobra",
+    "mma_record": "11–3 (1 NC)"
+  }
+]
