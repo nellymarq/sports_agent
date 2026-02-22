@@ -1,0 +1,11 @@
+# runtime state
+state/
+cache/
+tests/cache/
+
+# python artifacts
+__pycache__/
+*.pyc
+
+# virtual environments
+.venv/
