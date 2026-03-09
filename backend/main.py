@@ -21,7 +21,7 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
 # Import the shared engine entrypoint (async pipeline)
-from engine_entry import _run_full_pipeline, clear_task_queue
+from engine_entry import _run_full_pipeline, clear_task_queue, LLM_ROUTING, LLM_ORCHESTRATOR
 from prediction_tracker import get_calibration_stats, record_result
 
 _logger = logging.getLogger("backend")
@@ -67,8 +67,24 @@ class RecordResultRequest(BaseModel):
 # Health Check
 # -------------------------------------------------
 @app.get("/health")
-def health() -> Dict[str, str]:
-    return {"status": "ok"}
+def health() -> Dict[str, Any]:
+    return {
+        "status": "ok",
+        "version": app.version,
+        "models": {
+            "routing": LLM_ROUTING.model,
+            "prediction": LLM_ORCHESTRATOR.model,
+        },
+    }
+
+
+@app.get("/stats")
+def stats() -> Dict[str, Any]:
+    """Return LLM usage stats for monitoring."""
+    return {
+        "routing_llm": LLM_ROUTING.stats,
+        "prediction_llm": LLM_ORCHESTRATOR.stats,
+    }
 
 
 # -------------------------------------------------
