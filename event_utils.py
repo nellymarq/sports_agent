@@ -142,3 +142,34 @@ async def get_unified_next_event() -> Optional[Dict[str, Any]]:
     Async helper to get the next scheduled event (ingested).
     """
     return await get_next_scheduled_event()
+
+
+def get_event_fighters(event_id: str) -> List[str]:
+    """
+    Extract main event fighters from a given event.
+    Falls back to co-main or first card bout if main event is empty.
+    """
+    ev = get_event_by_code(event_id)
+    if not ev:
+        return []
+
+    # Try main event first
+    main = ev.get("main_event", {})
+    fighters = main.get("fighters", [])
+    if fighters and len(fighters) >= 2:
+        return [f if isinstance(f, str) else f.get("name", "") for f in fighters]
+
+    # Try co-main
+    co_main = ev.get("co_main_event", {})
+    fighters = co_main.get("fighters", [])
+    if fighters and len(fighters) >= 2:
+        return [f if isinstance(f, str) else f.get("name", "") for f in fighters]
+
+    # Try first card bout
+    card = ev.get("card", [])
+    if card:
+        fighters = card[0].get("fighters", [])
+        if fighters and len(fighters) >= 2:
+            return [f if isinstance(f, str) else f.get("name", "") for f in fighters]
+
+    return []

@@ -48,6 +48,7 @@ from memory.memory_api import MemoryStore
 # === DATA + RETRIEVAL ===
 from fighter_utils import extract_fighters
 from retrieval_pipeline import get_retrieved_context
+from event_utils import get_event_fighters
 from data.metadata import Evidence, SpecialistOutput, FinalOutput
 
 # === UNIFIED EVENT PIPELINE ===
@@ -290,7 +291,17 @@ async def orchestrator(
         unified_metadata_payload = None
         unified_prediction_payload = None
 
-    # NEW: derive fighters from unified event main event if user didn't name them
+    # Derive fighters from event data if user mentioned a UFC event but no fighter names
+    if not fighters:
+        event_id = _resolve_event_id_from_text(user_input)
+        if event_id:
+            event_fighters = get_event_fighters(event_id)
+            if event_fighters:
+                fighters = event_fighters
+                primary_fighter = fighters[0]
+                info(f"Orchestrator: derived fighters from event {event_id}: {fighters}")
+
+    # Fallback: derive from unified event object
     if unified_event and not fighters:
         try:
             ev_dict = unified_event.to_dict()

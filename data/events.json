@@ -2,21 +2,34 @@
   {
     "id": "ufc_313",
     "code": "UFC 313",
-    "name": "UFC 313",
-    "location": "",
+    "name": "UFC 313: Pereira vs Ankalaev",
+    "date": "2025-03-08",
+    "location": "T-Mobile Arena, Las Vegas, NV",
     "main_event": {
-      "fighters": []
+      "fighters": ["Alex Pereira", "Magomed Ankalaev"],
+      "weight_class": "Light Heavyweight",
+      "is_title_fight": true,
+      "rounds": 5
     },
     "co_main_event": {
-      "fighters": []
+      "fighters": ["Jailton Almeida", "Derrick Lewis"],
+      "weight_class": "Heavyweight",
+      "rounds": 3
     },
-    "card": []
+    "card": [
+      {"fighters": ["Alex Pereira", "Magomed Ankalaev"], "weight_class": "Light Heavyweight"},
+      {"fighters": ["Jailton Almeida", "Derrick Lewis"], "weight_class": "Heavyweight"},
+      {"fighters": ["Arman Tsarukyan", "Renato Moicano"], "weight_class": "Lightweight"},
+      {"fighters": ["Dustin Poirier", "Diego Lopes"], "weight_class": "Lightweight"},
+      {"fighters": ["Amanda Lemos", "Virna Jandiroba"], "weight_class": "Strawweight"}
+    ]
   },
   {
     "id": "ufc_314",
     "code": "UFC 314",
     "name": "UFC 314",
-    "location": "",
+    "date": "2025-04-12",
+    "location": "T-Mobile Arena, Las Vegas, NV",
     "main_event": {
       "fighters": []
     },
@@ -29,45 +42,7 @@
     "id": "ufc_315",
     "code": "UFC 315",
     "name": "UFC 315",
-    "location": "",
-    "main_event": {
-      "fighters": []
-    },
-    "co_main_event": {
-      "fighters": []
-    },
-    "card": []
-  },
-  {
-    "id": "ufc_316",
-    "code": "UFC 316",
-    "name": "UFC 316",
-    "location": "",
-    "main_event": {
-      "fighters": []
-    },
-    "co_main_event": {
-      "fighters": []
-    },
-    "card": []
-  },
-  {
-    "id": "ufc_317",
-    "code": "UFC 317",
-    "name": "UFC 317",
-    "location": "",
-    "main_event": {
-      "fighters": []
-    },
-    "co_main_event": {
-      "fighters": []
-    },
-    "card": []
-  },
-  {
-    "id": "ufc_318",
-    "code": "UFC 318",
-    "name": "UFC 318",
+    "date": "2025-05-03",
     "location": "",
     "main_event": {
       "fighters": []
