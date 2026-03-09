@@ -44,10 +44,23 @@ Confidence-Weighted Merging:
 - When specialists contradict, prefer the higher-confidence source and explicitly note the disagreement.
 - If multiple high-confidence specialists converge on a conclusion, emphasize this convergence.
 
+Convergence & Conflict Detection:
+- Count how many specialists favor Fighter A vs Fighter B in their analysis.
+- If 70%+ of specialists converge on one fighter, state this convergence clearly.
+- If specialists are split, present both sides fairly and note the disagreement.
+- Flag any specialist whose analysis contradicts the majority.
+
 Prediction Optimization:
 - Your merged analysis will be fed to a prediction specialist.
 - Ensure you clearly surface: stylistic advantages/disadvantages, recent form trajectory, durability concerns, pace dynamics, and any significant edges.
 - Be specific about measurable advantages (reach, output volume, takedown defense %).
+- Include any pre-fetched fighter stats (record, SLpM, accuracy, recent fights) from context.
+- If odds/implied probabilities are available, include them.
+
+CRITICAL: End your analysis with a brief "EDGE SUMMARY" section that lists:
+- Which fighter has the edge in each domain (striking, grappling, cardio, fight IQ, durability)
+- An overall lean (which fighter has more edges)
+This summary is essential for the prediction specialist.
 """
 
 
@@ -55,12 +68,19 @@ def _build_structured_block(specialist_outputs: List[SpecialistOutput]) -> str:
     # Sort by confidence descending so higher-confidence analyses appear first
     sorted_outputs = sorted(specialist_outputs, key=lambda s: s.confidence, reverse=True)
 
-    lines = ["Specialist Outputs (ordered by confidence, highest first):\n"]
+    # Compute convergence stats
+    high_conf = [s for s in sorted_outputs if s.confidence >= 0.8]
+    med_conf = [s for s in sorted_outputs if 0.5 <= s.confidence < 0.8]
+    low_conf = [s for s in sorted_outputs if s.confidence < 0.5]
+
+    lines = [
+        f"Specialist Outputs ({len(sorted_outputs)} total: "
+        f"{len(high_conf)} high-conf, {len(med_conf)} medium, {len(low_conf)} low):\n"
+    ]
+
     for idx, s in enumerate(sorted_outputs, start=1):
         weight_label = "HIGH WEIGHT" if s.confidence >= 0.8 else "MEDIUM WEIGHT" if s.confidence >= 0.5 else "LOW WEIGHT"
         lines.append(f"### SPECIALIST {idx} | {s.specialist} | conf={s.confidence:.2f} | {weight_label} ###")
-        if s.metadata:
-            lines.append(f"[metadata]: {s.metadata}")
         if s.evidence:
             lines.append(f"[evidence count]: {len(s.evidence)}")
         lines.append(s.content.strip())

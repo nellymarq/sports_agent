@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import sys
+import time
+import logging
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,9 +20,11 @@ if str(ROOT) not in sys.path:
 # Import the shared engine entrypoint (async pipeline)
 from engine_entry import _run_full_pipeline, clear_task_queue
 
+_logger = logging.getLogger("backend")
+
 app = FastAPI(
     title="UFC Analytics Backend",
-    version="1.0.0",
+    version="2.0.0",
 )
 
 # -------------------------------------------------
@@ -44,6 +48,7 @@ class AnalyzeRequest(BaseModel):
 
 class AnalyzeResponse(BaseModel):
     content: str
+    elapsed_seconds: Optional[float] = None
 
 
 # -------------------------------------------------
@@ -62,13 +67,15 @@ async def analyze(req: AnalyzeRequest) -> AnalyzeResponse:
     """
     Runs the full multi-agent UFC pipeline:
     retrieval → router → supervisor → orchestrator → critic.
-    This version is async-safe and avoids asyncio.run(),
-    preventing Groq semaphore event-loop conflicts.
     """
+    t0 = time.monotonic()
     try:
         clear_task_queue()
         result = await _run_full_pipeline(req.user_input)
-        return AnalyzeResponse(content=result)
+        elapsed = round(time.monotonic() - t0, 2)
+        _logger.info(f"Analysis completed in {elapsed}s for: {req.user_input[:80]}")
+        return AnalyzeResponse(content=result, elapsed_seconds=elapsed)
 
     except Exception as e:
+        _logger.exception(f"Analysis failed for: {req.user_input[:80]}")
         raise HTTPException(status_code=500, detail=str(e))
