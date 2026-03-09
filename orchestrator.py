@@ -53,6 +53,9 @@ from data.metadata import Evidence, SpecialistOutput, FinalOutput
 # === UNIFIED EVENT PIPELINE ===
 from pipeline.event_pipeline import EventPipeline
 
+# === PRE-FETCH ===
+from tools.prefetch import prefetch_fighter_stats, format_prefetched_stats
+
 # === MEMORY STORE INSTANCE (patchable in tests) ===
 MEMORY_STORE = MemoryStore()
 
@@ -307,6 +310,16 @@ async def orchestrator(
                         fighters = derived
                         primary_fighter = derived[0]
 
+    # === PRE-FETCH FIGHTER STATS ===
+    prefetched_stats = {}
+    prefetched_context = ""
+    if fighters and not test_mode:
+        try:
+            prefetched_stats = prefetch_fighter_stats(fighters)
+            prefetched_context = format_prefetched_stats(prefetched_stats)
+        except Exception as e:
+            error(f"Fighter stats prefetch failed (non-fatal): {e}")
+
     # === STRUCTURED MEMORY ===
     semantic_memory = get_semantic(primary_fighter) or ""
     episodic_memory = get_recent_episodic(5) or []
@@ -319,6 +332,10 @@ async def orchestrator(
             fighters=fighters,
         )
 
+    # Prepend pre-fetched stats to retrieved context
+    if prefetched_context:
+        retrieved_context = prefetched_context + "\n\n" + retrieved_context
+
     context = {
         "history_length": len(history),
         "semantic_memory_present": bool(semantic_memory),
@@ -329,6 +346,7 @@ async def orchestrator(
         "unified_event": unified_event.to_dict() if unified_event else None,
         "unified_metadata": unified_metadata_payload,
         "unified_prediction": unified_prediction_payload,
+        "prefetched_stats": prefetched_stats,
     }
 
     # === DAG EXECUTION STATE ===
