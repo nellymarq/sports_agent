@@ -49,12 +49,24 @@ else:
 # FULL MULTI-AGENT PIPELINE (ASYNC)
 # ============================================================
 
-async def _run_full_pipeline(user_input: str) -> str:
+from typing import AsyncGenerator, Callable, Optional
+
+
+async def _run_full_pipeline(
+    user_input: str,
+    on_stage: Optional[Callable[[str], None]] = None,
+) -> str:
     history_pairs = load_history()
     history = [f"{role}: {content}" for role, content in history_pairs]
     episodic_memory_text = "\n".join(history) if history else ""
 
+    def _stage(name: str) -> None:
+        _logger.info(f"Pipeline stage: {name}")
+        if on_stage:
+            on_stage(name)
+
     # 1. Retrieval
+    _stage("retrieval")
     retrieved_summary = await retrieval_agent(
         llm=ACTIVE_LLM,
         user_input=user_input,
@@ -64,6 +76,7 @@ async def _run_full_pipeline(user_input: str) -> str:
     )
 
     # 2. Router
+    _stage("routing")
     routing = await router_agent(
         llm=ACTIVE_LLM,
         user_input=user_input,
@@ -72,6 +85,7 @@ async def _run_full_pipeline(user_input: str) -> str:
     )
 
     # 3. Supervisor
+    _stage("supervisor")
     task_plan = await supervisor_agent(
         llm=ACTIVE_LLM,
         router_output=routing,
@@ -82,6 +96,7 @@ async def _run_full_pipeline(user_input: str) -> str:
     )
 
     # 4. Orchestrator (uses GPT‑OSS 20B)
+    _stage("orchestrator")
     result = await orchestrator(
         llm=LLM_ROUTING,                  # router/supervisor/specialists/critic
         prediction_llm=LLM_ORCHESTRATOR,  # orchestrator + prediction specialist
