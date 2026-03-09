@@ -35,3 +35,7 @@ memory/memory.md
 
 # scraped HTML cache
 *.html
+
+# frontend build artifacts
+frontend/node_modules/
+frontend/.next/
