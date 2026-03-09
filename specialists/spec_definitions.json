@@ -40,14 +40,6 @@
     "template_type": "full"
   },
   {
-    "filename": "metadata_specialist.py",
-    "name": "Metadata specialist",
-    "specialist_key": "metadata",
-    "domain_focus": ["identity", "physical attributes", "competitive attributes"],
-    "optional_section_title": "Metadata Notes",
-    "template_type": "full"
-  },
-  {
     "filename": "pace_specialist.py",
     "name": "Pace specialist",
     "specialist_key": "pace",
@@ -109,14 +101,6 @@
     "specialist_key": "knowledge",
     "domain_focus": ["background", "experience", "archetypes"],
     "optional_section_title": "Knowledge Notes",
-    "template_type": "full"
-  },
-  {
-    "filename": "prediction_specialist.py",
-    "name": "Prediction specialist",
-    "specialist_key": "prediction",
-    "domain_focus": ["probabilistic outcomes", "scenario modeling", "win conditions"],
-    "optional_section_title": "Outcome Scenarios",
     "template_type": "full"
   },
   {

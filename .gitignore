@@ -32,3 +32,6 @@ tools/browser_profile/
 # memory data (per-instance)
 memory/memory.json
 memory/memory.md
+
+# scraped HTML cache
+*.html

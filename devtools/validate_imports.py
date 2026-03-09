@@ -35,7 +35,7 @@ if __name__ == "__main__":
     validate_package("router_agent")
     validate_package("supervisor")
     validate_package("orchestrator")
-    validate_package("coordinator")
+    validate_package("coordinator_agent")
     validate_package("critic_agent")
 
     print("\nDone.")

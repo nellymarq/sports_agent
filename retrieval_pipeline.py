@@ -21,9 +21,12 @@ def get_retrieved_context(
     if not user_input:
         return ""
 
-    store = VectorStore()
-    query_emb = get_embedding(user_input)
-    results = store.search(query_emb, top_k=top_k) or []
+    try:
+        store = VectorStore()
+        query_emb = get_embedding(user_input)
+        results = store.search(query_emb, top_k=top_k) or []
+    except Exception:
+        return ""
 
     if not results:
         return ""
@@ -34,7 +37,7 @@ def get_retrieved_context(
     for entry, score in results:
         meta = entry.get("metadata", {}) or {}
 
-        # Align with memory_agent semantic metadata: "fighter"
+        # Align with memory_agent semantic metadata: "fighter" / "primary_fighter"
         if fighter_norm:
             meta_fighter = (meta.get("fighter") or meta.get("primary_fighter") or "").lower().strip()
             if meta_fighter and meta_fighter != fighter_norm:

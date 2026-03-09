@@ -89,14 +89,16 @@ async def check_orchestrator_test_mode():
     try:
         result = await orchestrator(
             llm=llm,
+	    prediction_llm=llm, # MockLLM for prediction in test mode
             tool_registry=TOOL_REGISTRY,
             task_plan=dummy_plan,
             test_mode=True,
         )
-        if isinstance(result, dict) and result.get("final") == "[MOCK FINAL OUTPUT]":
-            print("✔ Orchestrator test mode OK\n")
+        if result == "[TEST MODE] No tasks provided.":
+            print("✔ Orchestrator test mode OK")
         else:
-            print("✖ Orchestrator test mode returned unexpected output\n")
+            print("✖ Orchestrator test mode returned unexpected output")
+
     except Exception:
         print("✖ Orchestrator test mode FAILED")
         traceback.print_exc()

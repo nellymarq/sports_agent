@@ -35,6 +35,16 @@ def _normalize(text: str) -> str:
 def _detect_question_type(text: str) -> str:
     t = _normalize(text)
 
+    # Event-aware detection
+    if "ufc" in t and "main event" in t:
+        return "event_who_wins"
+    if "next ufc" in t:
+        return "event_who_wins"
+    if any(k in t for k in ["ufc ", "ufc-", "ufc:"]) and any(
+        kw in t for kw in ["who wins", "who takes", "who do you favor"]
+    ):
+        return "event_who_wins"
+
     if any(k in t for k in ["who wins", "who takes", "who do you favor", "who would win"]):
         return "who_wins"
     if any(k in t for k in ["style", "archetype", "how does he fight", "what kind of fighter"]):
@@ -97,7 +107,7 @@ def _base_keyword_routing(text: str) -> List[str]:
 def _intent_enhanced_routing(question_type: str, current: List[str]) -> List[str]:
     specialists = set(current)
 
-    if question_type == "who_wins":
+    if question_type in ("who_wins", "event_who_wins"):
         specialists.update(DYNAMIC_SPECIALISTS)
 
     elif question_type == "style_profile":
@@ -190,9 +200,10 @@ async def router_agent(
         "profile", "vs", "versus", "how does", "compare", "analysis",
         "stylistic", "fight iq", "gameplan", "scramble", "durability",
         "judging", "knowledge graph", "who wins", "who would win",
+        "main event",
     ]
 
-    if any(t in text for t in full_triggers) and qtype in ("who_wins", "general"):
+    if any(t in text for t in full_triggers) and qtype in ("who_wins", "event_who_wins", "general"):
         specialists = FULL_SPECIALIST_LIST.copy() + requested_debug
         specialists = list(dict.fromkeys(specialists))
         info(f"Router selected specialists (input full-mode): {specialists}")

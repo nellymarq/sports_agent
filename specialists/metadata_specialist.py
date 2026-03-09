@@ -1,15 +1,15 @@
-# specialists/template/specialist_template_full.py
+# specialists/metadata_specialist.py
 
-from typing import Iterable
+from typing import Iterable, Dict, Any, Optional
 from specialists.tool_runtime import (
     build_system_prompt,
     run_tool_loop,
 )
-from data.metadata import SpecialistOutput
+from data.metadata import SpecialistOutput, Evidence
 
 BASE_PROMPT = """### Role
 
-You are the **{{SPECIALIST_NAME}} specialist** in a modular, multi-agent UFC analysis system.
+You are the **Metadata specialist** in a modular, multi-agent UFC analysis system.
 You think like a seasoned fight analyst and a high-level coach. You focus only on your domain
 while staying aligned with the orchestrator’s overall plan.
 
@@ -74,7 +74,15 @@ PROFILE = """You are a domain specialist in a modular UFC analytics engine.
 - Aligned with orchestrator and critic
 """
 
-def _build_memory_block(retrieved_context, semantic_memory, episodic_memory, fighters, coordinator_output):
+def _build_memory_block(
+    retrieved_context,
+    semantic_memory,
+    episodic_memory,
+    fighters,
+    coordinator_output,
+    unified_event: Optional[Dict[str, Any]] = None,
+    unified_metadata: Optional[Dict[str, Any]] = None,
+):
     sections = []
 
     if fighters:
@@ -82,6 +90,12 @@ def _build_memory_block(retrieved_context, semantic_memory, episodic_memory, fig
 
     if coordinator_output:
         sections.append("=== Coordinator Summary ===\n" + str(coordinator_output))
+
+    if unified_event:
+        sections.append("=== Unified Event (Structured) ===\n" + str(unified_event))
+
+    if unified_metadata:
+        sections.append("=== Unified Metadata Payload ===\n" + str(unified_metadata))
 
     if retrieved_context:
         sections.append("=== Retrieved Context ===\n" + str(retrieved_context))
@@ -91,8 +105,8 @@ def _build_memory_block(retrieved_context, semantic_memory, episodic_memory, fig
 
     if episodic_memory:
         sections.append(
-            "=== Recent Session Summaries ===\n" +
-            "\n".join(map(str, episodic_memory))
+            "=== Recent Session Summaries ===\n"
+            + "\n".join(map(str, episodic_memory))
         )
 
     return "\n\n".join(sections) if sections else ""
@@ -116,6 +130,10 @@ async def run_metadata_specialist(
     history = history or []
     semantic_memory = semantic_memory or {}
     episodic_memory = episodic_memory or []
+    context = context or {}
+
+    unified_event = context.get("unified_event")
+    unified_metadata = context.get("unified_metadata")
 
     memory_block = _build_memory_block(
         retrieved_context=retrieved_context,
@@ -123,6 +141,8 @@ async def run_metadata_specialist(
         episodic_memory=episodic_memory,
         fighters=fighters,
         coordinator_output=coordinator_output,
+        unified_event=unified_event,
+        unified_metadata=unified_metadata,
     )
 
     system_text = BASE_PROMPT + "\n\n" + memory_block
@@ -144,14 +164,57 @@ async def run_metadata_specialist(
 
     messages.append({"role": "user", "content": user_input or ""})
 
-    # Test mode: no tools
+    # === TEST MODE ===
     if not tool_registry:
         return SpecialistOutput.create(
-            specialist="{{SPECIALIST_NAME}}",
-            content=f"{{SPECIALIST_NAME}} executed (test mode).",
+            specialist="Metadata specialist",
+            content="Metadata specialist executed (test mode).",
             reasoning="Test mode execution.",
             evidence=[],
             confidence=0.5,
         )
 
-    return await run_tool_loop(llm, messages, tool_registry)
+    # === REAL MODE ===
+    raw = await run_tool_loop(llm, messages, tool_registry)
+
+    # --- SCHEMA ENFORCEMENT ---
+    if isinstance(raw, SpecialistOutput):
+        return raw
+
+    if isinstance(raw, str):
+        return SpecialistOutput.create(
+            specialist="Metadata specialist",
+            content=raw.strip(),
+            reasoning=None,
+            evidence=[],
+            confidence=0.7,
+        )
+
+    if isinstance(raw, dict):
+        evidence_list = []
+        for ev in raw.get("evidence", []) or []:
+            evidence_list.append(
+                Evidence.create(
+                    source=ev.get("source", "unknown"),
+                    content=ev.get("content", ""),
+                    confidence=float(ev.get("confidence", 0.7)),
+                    provenance=ev.get("provenance", {}),
+                )
+            )
+
+        return SpecialistOutput.create(
+            specialist="Metadata specialist",
+            content=str(raw.get("content", "")).strip(),
+            reasoning=raw.get("reasoning"),
+            evidence=evidence_list,
+            confidence=float(raw.get("confidence", 0.7)),
+            metadata=raw.get("metadata", {}) or {},
+        )
+
+    return SpecialistOutput.create(
+        specialist="Metadata specialist",
+        content=str(raw),
+        reasoning=None,
+        evidence=[],
+        confidence=0.7,
+    )

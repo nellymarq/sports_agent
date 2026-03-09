@@ -5,11 +5,11 @@ from specialists.tool_runtime import (
     build_system_prompt,
     run_tool_loop,
 )
-from data.metadata import SpecialistOutput
+from data.metadata import SpecialistOutput, Evidence
 
 BASE_PROMPT = """### Role
 
-You are the **{{SPECIALIST_NAME}} specialist** in a modular, multi-agent UFC analysis system.
+You are the **Judging specialist** in a modular, multi-agent UFC analysis system.
 You think like a seasoned fight analyst and a high-level coach. You focus only on your domain
 while staying aligned with the orchestrator’s overall plan.
 
@@ -91,8 +91,8 @@ def _build_memory_block(retrieved_context, semantic_memory, episodic_memory, fig
 
     if episodic_memory:
         sections.append(
-            "=== Recent Session Summaries ===\n" +
-            "\n".join(map(str, episodic_memory))
+            "=== Recent Session Summaries ===\n"
+            + "\n".join(map(str, episodic_memory))
         )
 
     return "\n\n".join(sections) if sections else ""
@@ -144,14 +144,57 @@ async def run_judging_specialist(
 
     messages.append({"role": "user", "content": user_input or ""})
 
-    # Test mode: no tools
+    # === TEST MODE ===
     if not tool_registry:
         return SpecialistOutput.create(
-            specialist="{{SPECIALIST_NAME}}",
-            content=f"{{SPECIALIST_NAME}} executed (test mode).",
+            specialist="Judging specialist",
+            content="Judging specialist executed (test mode).",
             reasoning="Test mode execution.",
             evidence=[],
             confidence=0.5,
         )
 
-    return await run_tool_loop(llm, messages, tool_registry)
+    # === REAL MODE ===
+    raw = await run_tool_loop(llm, messages, tool_registry)
+
+    # --- SCHEMA ENFORCEMENT ---
+    if isinstance(raw, SpecialistOutput):
+        return raw
+
+    if isinstance(raw, str):
+        return SpecialistOutput.create(
+            specialist="Judging specialist",
+            content=raw.strip(),
+            reasoning=None,
+            evidence=[],
+            confidence=0.7,
+        )
+
+    if isinstance(raw, dict):
+        evidence_list = []
+        for ev in raw.get("evidence", []) or []:
+            evidence_list.append(
+                Evidence.create(
+                    source=ev.get("source", "unknown"),
+                    content=ev.get("content", ""),
+                    confidence=float(ev.get("confidence", 0.7)),
+                    provenance=ev.get("provenance", {}),
+                )
+            )
+
+        return SpecialistOutput.create(
+            specialist="Judging specialist",
+            content=str(raw.get("content", "")).strip(),
+            reasoning=raw.get("reasoning"),
+            evidence=evidence_list,
+            confidence=float(raw.get("confidence", 0.7)),
+            metadata=raw.get("metadata", {}) or {},
+        )
+
+    return SpecialistOutput.create(
+        specialist="Judging specialist",
+        content=str(raw),
+        reasoning=None,
+        evidence=[],
+        confidence=0.7,
+    )
