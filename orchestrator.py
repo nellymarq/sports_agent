@@ -55,7 +55,7 @@ from data.metadata import Evidence, SpecialistOutput, FinalOutput
 from pipeline.event_pipeline import EventPipeline
 
 # === PRE-FETCH ===
-from tools.prefetch import prefetch_fighter_stats, format_prefetched_stats
+from tools.prefetch import prefetch_fighter_stats, format_prefetched_stats, build_fighter_comparison
 
 # === DOMAIN PROMPTS ===
 from specialists.domain_prompts import get_domain_guidance
@@ -337,6 +337,9 @@ async def orchestrator(
         try:
             prefetched_stats = prefetch_fighter_stats(fighters)
             prefetched_context = format_prefetched_stats(prefetched_stats)
+            comparison = build_fighter_comparison(prefetched_stats)
+            if comparison:
+                prefetched_context = comparison + "\n\n" + prefetched_context
         except Exception as e:
             error(f"Fighter stats prefetch failed (non-fatal): {e}")
 

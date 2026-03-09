@@ -69,6 +69,18 @@ def prefetch_fighter_stats(fighters: List[str]) -> Dict[str, Any]:
     return results
 
 
+def build_fighter_comparison(stats: Dict[str, Any]) -> str:
+    """Build head-to-head comparison if exactly 2 fighters are pre-fetched."""
+    if len(stats) != 2:
+        return ""
+    try:
+        from tools.comparison import build_comparison
+        fighters = list(stats.values())
+        return build_comparison(fighters[0], fighters[1])
+    except Exception:
+        return ""
+
+
 def format_prefetched_stats(stats: Dict[str, Any]) -> str:
     """Format pre-fetched stats into a readable context block."""
     if not stats:
