@@ -1,9 +1,21 @@
-streamlit
+# Core LLM
+groq
+
+# Web scraping & API
 requests
 beautifulsoup4
-langchain
-langchain-openai
-openai
-tiktoken
+
+# Environment
 python-dotenv
+
+# Embeddings
 sentence-transformers
+numpy
+
+# Backend API
+fastapi
+uvicorn[standard]
+
+# Testing
+pytest
+pytest-asyncio
