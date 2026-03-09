@@ -19,6 +19,7 @@ if str(ROOT) not in sys.path:
 
 # Import the shared engine entrypoint (async pipeline)
 from engine_entry import _run_full_pipeline, clear_task_queue
+from prediction_tracker import get_calibration_stats, record_result
 
 _logger = logging.getLogger("backend")
 
@@ -51,6 +52,14 @@ class AnalyzeResponse(BaseModel):
     elapsed_seconds: Optional[float] = None
 
 
+class RecordResultRequest(BaseModel):
+    event_id: str
+    fighter_a: str
+    fighter_b: str
+    actual_winner: str
+    actual_method: str = ""
+
+
 # -------------------------------------------------
 # Health Check
 # -------------------------------------------------
@@ -79,3 +88,27 @@ async def analyze(req: AnalyzeRequest) -> AnalyzeResponse:
     except Exception as e:
         _logger.exception(f"Analysis failed for: {req.user_input[:80]}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------
+# Prediction Calibration Endpoints
+# -------------------------------------------------
+@app.get("/calibration")
+def calibration() -> Dict[str, Any]:
+    """Return prediction calibration stats."""
+    return get_calibration_stats()
+
+
+@app.post("/result")
+def submit_result(req: RecordResultRequest) -> Dict[str, Any]:
+    """Record an actual fight result for calibration tracking."""
+    updated = record_result(
+        event_id=req.event_id,
+        fighter_a=req.fighter_a,
+        fighter_b=req.fighter_b,
+        actual_winner=req.actual_winner,
+        actual_method=req.actual_method,
+    )
+    if updated:
+        return {"status": "ok", "prediction": updated}
+    return {"status": "not_found", "message": "No matching prediction found."}

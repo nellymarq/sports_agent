@@ -60,6 +60,9 @@ from tools.prefetch import prefetch_fighter_stats, format_prefetched_stats, buil
 # === DOMAIN PROMPTS ===
 from specialists.domain_prompts import get_domain_guidance
 
+# === PREDICTION TRACKING ===
+from prediction_tracker import record_prediction
+
 # === MEMORY STORE INSTANCE (patchable in tests) ===
 MEMORY_STORE = MemoryStore()
 
@@ -564,6 +567,24 @@ async def orchestrator(
                             },
                             metadata={},
                         )
+
+                # Track prediction for calibration
+                if prediction_output and isinstance(prediction_output, SpecialistOutput):
+                    pred_meta = prediction_output.metadata or {}
+                    if pred_meta.get("predicted_winner") and len(fighters) >= 2:
+                        try:
+                            event_id = _resolve_event_id_from_text(user_input) or "unknown"
+                            record_prediction(
+                                event_id=event_id,
+                                fighter_a=fighters[0],
+                                fighter_b=fighters[1] if len(fighters) > 1 else "unknown",
+                                predicted_winner=pred_meta["predicted_winner"],
+                                win_probability=pred_meta.get("prob_fighter_a", 50) / 100.0,
+                                confidence_tier=pred_meta.get("confidence_tier", ""),
+                                method_lean=pred_meta.get("method_lean", ""),
+                            )
+                        except Exception as e:
+                            error(f"Prediction tracking failed (non-fatal): {e}")
 
                 completed.add(tid)
                 continue
