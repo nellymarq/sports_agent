@@ -8,7 +8,13 @@ from typing import Dict, Any, List, Optional, Tuple
 from bs4 import BeautifulSoup
 from logger import info, error
 
-DEFAULT_TIMEOUT = 15
+try:
+    from config import TOOL_REQUEST_TIMEOUT, TOOL_CACHE_TTL_SECONDS
+except ImportError:
+    TOOL_REQUEST_TIMEOUT = 15
+    TOOL_CACHE_TTL_SECONDS = 300
+
+DEFAULT_TIMEOUT = TOOL_REQUEST_TIMEOUT
 DEFAULT_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 }
@@ -17,7 +23,7 @@ DEFAULT_HEADERS = {
 # RESPONSE CACHE — avoids redundant API calls across specialists
 # ============================================================
 _CACHE: Dict[str, Tuple[float, Any]] = {}  # key -> (timestamp, result)
-_CACHE_TTL = 300  # 5 minutes
+_CACHE_TTL = TOOL_CACHE_TTL_SECONDS
 
 
 def _cache_get(key: str) -> Optional[Any]:

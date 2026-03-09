@@ -119,7 +119,11 @@ async def run_tool_loop(llm, messages, tool_registry, max_iters: int = 4):
     # -----------------------------------------------------
     # Enforce token budget BEFORE sending to Groq
     # -----------------------------------------------------
-    MAX_INPUT_TOKENS = 4500  # safe for llama-3.1-8b-instant
+    try:
+        from config import SPECIALIST_MAX_INPUT_TOKENS
+        MAX_INPUT_TOKENS = SPECIALIST_MAX_INPUT_TOKENS
+    except ImportError:
+        MAX_INPUT_TOKENS = 4500
 
     # Truncate messages array
     messages = truncate_messages(messages, MAX_INPUT_TOKENS)

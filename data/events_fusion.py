@@ -11,10 +11,16 @@ from data.events_schema import Event
 _logger = logging.getLogger("events_fusion")
 
 
+try:
+    from config import EVENT_PROVIDER_TIMEOUT
+except ImportError:
+    EVENT_PROVIDER_TIMEOUT = 15.0
+
+
 async def _safe_fetch(coro, provider_name: str) -> Dict[str, Any]:
     """Run a provider coroutine with error isolation."""
     try:
-        result = await asyncio.wait_for(coro, timeout=15.0)
+        result = await asyncio.wait_for(coro, timeout=EVENT_PROVIDER_TIMEOUT)
         return result or {}
     except asyncio.TimeoutError:
         _logger.warning(f"Provider '{provider_name}' timed out after 15s")
