@@ -369,12 +369,17 @@ async def orchestrator(
             info(f"Orchestrator: launching {len(specialist_batch)} specialists in parallel")
 
             async def _run_spec(t):
+                # Enrich user_input with fighter names for specialist context
+                enriched_input = user_input
+                if fighters and "vs" not in user_input.lower():
+                    enriched_input = f"{user_input}\n\n[Fighters: {', '.join(fighters)}]"
+
                 return t["id"], await _run_single_specialist(
                     specialist_key=t["specialist"],
                     name=t.get("name", t["specialist"]),
                     llm=llm,
                     tool_registry=tool_registry,
-                    user_input=user_input,
+                    user_input=enriched_input,
                     history=history,
                     retrieved_context=retrieved_context,
                     semantic_memory=semantic_memory,

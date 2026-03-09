@@ -162,17 +162,30 @@ async def critic_review(
         "fighters": fighters,
     }
 
+    # Calibrate confidence from inputs rather than hardcoding
+    coord_conf = coordinator_output.confidence or 0.5
+    pred_conf = prediction_output.confidence if prediction_output else None
+    if pred_conf is not None:
+        # Weighted average: coordinator 40%, prediction 60%
+        final_conf = 0.4 * coord_conf + 0.6 * pred_conf
+    else:
+        final_conf = coord_conf
+    # Clamp to [0, 1]
+    final_conf = max(0.0, min(1.0, final_conf))
+
     metadata = {
         "source": "critic",
         "chunk_count": len(chunks),
         "has_prediction": prediction_output is not None,
+        "coordinator_confidence": coord_conf,
+        "prediction_confidence": pred_conf,
     }
 
     return FinalOutput.create(
         content=final_text,
         merged_from=parent_ids,
         evidence=all_evidence,
-        confidence=0.9,
+        confidence=final_conf,
         lineage=lineage,
         metadata=metadata,
     )

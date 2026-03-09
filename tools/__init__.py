@@ -3,7 +3,8 @@
 
 import requests
 import json
-from typing import Dict, Any, List, Optional
+import time
+from typing import Dict, Any, List, Optional, Tuple
 from bs4 import BeautifulSoup
 from logger import info, error
 
@@ -11,6 +12,54 @@ DEFAULT_TIMEOUT = 15
 DEFAULT_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 }
+
+# ============================================================
+# RESPONSE CACHE — avoids redundant API calls across specialists
+# ============================================================
+_CACHE: Dict[str, Tuple[float, Any]] = {}  # key -> (timestamp, result)
+_CACHE_TTL = 300  # 5 minutes
+
+
+def _cache_get(key: str) -> Optional[Any]:
+    if key in _CACHE:
+        ts, val = _CACHE[key]
+        if time.time() - ts < _CACHE_TTL:
+            return val
+        del _CACHE[key]
+    return None
+
+
+def _cache_set(key: str, val: Any) -> None:
+    _CACHE[key] = (time.time(), val)
+
+
+# ============================================================
+# ODDS UTILITIES — American odds to implied probability
+# ============================================================
+
+def american_to_implied_prob(odds: str) -> Optional[float]:
+    """Convert American odds string to implied probability (0-1)."""
+    try:
+        o = int(odds.replace("+", "").strip())
+    except (ValueError, AttributeError):
+        return None
+    if o > 0:
+        return 100.0 / (o + 100.0)
+    elif o < 0:
+        return abs(o) / (abs(o) + 100.0)
+    return None
+
+
+def implied_prob_pair(fav_odds: str, dog_odds: str) -> Dict[str, Optional[float]]:
+    """Return implied probabilities for a favorite/underdog pair."""
+    fav_p = american_to_implied_prob(fav_odds)
+    dog_p = american_to_implied_prob(dog_odds)
+    # Remove vig (normalize to sum=1)
+    if fav_p and dog_p:
+        total = fav_p + dog_p
+        fav_p = fav_p / total
+        dog_p = dog_p / total
+    return {"favorite_prob": fav_p, "underdog_prob": dog_p}
 
 
 def _safe_get(url: str, timeout: int = DEFAULT_TIMEOUT, headers: Optional[Dict] = None) -> requests.Response:
@@ -91,6 +140,11 @@ class UFCStatsTool:
         if not fighter:
             return {"error": "fighter_name is required"}
 
+        cache_key = f"ufcstats:{fighter.lower()}"
+        cached = _cache_get(cache_key)
+        if cached is not None:
+            return cached
+
         url = f"https://ufcstats.com/statistics/fighters?query={fighter.replace(' ', '+')}"
         try:
             resp = _safe_get(url)
@@ -125,13 +179,15 @@ class UFCStatsTool:
 
             best["detail_stats"] = detail_stats
 
-            return {
+            result = {
                 "source": "UFCStats",
                 "query": fighter,
                 "best_match": best,
                 "all_matches": fighters_found[:5],
                 "stats_parsed": True,
             }
+            _cache_set(cache_key, result)
+            return result
 
         except Exception as e:
             error(f"UFCStats request failed: {e}")
@@ -149,6 +205,11 @@ class ESPNUFCTool:
         fighter = (args.get("fighter_name") or "").strip()
         if not fighter:
             return {"error": "fighter_name is required"}
+
+        cache_key = f"espn:{fighter.lower()}"
+        cached = _cache_get(cache_key)
+        if cached is not None:
+            return cached
 
         # ESPN athlete search API
         search_url = f"https://site.web.api.espn.com/apis/common/v3/search?query={fighter.replace(' ', '+')}&limit=5&type=player&sport=mma"
@@ -171,19 +232,23 @@ class ESPNUFCTool:
                     })
 
             if not results:
-                return {
+                result = {
                     "source": "ESPN UFC",
                     "query": fighter,
                     "fighters": [],
                     "note": "No fighters found via ESPN search API.",
                 }
+                _cache_set(cache_key, result)
+                return result
 
-            return {
+            result = {
                 "source": "ESPN UFC",
                 "query": fighter,
                 "fighters": results[:5],
                 "stats_parsed": True,
             }
+            _cache_set(cache_key, result)
+            return result
 
         except Exception as e:
             # Fallback: try scraping
@@ -223,6 +288,11 @@ class DraftKingsTool:
     def invoke(self, args: Dict[str, Any]) -> Dict[str, Any]:
         fighter = (args.get("fighter_name") or "").strip().lower()
 
+        cache_key = f"dk:{fighter or 'all'}"
+        cached = _cache_get(cache_key)
+        if cached is not None:
+            return cached
+
         try:
             url = "https://sportsbook-nash.draftkings.com/sites/US-SB/api/v5/eventgroups/9034/categories/all"
             resp = _safe_get(url, headers={
@@ -245,11 +315,13 @@ class DraftKingsTool:
                             odds_american = outcome.get("oddsAmerican", "")
                             odds_decimal = outcome.get("oddsDecimal", "")
 
+                            impl_prob = american_to_implied_prob(odds_american)
                             entry = {
                                 "event": event_name,
                                 "fighter": outcome.get("participant", ""),
                                 "odds_american": odds_american,
                                 "odds_decimal": odds_decimal,
+                                "implied_probability": round(impl_prob, 4) if impl_prob else None,
                                 "market": m.get("description", ""),
                             }
 
@@ -259,15 +331,17 @@ class DraftKingsTool:
                             events.append(entry)
 
             if fighter and fighter_odds:
-                return {
+                result = {
                     "source": "DraftKings Sportsbook",
                     "query": fighter,
                     "fighter_odds": fighter_odds,
                     "total_markets": len(events),
                     "live_data": True,
                 }
+                _cache_set(cache_key, result)
+                return result
 
-            return {
+            result = {
                 "source": "DraftKings Sportsbook",
                 "query": fighter or "all",
                 "all_odds": events[:20],
@@ -275,6 +349,8 @@ class DraftKingsTool:
                 "fighter_specific": [],
                 "live_data": True,
             }
+            _cache_set(cache_key, result)
+            return result
 
         except Exception as e:
             error(f"DraftKings API failed: {e}")
@@ -295,6 +371,11 @@ class PolymarketTool:
 
     def invoke(self, args: Dict[str, Any]) -> Dict[str, Any]:
         fighter = (args.get("fighter_name") or "").strip().lower()
+
+        cache_key = f"poly:{fighter or 'all'}"
+        cached = _cache_get(cache_key)
+        if cached is not None:
+            return cached
 
         try:
             url = "https://gamma-api.polymarket.com/events?tag=mma&closed=false&limit=20"
@@ -325,21 +406,25 @@ class PolymarketTool:
                         fighter_markets.append(entry)
 
             if fighter and fighter_markets:
-                return {
+                result = {
                     "source": "Polymarket",
                     "query": fighter,
                     "fighter_markets": fighter_markets,
                     "total_mma_markets": len(markets),
                     "live_data": True,
                 }
+                _cache_set(cache_key, result)
+                return result
 
-            return {
+            result = {
                 "source": "Polymarket",
                 "query": fighter or "all",
                 "all_mma_markets": markets[:15],
                 "total_mma_markets": len(markets),
                 "live_data": True,
             }
+            _cache_set(cache_key, result)
+            return result
 
         except Exception as e:
             error(f"Polymarket API failed: {e}")
