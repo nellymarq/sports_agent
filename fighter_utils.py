@@ -106,11 +106,8 @@ def extract_fighters(question: str) -> Tuple[List[str], str]:
     return [], "unknown"
 
 # ---------------------------------------------------------------------
-# NEW UNIFIED-SCHEMA LAYER
+# NEW UNIFIED-SCHEMA LAYER (lazy imports to avoid hard dependency on bs4)
 # ---------------------------------------------------------------------
-
-from data.events_fusion import build_unified_event
-from data.fighter_history_service import FighterHistoryService
 
 
 def extract_canonical_fighters(question: str) -> Tuple[List[str], str]:
@@ -120,6 +117,8 @@ def extract_canonical_fighters(question: str) -> Tuple[List[str], str]:
     - canonicalizes fighter IDs
     - attaches history summaries via FighterHistoryService
     """
+    from data.fighter_history_service import FighterHistoryService
+
     fighters, primary = extract_fighters(question)
     if not fighters:
         return [], "unknown"
