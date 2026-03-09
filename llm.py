@@ -112,20 +112,37 @@ class GroqLLM:
     # --------------------------------------------------------------
     # Public chat method
     # --------------------------------------------------------------
-    async def chat(self, messages: List[Dict[str, str]]):
+    async def chat(self, messages: List[Dict[str, str]], retries: int = 2):
         """
         Core chat method used by the entire system.
         Returns the full message object (with .content, .tool_calls, etc.).
+        Retries on transient errors (rate limits, timeouts).
         """
-        try:
-            async with GROQ_SEMAPHORE:
-                resp = await self._create_completion(messages)
+        last_err = None
+        for attempt in range(1 + retries):
+            try:
+                async with GROQ_SEMAPHORE:
+                    resp = await self._create_completion(messages)
+                return resp.choices[0].message
+            except Exception as e:
+                last_err = e
+                err_str = str(e).lower()
+                is_transient = any(k in err_str for k in [
+                    "rate_limit", "429", "timeout", "503", "overloaded",
+                    "connection", "temporarily",
+                ])
+                if is_transient and attempt < retries:
+                    wait = 2 ** attempt  # 1s, 2s
+                    logger.warning(
+                        f"Transient LLM error (attempt {attempt + 1}/{1 + retries}), "
+                        f"retrying in {wait}s: {e}"
+                    )
+                    await asyncio.sleep(wait)
+                    continue
+                break
 
-            return resp.choices[0].message
-
-        except Exception as e:
-            logger.exception("GroqLLM.chat failed")
-            raise RuntimeError(f"Groq LLM error (model={self.model}): {e}") from e
+        logger.exception("GroqLLM.chat failed after retries")
+        raise RuntimeError(f"Groq LLM error (model={self.model}): {last_err}") from last_err
 
 
 # Global singleton instance (legacy usage)

@@ -6,8 +6,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ENV_PATH = os.path.join(BASE_DIR, ".env")
 load_dotenv(ENV_PATH)
 
-print("DEBUG (engine_entry): Loaded .env from:", ENV_PATH)
-print("DEBUG (engine_entry): GROQ_API_KEY =", os.getenv("GROQ_API_KEY"))
+import logging
+_logger = logging.getLogger("engine_entry")
+_logger.debug(f"Loaded .env from: {ENV_PATH}")
 
 # -------------------------------------------------
 # Import engine components

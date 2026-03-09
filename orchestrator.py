@@ -316,6 +316,7 @@ async def orchestrator(
         retrieved_context = get_retrieved_context(
             user_input=user_input,
             fighter=primary_fighter if primary_fighter != "unknown" else "",
+            fighters=fighters,
         )
 
     context = {
