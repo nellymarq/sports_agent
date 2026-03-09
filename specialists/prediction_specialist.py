@@ -1,6 +1,7 @@
 # specialists/prediction_specialist.py
 
 from typing import List, Dict, Any, Optional
+import re
 from data.metadata import SpecialistOutput, Evidence
 from specialists.tool_runtime import build_system_prompt, run_tool_loop
 
@@ -12,11 +13,45 @@ You think like a seasoned fight analyst and betting strategist with deep statist
 
 ---
 
+### Analytical Framework
+
+Apply these frameworks IN ORDER to build your prediction:
+
+1. **Stylistic Matchup Analysis**
+   - Who dictates where the fight takes place? (range, clinch, ground)
+   - What is the A-game of each fighter, and can the opponent neutralize it?
+   - Historic performance vs similar styles (pressure fighters, wrestlers, counter-strikers)
+
+2. **Statistical Edge Mapping**
+   - Compare SLpM, striking accuracy, striking defense, takedown accuracy, takedown defense
+   - Significant strikes absorbed vs landed ratio
+   - Activity rate and output volume differences
+   - If stats are provided in context, USE THEM — do not guess
+
+3. **Form & Trajectory**
+   - Recent fight results (last 3-5): wins, losses, quality of opposition
+   - Finish rate trends (more/fewer finishes recently?)
+   - Age curve considerations (declining athleticism, increased IQ)
+   - Layoff effects (ring rust vs recovery)
+
+4. **Odds Calibration**
+   - If market odds/implied probabilities are available, use them as a BASELINE
+   - Your prediction should diverge from market odds ONLY when specialist analysis
+     provides clear evidence for a different assessment
+   - Explain WHY you agree or disagree with the market
+
+5. **Contextual Factors**
+   - Title fight implications (5 rounds vs 3)
+   - Venue/altitude effects
+   - Weight cut history
+   - Camp changes or injury reports
+
+---
+
 ### Responsibilities
 
 - Produce a STRUCTURED prediction with explicit win probabilities (must sum to 100%).
-- Ground your prediction in the coordinator's merged analysis.
-- Use retrieved context, unified event data, odds, and memory to calibrate confidence.
+- Ground your prediction in the coordinator's merged analysis AND pre-fetched stats.
 - Cross-reference specialist analyses to identify convergent and divergent signals.
 - Be explicit about uncertainty — wider probability spreads for uncertain matchups.
 
@@ -176,16 +211,19 @@ async def run_prediction_specialist(
 
     # --- SCHEMA ENFORCEMENT ---
     if isinstance(raw, SpecialistOutput):
+        raw.metadata = {**(raw.metadata or {}), **parse_prediction_output(raw.content)}
         return raw
 
     if isinstance(raw, str):
+        parsed = parse_prediction_output(raw)
+        confidence = _confidence_from_tier(parsed.get("confidence_tier", ""))
         return SpecialistOutput.create(
             specialist="prediction",
             content=raw.strip(),
             reasoning=None,
             evidence=[],
-            confidence=0.7,
-            metadata={},
+            confidence=confidence,
+            metadata=parsed,
         )
 
     if isinstance(raw, dict):
@@ -200,13 +238,17 @@ async def run_prediction_specialist(
                 )
             )
 
+        content = str(raw.get("content", "")).strip()
+        parsed = parse_prediction_output(content)
+        confidence = _confidence_from_tier(parsed.get("confidence_tier", "")) or float(raw.get("confidence", 0.7))
+
         return SpecialistOutput.create(
             specialist="prediction",
-            content=str(raw.get("content", "")).strip(),
+            content=content,
             reasoning=raw.get("reasoning"),
             evidence=evidence_list,
-            confidence=float(raw.get("confidence", 0.7)),
-            metadata=raw.get("metadata", {}) or {},
+            confidence=confidence,
+            metadata={**(raw.get("metadata", {}) or {}), **parsed},
         )
 
     return SpecialistOutput.create(
@@ -217,3 +259,60 @@ async def run_prediction_specialist(
         confidence=0.7,
         metadata={},
     )
+
+
+# ============================================================
+# PREDICTION OUTPUT PARSER
+# ============================================================
+
+def parse_prediction_output(text: str) -> Dict[str, Any]:
+    """
+    Extract structured fields from the prediction specialist's output.
+    Returns a dict with parsed fields (empty dict if parsing fails).
+    """
+    if not text:
+        return {}
+
+    result: Dict[str, Any] = {}
+
+    # Predicted winner
+    m = re.search(r"\*\*PREDICTED WINNER:\*\*\s*(.+?)(?:\n|$)", text)
+    if m:
+        result["predicted_winner"] = m.group(1).strip()
+
+    # Win probability
+    m = re.search(r"\*\*WIN PROBABILITY:\*\*\s*(\d+)%\s*vs\s*(\d+)%", text)
+    if m:
+        result["prob_fighter_a"] = int(m.group(1))
+        result["prob_fighter_b"] = int(m.group(2))
+
+    # Confidence tier
+    m = re.search(r"\*\*CONFIDENCE TIER:\*\*\s*(.+?)(?:\n|$)", text)
+    if m:
+        result["confidence_tier"] = m.group(1).strip()
+
+    # Method lean
+    m = re.search(r"\*\*METHOD LEAN:\*\*\s*(.+?)(?:\n|$)", text)
+    if m:
+        result["method_lean"] = m.group(1).strip()
+
+    # Round lean
+    m = re.search(r"\*\*ROUND LEAN:\*\*\s*(.+?)(?:\n|$)", text)
+    if m:
+        result["round_lean"] = m.group(1).strip()
+
+    return result
+
+
+def _confidence_from_tier(tier: str) -> float:
+    """Map confidence tier string to numeric confidence."""
+    tier_lower = (tier or "").lower().strip()
+    if "very high" in tier_lower:
+        return 0.9
+    if "high" in tier_lower:
+        return 0.8
+    if "medium" in tier_lower:
+        return 0.65
+    if "low" in tier_lower:
+        return 0.5
+    return 0.7  # default

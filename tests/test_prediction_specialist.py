@@ -10,6 +10,8 @@ import pytest
 from specialists.prediction_specialist import (
     run_prediction_specialist,
     _build_context_block,
+    parse_prediction_output,
+    _confidence_from_tier,
 )
 from data.metadata import SpecialistOutput
 from tests.mock_llm import MockLLM
@@ -106,3 +108,50 @@ class TestPredictionSpecialist:
             user_input="test",
         )
         assert isinstance(result, SpecialistOutput)
+
+
+class TestPredictionParser:
+    def test_parses_full_output(self):
+        text = """**PREDICTED WINNER:** Alex Pereira
+**WIN PROBABILITY:** 65% vs 35%
+**CONFIDENCE TIER:** High
+**METHOD LEAN:** KO/TKO
+**ROUND LEAN:** Early (R1-2)
+"""
+        result = parse_prediction_output(text)
+        assert result["predicted_winner"] == "Alex Pereira"
+        assert result["prob_fighter_a"] == 65
+        assert result["prob_fighter_b"] == 35
+        assert result["confidence_tier"] == "High"
+        assert result["method_lean"] == "KO/TKO"
+        assert result["round_lean"] == "Early (R1-2)"
+
+    def test_parses_partial_output(self):
+        text = "**PREDICTED WINNER:** Islam Makhachev\nSome other text"
+        result = parse_prediction_output(text)
+        assert result["predicted_winner"] == "Islam Makhachev"
+        assert "prob_fighter_a" not in result
+
+    def test_empty_text(self):
+        assert parse_prediction_output("") == {}
+
+    def test_no_match(self):
+        assert parse_prediction_output("Just some random text") == {}
+
+
+class TestConfidenceFromTier:
+    def test_very_high(self):
+        assert _confidence_from_tier("Very High") == 0.9
+
+    def test_high(self):
+        assert _confidence_from_tier("High") == 0.8
+
+    def test_medium(self):
+        assert _confidence_from_tier("Medium") == 0.65
+
+    def test_low(self):
+        assert _confidence_from_tier("Low") == 0.5
+
+    def test_default(self):
+        assert _confidence_from_tier("") == 0.7
+        assert _confidence_from_tier("unknown") == 0.7
