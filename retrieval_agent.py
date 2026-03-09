@@ -5,8 +5,8 @@
 from typing import List, Tuple, Optional, Any
 
 from logger import info, error, debug
-from event_utils import get_unified_next_event
-from fighter_utils import extract_canonical_fighters
+from event_utils import get_unified_next_event, get_event_fighters
+from fighter_utils import extract_fighters
 
 
 async def _build_event_context() -> Tuple[Optional[dict], str]:
@@ -25,17 +25,32 @@ async def _build_event_context() -> Tuple[Optional[dict], str]:
     name = event.get("name") or "Unknown event"
     date = event.get("date") or "Unknown date"
     location = event.get("location") or "Unknown location"
-    main_event = event.get("main_event") or ""
-    co_main = event.get("co_main_event") or ""
+    main_event = event.get("main_event") or {}
+    co_main = event.get("co_main_event") or {}
 
     lines: List[str] = []
     lines.append(f"Next scheduled UFC event: {name}")
     lines.append(f"Date: {date}")
     lines.append(f"Location: {location}")
 
-    if main_event:
+    # Format main event
+    if isinstance(main_event, dict) and main_event.get("fighters"):
+        me_fighters = main_event["fighters"]
+        if isinstance(me_fighters, list) and len(me_fighters) >= 2:
+            lines.append(f"Main event: {me_fighters[0]} vs {me_fighters[1]}")
+            wc = main_event.get("weight_class", "")
+            if wc:
+                lines.append(f"  Weight class: {wc}")
+            if main_event.get("is_title_fight"):
+                lines.append("  Title fight: Yes")
+    elif isinstance(main_event, str) and main_event:
         lines.append(f"Main event: {main_event}")
-    if co_main:
+
+    if isinstance(co_main, dict) and co_main.get("fighters"):
+        cm_fighters = co_main["fighters"]
+        if isinstance(cm_fighters, list) and len(cm_fighters) >= 2:
+            lines.append(f"Co-main event: {cm_fighters[0]} vs {cm_fighters[1]}")
+    elif isinstance(co_main, str) and co_main:
         lines.append(f"Co-main event: {co_main}")
 
     return event, "\n".join(lines)
@@ -63,12 +78,24 @@ async def retrieval_agent(
     info("Retrieval agent invoked")
 
     # 1) Extract fighters directly from the user question
-    fighters, primary = extract_canonical_fighters(user_input)
+    fighters, primary = extract_fighters(user_input)
     debug(f"retrieval_agent: extracted fighters={fighters}, primary={primary}")
+
+    # 1b) If no fighters found in text, try to derive from event mention
+    if not fighters:
+        import re
+        m = re.search(r"ufc\s*([0-9]{2,4})", user_input.lower())
+        if m:
+            event_id = f"ufc_{m.group(1)}"
+            event_fighters = get_event_fighters(event_id)
+            if event_fighters:
+                fighters = event_fighters
+                primary = fighters[0]
+                debug(f"retrieval_agent: derived fighters from event {event_id}: {fighters}")
 
     fighter_lines: List[str] = []
     if fighters:
-        fighter_lines.append("Fighters extracted from question (canonical IDs):")
+        fighter_lines.append("Fighters identified:")
         for f in fighters:
             fighter_lines.append(f"- {f}")
     else:

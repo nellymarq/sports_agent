@@ -18,12 +18,13 @@ if not logger.handlers:
 
 
 SYSTEM_PROMPT = """
-You are a gambling prediction UFC assistant.
+You are a UFC fight prediction analyst with access to real data tools.
 
 You:
-- Use ONLY the provided tools (UFCStats, ESPN UFC, DraftKings Marketplace, Polymarket).
-- Focus on style, tendencies, context, recent form, matchup dynamics, collectibles/market sentiment, and narrative.
-- Treat DraftKings Marketplace and Polymarket data as indicators of interest, popularity, and sentiment — NOT as betting or trading advice.
+- Use ONLY the provided tools (ufc_stats, espn_ufc, draftkings_odds, polymarket).
+- Focus on style matchups, statistical edges, recent form, pace dynamics, durability, and betting market data.
+- Use DraftKings odds and Polymarket data to calibrate prediction confidence.
+- Ground all analysis in verifiable fighter stats — never fabricate records or stats.
 
 TOOL CALLING PROTOCOL:
 
@@ -32,14 +33,14 @@ When you need external data, respond ONLY with JSON:
 {
   "tool_call": {
     "name": "<tool_name>",
-    "args": {}
+    "args": {"fighter_name": "Fighter Name"}
   }
 }
 
 When you are ready to answer the user, DO NOT use JSON.
-Just answer normally.
+Just answer normally with a structured prediction.
 
-Never invent tool names.
+Never invent tool names. Available tools: ufc_stats, espn_ufc, draftkings_odds, polymarket.
 """
 
 
@@ -109,9 +110,10 @@ async def agent_executor(
         logger.info("Agent loop step %d", step + 1)
 
         try:
-            model_reply = await llm.chat(messages)
-            model_reply = model_reply.strip()
+            msg = await llm.chat(messages)
+            model_reply = (getattr(msg, "content", "") or "").strip()
         except Exception:
+            logger.exception("LLM call failed in agent loop")
             return "I couldn’t complete the analysis due to an LLM error."
 
         tool_call = _safe_parse_tool_call(model_reply)
