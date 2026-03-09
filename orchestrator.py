@@ -1,8 +1,10 @@
-# orchestrator.py — final consolidated version with inline memory writes
+# orchestrator.py — DAG-based execution with inline memory writes
 # Compatible with router_agent + supervisor_agent task graph and tests.
 
 import asyncio
-from typing import Dict, Any, List
+import time
+from typing import Dict, Any, List, Set, Optional
+import re
 
 from logger import info, debug, error
 
@@ -47,6 +49,9 @@ from memory.memory_api import MemoryStore
 from fighter_utils import extract_fighters
 from retrieval_pipeline import get_retrieved_context
 from data.metadata import Evidence, SpecialistOutput, FinalOutput
+
+# === UNIFIED EVENT PIPELINE ===
+from pipeline.event_pipeline import EventPipeline
 
 # === MEMORY STORE INSTANCE (patchable in tests) ===
 MEMORY_STORE = MemoryStore()
@@ -96,6 +101,21 @@ def _validate_task_plan(task_plan: Dict[str, Any]) -> List[str]:
     return errors
 
 # =====================================================================
+#                           EVENT RESOLUTION
+# =====================================================================
+
+def _resolve_event_id_from_text(text: str) -> Optional[str]:
+    """
+    Best-effort: extract 'UFC 313' -> 'ufc_313' style event_id.
+    """
+    t = (text or "").lower()
+    m = re.search(r"ufc\s*([0-9]{2,4})", t)
+    if not m:
+        return None
+    num = m.group(1)
+    return f"ufc_{num}"
+
+# =====================================================================
 #                           SPECIALIST RUNNER
 # =====================================================================
 
@@ -125,14 +145,18 @@ async def _run_single_specialist(
         )
 
     try:
-        output = await specialist_fn(
-            llm=llm,
-            tool_registry=tool_registry,
-            user_input=user_input,
-            history=history,
-            retrieved_context=retrieved_context,
-            semantic_memory=semantic_memory,
-            episodic_memory=episodic_memory,
+        output = await asyncio.wait_for(
+            specialist_fn(
+                llm=llm,
+                tool_registry=tool_registry,
+                user_input=user_input,
+                history=history,
+                retrieved_context=retrieved_context,
+                semantic_memory=semantic_memory,
+                episodic_memory=episodic_memory,
+                context=context,
+            ),
+            timeout=60.0,  # 60s max per specialist
         )
 
         # === SCHEMA ENFORCEMENT ===
@@ -195,11 +219,27 @@ async def _run_single_specialist(
         )
 
 # =====================================================================
-#                           ORCHESTRATOR
+#                           ORCHESTRATOR (DAG)
 # =====================================================================
 
-async def orchestrator(llm, tool_registry, task_plan, test_mode: bool = False) -> str:
-    info("Orchestrator: starting execution")
+async def orchestrator(
+    llm,
+    tool_registry,
+    task_plan,
+    test_mode: bool = False,
+    prediction_llm=None,
+) -> str:
+    """
+    Backward-compatible signature:
+    - old calls: orchestrator(llm, tool_registry, task_plan, test_mode=True/False)
+    - new calls: orchestrator(llm, tool_registry, task_plan, test_mode, prediction_llm=...)
+    """
+    _t_start = time.monotonic()
+    info("Orchestrator: starting execution (DAG mode)")
+
+    # Default: use same LLM for prediction if none provided (tests, doctor)
+    if prediction_llm is None:
+        prediction_llm = llm
 
     # === VALIDATE TASK PLAN ===
     validation_errors = _validate_task_plan(task_plan)
@@ -211,16 +251,64 @@ async def orchestrator(llm, tool_registry, task_plan, test_mode: bool = False) -
     retrieved_context = task_plan.get("retrieved_context", "")
     tasks = task_plan.get("tasks", [])
 
-    # Only run specialist tasks; coordinator/critic tasks are handled internally
-    specialist_tasks = [
-        t for t in tasks
-        if t.get("task_type") == "specialist" and "specialist" in t
-    ]
+    # Early test-mode short-circuit
+    if test_mode and not tasks:
+        return "[TEST MODE] No tasks provided."
+
+    # Ensure tasks have ids and depends_on
+    for idx, t in enumerate(tasks):
+        t.setdefault("id", idx)
+        t.setdefault("depends_on", [])
+
+    tasks_by_id: Dict[int, Dict[str, Any]] = {t["id"]: t for t in tasks}
+    completed: Set[int] = set()
 
     fighters, primary_fighter = extract_fighters(user_input)
 
+    # === UNIFIED EVENT PIPELINE ===
+    pipeline = EventPipeline()
+    unified_event = None
+    unified_metadata_payload = None
+    unified_prediction_payload = None
+
+    try:
+        event_id = _resolve_event_id_from_text(user_input)
+        if event_id:
+            unified_event = await pipeline.load_unified_event(event_id)
+        else:
+            unified_event = await pipeline.load_unified_next_event()
+
+        if unified_event:
+            unified_metadata_payload = await pipeline.build_metadata_payload(unified_event.id)
+            unified_prediction_payload = await pipeline.build_prediction_payload(unified_event.id)
+    except Exception as e:
+        error(f"Unified event pipeline failed (non-fatal): {e}")
+        unified_event = None
+        unified_metadata_payload = None
+        unified_prediction_payload = None
+
+    # NEW: derive fighters from unified event main event if user didn't name them
+    if unified_event and not fighters:
+        try:
+            ev_dict = unified_event.to_dict()
+        except Exception:
+            ev_dict = None
+
+        if isinstance(ev_dict, dict):
+            main_ev = ev_dict.get("main_event") or ""
+            if isinstance(main_ev, str) and "vs" in main_ev.lower():
+                text = main_ev.replace("VS.", "vs.").replace("VS", "vs")
+                parts = text.split("vs")
+                if len(parts) == 2:
+                    left = parts[0].strip()
+                    right = parts[1].strip()
+                    derived = [n for n in (left, right) if n]
+                    if derived:
+                        fighters = derived
+                        primary_fighter = derived[0]
+
     # === STRUCTURED MEMORY ===
-    semantic_memory = get_semantic(primary_fighter) or {}
+    semantic_memory = get_semantic(primary_fighter) or ""
     episodic_memory = get_recent_episodic(5) or []
 
     # === RETRIEVAL ===
@@ -237,100 +325,258 @@ async def orchestrator(llm, tool_registry, task_plan, test_mode: bool = False) -
         "retrieved_context_present": bool(retrieved_context),
         "fighters": fighters,
         "primary_fighter": primary_fighter,
+        "unified_event": unified_event.to_dict() if unified_event else None,
+        "unified_metadata": unified_metadata_payload,
+        "unified_prediction": unified_prediction_payload,
     }
 
-    # === TEST MODE SHORT-CIRCUIT ===
-    if test_mode and not specialist_tasks:
-        return "[TEST MODE] No tasks provided."
+    # === DAG EXECUTION STATE ===
+    specialist_outputs: List[SpecialistOutput] = []
+    coordinator_output: SpecialistOutput | None = None
+    prediction_output: SpecialistOutput | None = None
+    final_output_meta: FinalOutput | None = None
 
-    # === SPECIALIST EXECUTION ===
-    async def _run_task(t):
-        return await _run_single_specialist(
-            specialist_key=t["specialist"],
-            name=t.get("name", ""),
-            llm=llm,
-            tool_registry=tool_registry,
-            user_input=user_input,
-            history=history,
-            retrieved_context=retrieved_context,
-            semantic_memory=semantic_memory,
-            episodic_memory=episodic_memory,
-            context=context,
-        )
+    # Router metadata (for diagnostics in coordinator)
+    router_output = {
+        "question_type": task_plan.get("question_type"),
+        "specialists": task_plan.get("specialists", []),
+        "debug_specialists": task_plan.get("debug_specialists", []),
+    }
 
-    specialist_outputs = await asyncio.gather(*[_run_task(t) for t in specialist_tasks])
+    # === DAG EXECUTION LOOP (PARALLEL) ===
+    while len(completed) < len(tasks):
+        # Collect all tasks whose dependencies are satisfied
+        ready = []
+        for t in tasks:
+            tid = t["id"]
+            if tid in completed:
+                continue
+            deps = t.get("depends_on") or []
+            if all(d in completed for d in deps):
+                ready.append(t)
 
-    # === COORDINATOR ===
-    coordinator_output = await coordinator_merge(
-        llm=llm,
-        specialist_outputs=specialist_outputs,
-        semantic_memory=semantic_memory,
-        episodic_memory=episodic_memory,
-        user_input=user_input,
-        fighters=fighters,
-    )
+        if not ready:
+            error("Orchestrator: DAG execution stalled (cyclic or unsatisfiable dependencies).")
+            break
 
-    # ENFORCE SpecialistOutput TYPE (defensive)
-    if isinstance(coordinator_output, str):
-        coordinator_output = SpecialistOutput.create(
-            specialist="coordinator",
-            content=coordinator_output,
-            reasoning=None,
-            evidence=[],
-            confidence=0.7,
-            lineage={"source": "coordinator_fallback"},
-            metadata={},
-        )
+        # Separate by type for batch execution
+        specialist_batch = [t for t in ready if t.get("task_type") == "specialist"]
+        other_tasks = [t for t in ready if t.get("task_type") != "specialist"]
 
-    # === DEBUG MODE DETECTION ===
-    debug_mode_active = any(
-        s.specialist
-        in (
-            "routing_debug",
-            "coordinator_debug",
-            "critic_debug",
-            "memory_debug",
-        )
-        for s in specialist_outputs
-    )
+        # Run all ready specialists in parallel
+        if specialist_batch:
+            _t_batch = time.monotonic()
+            info(f"Orchestrator: launching {len(specialist_batch)} specialists in parallel")
 
-    # === PREDICTION ===
-    if test_mode or debug_mode_active:
-        prediction_output = None
-    else:
-        prediction_output = await run_prediction_specialist(
-            llm=llm,
-            coordinator_output=coordinator_output,
-            user_input=user_input,
-            fighters=fighters,
-            semantic_memory=semantic_memory,
-            episodic_memory=episodic_memory,
-            retrieved_context=retrieved_context,
-        )
+            async def _run_spec(t):
+                return t["id"], await _run_single_specialist(
+                    specialist_key=t["specialist"],
+                    name=t.get("name", t["specialist"]),
+                    llm=llm,
+                    tool_registry=tool_registry,
+                    user_input=user_input,
+                    history=history,
+                    retrieved_context=retrieved_context,
+                    semantic_memory=semantic_memory,
+                    episodic_memory=episodic_memory,
+                    context=context,
+                )
 
-    # === CRITIC ===
-    final_output_meta = await critic_review(
-        llm=llm,
-        coordinator_output=coordinator_output,
-        prediction_output=prediction_output,
-        user_input=user_input,
-        fighters=fighters,
-        semantic_memory=semantic_memory,
-        episodic_memory=episodic_memory,
-    )
+            results = await asyncio.gather(
+                *[_run_spec(t) for t in specialist_batch],
+                return_exceptions=True,
+            )
 
-    # ENFORCE FinalOutput TYPE (defensive)
-    if isinstance(final_output_meta, str):
+            for i, result in enumerate(results):
+                t = specialist_batch[i]
+                tid = t["id"]
+                if isinstance(result, Exception):
+                    error(f"Specialist '{t['specialist']}' raised exception: {result}")
+                    specialist_outputs.append(SpecialistOutput.create(
+                        specialist=t["specialist"],
+                        content=f"[ERROR] Specialist '{t['specialist']}' failed.",
+                        reasoning=None,
+                        evidence=[],
+                        confidence=0.0,
+                        lineage={"specialist": t["specialist"], "error": True},
+                        metadata={"error_message": str(result)},
+                    ))
+                else:
+                    _, output = result
+                    specialist_outputs.append(output)
+                completed.add(tid)
+
+            info(f"Orchestrator: specialist batch completed in {time.monotonic() - _t_batch:.2f}s")
+
+        # Run non-specialist tasks (coordinator, critic) sequentially
+        for t in other_tasks:
+            tid = t["id"]
+            task_type = t.get("task_type")
+
+            # ---------------- COORDINATOR TASK ----------------
+            if task_type == "coordinator_merge":
+                coordinator_output = await coordinator_merge(
+                    llm=llm,
+                    specialist_outputs=specialist_outputs,
+                    semantic_memory=semantic_memory,
+                    episodic_memory=episodic_memory,
+                    user_input=user_input,
+                    fighters=fighters,
+                    router_output=router_output,
+                )
+
+                # Enforce SpecialistOutput type
+                if isinstance(coordinator_output, str):
+                    coordinator_output = SpecialistOutput.create(
+                        specialist="coordinator",
+                        content=coordinator_output,
+                        reasoning=None,
+                        evidence=[],
+                        confidence=0.7,
+                        lineage={"source": "coordinator_fallback"},
+                        metadata={},
+                    )
+
+                # DEBUG MODE DETECTION
+                debug_mode_active = any(
+                    s.specialist
+                    in (
+                        "routing_debug",
+                        "coordinator_debug",
+                        "critic_debug",
+                        "memory_debug",
+                    )
+                    for s in specialist_outputs
+                )
+
+                # PREDICTION (only once coordinator is ready)
+                if not test_mode and not debug_mode_active:
+                    prediction_output = await run_prediction_specialist(
+                        llm=prediction_llm,
+                        tool_registry=tool_registry,
+                        coordinator_output=coordinator_output,
+                        user_input=user_input,
+                        fighters=fighters,
+                        semantic_memory=semantic_memory,
+                        episodic_memory=episodic_memory,
+                        retrieved_context=retrieved_context,
+                        prediction_features=context.get("unified_prediction"),
+                        event_metadata=context.get("unified_metadata"),
+                    )
+
+                    # --- SCHEMA ENFORCEMENT FOR PREDICTION ---
+                    if isinstance(prediction_output, str):
+                        prediction_output = SpecialistOutput.create(
+                            specialist="prediction",
+                            content=prediction_output.strip(),
+                            reasoning=None,
+                            evidence=[],
+                            confidence=0.7,
+                            lineage={
+                                "specialist": "prediction",
+                                "source": "orchestrator_wrap",
+                            },
+                            metadata={},
+                        )
+                    elif isinstance(prediction_output, dict):
+                        evidence_list = []
+                        for ev in prediction_output.get("evidence", []) or []:
+                            evidence_list.append(
+                                Evidence.create(
+                                    source=ev.get("source", "unknown"),
+                                    content=ev.get("content", ""),
+                                    confidence=float(ev.get("confidence", 0.7)),
+                                    provenance=ev.get("provenance", {}),
+                                )
+                            )
+
+                        prediction_output = SpecialistOutput.create(
+                            specialist="prediction",
+                            content=str(prediction_output.get("content", "")).strip(),
+                            reasoning=prediction_output.get("reasoning"),
+                            evidence=evidence_list,
+                            confidence=float(prediction_output.get("confidence", 0.7)),
+                            lineage={
+                                "specialist": "prediction",
+                                "source": "orchestrator_wrap",
+                            },
+                            metadata=prediction_output.get("metadata", {}) or {},
+                        )
+                    elif prediction_output is not None and not isinstance(
+                        prediction_output, SpecialistOutput
+                    ):
+                        prediction_output = SpecialistOutput.create(
+                            specialist="prediction",
+                            content=str(prediction_output),
+                            reasoning=None,
+                            evidence=[],
+                            confidence=0.7,
+                            lineage={
+                                "specialist": "prediction",
+                                "source": "orchestrator_wrap",
+                            },
+                            metadata={},
+                        )
+
+                completed.add(tid)
+                continue
+
+            # ---------------- CRITIC TASK ----------------
+            if task_type == "critic_review":
+                final_output_meta = await critic_review(
+                    llm=llm,
+                    coordinator_output=coordinator_output,
+                    prediction_output=prediction_output,
+                    user_input=user_input,
+                    fighters=fighters,
+                    semantic_memory=semantic_memory,
+                    episodic_memory=episodic_memory,
+                )
+
+                # Enforce FinalOutput type
+                if isinstance(final_output_meta, str):
+                    final_output_meta = FinalOutput.create(
+                        content=final_output_meta,
+                        merged_from=[],
+                        evidence=[],
+                        confidence=0.7,
+                        lineage={"source": "critic_fallback"},
+                        metadata={},
+                    )
+
+                completed.add(tid)
+                continue
+
+            # Unknown task types
+            error(f"Orchestrator: unknown task_type '{task_type}' for task id={tid}")
+            completed.add(tid)
+
+    # Fallback: if critic didn't run, use coordinator output
+    if final_output_meta is None and coordinator_output is not None:
         final_output_meta = FinalOutput.create(
-            content=final_output_meta,
-            merged_from=[],
-            evidence=[],
-            confidence=0.7,
-            lineage={"source": "critic_fallback"},
+            content=coordinator_output.content,
+            merged_from=[coordinator_output.id],
+            evidence=coordinator_output.evidence,
+            confidence=coordinator_output.confidence,
+            lineage={"source": "coordinator_only", "parents": [coordinator_output.id]},
             metadata={},
         )
 
+    if final_output_meta is None:
+        return "[ERROR] Orchestrator failed to produce a final output."
+
+    info(f"Orchestrator: pipeline completed in {time.monotonic() - _t_start:.2f}s")
     final_output_str = final_output_meta.content
+
+    # =====================================================================
+    #                           MEMORY MAINTENANCE
+    # =====================================================================
+
+    # Decay stale long-term memories (older than 30 days)
+    MEMORY_STORE.decay_long_term(threshold_seconds=30 * 24 * 3600)
+    MEMORY_STORE.dedupe_long_term()
+    MEMORY_STORE.cap_long_term(max_entries=500)
+    MEMORY_STORE.decay_short_term(threshold_seconds=86400)
 
     # =====================================================================
     #                           INLINE MEMORY WRITES
@@ -400,8 +646,35 @@ async def orchestrator(llm, tool_registry, task_plan, test_mode: bool = False) -
 #                           SYNC WRAPPERS
 # =====================================================================
 
-async def run_agent_orchestrator(llm, tool_registry, task_plan, test_mode: bool = False):
-    return await orchestrator(llm, tool_registry, task_plan, test_mode=test_mode)
+async def run_agent_orchestrator(
+    llm,
+    tool_registry,
+    task_plan,
+    test_mode: bool = False,
+    prediction_llm=None,
+):
+    return await orchestrator(
+        llm=llm,
+        tool_registry=tool_registry,
+        task_plan=task_plan,
+        test_mode=test_mode,
+        prediction_llm=prediction_llm,
+    )
 
-def run_orchestrator_sync(llm, tool_registry, task_plan, test_mode: bool = False):
-    return asyncio.run(run_agent_orchestrator(llm, tool_registry, task_plan, test_mode=test_mode))
+
+def run_orchestrator_sync(
+    llm,
+    tool_registry,
+    task_plan,
+    test_mode: bool = False,
+    prediction_llm=None,
+):
+    return asyncio.run(
+        run_agent_orchestrator(
+            llm=llm,
+            tool_registry=tool_registry,
+            task_plan=task_plan,
+            test_mode=test_mode,
+            prediction_llm=prediction_llm,
+        )
+    )

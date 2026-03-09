@@ -1,4 +1,4 @@
-# tools.py
+# tools/__init__.py
 # Multi-agent compatible tool definitions with real data parsing.
 
 import requests

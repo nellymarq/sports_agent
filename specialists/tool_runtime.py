@@ -156,8 +156,18 @@ async def run_tool_loop(llm, messages, tool_registry, max_iters: int = 4):
             return f"Unknown tool: {tool_name}"
 
         try:
-            # tool_registry entries should be async callables
-            result = await tool_registry[tool_name](**tool_args)
+            tool = tool_registry[tool_name]
+            # Support both callable tools and class instances with .invoke()
+            if hasattr(tool, "invoke"):
+                result = tool.invoke(tool_args)
+            elif callable(tool):
+                import asyncio
+                if asyncio.iscoroutinefunction(tool):
+                    result = await tool(**tool_args)
+                else:
+                    result = tool(**tool_args)
+            else:
+                result = f"Tool '{tool_name}' is not callable"
         except Exception as e:
             tb = traceback.format_exc()
             error(f"Tool execution error ({tool_name}):\n{tb}")

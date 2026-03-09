@@ -40,6 +40,7 @@ async def test_full_pipeline():
     # Orchestrator (test mode)
     final_output = await orchestrator(
         llm=llm,
+	prediction_llm=llm,
         tool_registry=TOOL_REGISTRY,
         task_plan=task_plan,
         test_mode=True,

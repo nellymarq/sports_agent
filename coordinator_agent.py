@@ -1,8 +1,8 @@
 # coordinator_agent.py
 # Metadata-aware coordinator with memory awareness, subject consistency,
-# confidence-aware merging, AND optional debug-section output.
+# confidence-aware merging, AND enhanced diagnostics tightly integrated with router output.
 
-from typing import List
+from typing import List, Dict, Any
 from logger import info, debug, error
 
 from data.metadata import SpecialistOutput, Evidence
@@ -20,39 +20,49 @@ SECTION_ORDER = [
 ]
 
 COORDINATOR_SYSTEM_PROMPT = """
-You are the COORDINATOR AGENT for a multi-specialist UFC analytics engine.
+You merge all specialist outputs into a single, cohesive UFC analysis optimized for prediction accuracy.
 
 Your responsibilities:
-- Merge all specialist outputs into a single, cohesive analysis.
-- Identify overlapping insights and combine them smoothly.
+- Combine insights smoothly and avoid repetition.
 - Preserve nuance from each specialist.
-- Avoid repetition.
-- Organize the final answer into clear, analyst-style sections.
-- Maintain a professional, technical tone.
-- Do NOT invent new facts.
-- Do NOT contradict specialist outputs.
-- Do NOT remove meaningful analysis.
+- Maintain a technical, analyst-style tone.
+- Never invent new facts.
+- Never contradict specialist outputs without explicit justification.
+- Realign any off-topic content to the correct fighters.
+- Explicitly flag contradictions or uncertainty.
 - Produce a clean narrative, not JSON.
 
-CRITICAL: Subject Consistency
-- The user question and extracted fighter names define the subject of analysis.
-- Ensure the final analysis focuses on those fighters only.
-- If specialist outputs drift to other fighters, realign the narrative to the correct fighters
-  or explicitly note that some content appears mismatched and should be ignored.
+Subject Consistency:
+- The user question and extracted fighter names define the subject.
+- If specialists drift, correct the narrative or note mismatches.
 
-CONFIDENCE & CONTRADICTIONS
-- Each specialist has a confidence score.
-- When specialists disagree, prefer higher-confidence, better-supported analysis.
-- If contradictions remain, explicitly flag them as analyst-level uncertainty.
+Confidence-Weighted Merging:
+- Specialists are ordered by confidence score (highest first).
+- HIGH WEIGHT specialists (conf >= 0.8) should anchor the narrative.
+- MEDIUM WEIGHT specialists (0.5-0.8) provide supporting detail.
+- LOW WEIGHT specialists (< 0.5) should be noted but treated with caution.
+- When specialists contradict, prefer the higher-confidence source and explicitly note the disagreement.
+- If multiple high-confidence specialists converge on a conclusion, emphasize this convergence.
+
+Prediction Optimization:
+- Your merged analysis will be fed to a prediction specialist.
+- Ensure you clearly surface: stylistic advantages/disadvantages, recent form trajectory, durability concerns, pace dynamics, and any significant edges.
+- Be specific about measurable advantages (reach, output volume, takedown defense %).
 """
 
 
 def _build_structured_block(specialist_outputs: List[SpecialistOutput]) -> str:
-    lines = ["Specialist Outputs (with confidence and notes):\n"]
-    for idx, s in enumerate(specialist_outputs, start=1):
-        lines.append(f"### SPECIALIST {idx} | {s.specialist} | conf={s.confidence:.2f} ###")
+    # Sort by confidence descending so higher-confidence analyses appear first
+    sorted_outputs = sorted(specialist_outputs, key=lambda s: s.confidence, reverse=True)
+
+    lines = ["Specialist Outputs (ordered by confidence, highest first):\n"]
+    for idx, s in enumerate(sorted_outputs, start=1):
+        weight_label = "HIGH WEIGHT" if s.confidence >= 0.8 else "MEDIUM WEIGHT" if s.confidence >= 0.5 else "LOW WEIGHT"
+        lines.append(f"### SPECIALIST {idx} | {s.specialist} | conf={s.confidence:.2f} | {weight_label} ###")
         if s.metadata:
             lines.append(f"[metadata]: {s.metadata}")
+        if s.evidence:
+            lines.append(f"[evidence count]: {len(s.evidence)}")
         lines.append(s.content.strip())
         lines.append("")
     return "\n".join(lines)
@@ -65,6 +75,43 @@ def _compute_overall_confidence(specialist_outputs: List[SpecialistOutput]) -> f
     return total / len(specialist_outputs)
 
 
+def _build_diagnostics_block(
+    specialist_outputs: List[SpecialistOutput],
+    router_output: Dict[str, Any],
+) -> str:
+    """
+    Enhanced diagnostics:
+    - Which specialists ran
+    - Confidence scores
+    - Error flags
+    - Evidence counts
+    - Router question type
+    - Router-selected specialists
+    - Router debug specialists
+    """
+    lines = ["=== PIPELINE DIAGNOSTICS ==="]
+
+    # Router-level diagnostics
+    qtype = router_output.get("question_type", "unknown")
+    selected = router_output.get("specialists", [])
+    debug_specs = router_output.get("debug_specialists", [])
+
+    lines.append(f"Router question_type: {qtype}")
+    lines.append(f"Router selected specialists: {selected}")
+    lines.append(f"Router debug specialists: {debug_specs}")
+    lines.append("")
+
+    # Specialist-level diagnostics
+    for s in specialist_outputs:
+        err = bool(s.metadata.get("error") or s.lineage.get("error"))
+        lines.append(
+            f"- specialist={s.specialist} | conf={s.confidence:.2f} | "
+            f"error={err} | evidence_count={len(s.evidence)}"
+        )
+
+    return "\n".join(lines)
+
+
 async def coordinator_merge(
     llm,
     specialist_outputs: List[SpecialistOutput],
@@ -72,6 +119,7 @@ async def coordinator_merge(
     episodic_memory,
     user_input: str,
     fighters,
+    router_output: Dict[str, Any] = None,   # NEW: router output injected for diagnostics
 ) -> SpecialistOutput:
 
     info("Coordinator: merging specialist outputs")
@@ -88,10 +136,10 @@ async def coordinator_merge(
             metadata={},
         )
 
-    # Build structured block for LLM
+    router_output = router_output or {}
+
     structured_block = _build_structured_block(specialist_outputs)
 
-    # Memory context
     memory_context = ""
     if semantic_memory:
         memory_context += f"\n\nRelevant long-term fighter knowledge:\n{semantic_memory}"
@@ -130,7 +178,6 @@ async def coordinator_merge(
     try:
         reply = await llm.chat(messages)
 
-        # Safe extraction for MockLLM compatibility
         merged = (
             reply.get("content", "") if isinstance(reply, dict)
             else getattr(reply, "content", "")
@@ -138,21 +185,22 @@ async def coordinator_merge(
 
         debug(f"Coordinator merged output preview: {merged[:300]}...")
 
-        # === NEW: Append debug specialist outputs ===
-        debug_outputs = [
-            s for s in specialist_outputs
-            if s.specialist in (
-                "routing_debug",
-                "coordinator_debug",
-                "critic_debug",
-                "memory_debug",
-            )
-        ]
+        # Build diagnostics
+        diagnostics_block = _build_diagnostics_block(
+            specialist_outputs=specialist_outputs,
+            router_output=router_output,
+        )
 
-        if debug_outputs:
+        # Append diagnostics only if debug specialists were requested
+        debug_specs = router_output.get("debug_specialists", [])
+        if debug_specs:
             merged += "\n\n\n=== DEBUG OUTPUT ===\n"
-            for s in debug_outputs:
-                merged += f"\n\n--- {s.specialist.upper()} ---\n{s.content.strip()}\n"
+            merged += diagnostics_block + "\n"
+
+            # Append explicit debug specialists
+            for s in specialist_outputs:
+                if s.specialist in debug_specs:
+                    merged += f"\n\n--- {s.specialist.upper()} ---\n{s.content.strip()}\n"
 
         # Build lineage + evidence
         parent_ids = [s.id for s in specialist_outputs]
@@ -163,7 +211,7 @@ async def coordinator_merge(
         lineage = {
             "parents": parent_ids,
             "specialist": "coordinator",
-            "merge_strategy": "sectioned_merge_confidence_aware_with_debug_append",
+            "merge_strategy": "sectioned_merge_confidence_aware_with_router_diagnostics",
             "query": user_input,
             "fighters": fighters,
         }
@@ -179,7 +227,7 @@ async def coordinator_merge(
                 "section_order": SECTION_ORDER,
                 "overall_specialist_confidence": overall_conf,
                 "specialist_count": len(specialist_outputs),
-                "debug_appended": bool(debug_outputs),
+                "debug_appended": bool(debug_specs),
             },
         )
 

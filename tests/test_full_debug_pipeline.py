@@ -42,6 +42,7 @@ async def test_full_debug_pipeline():
     # Step 3: Run orchestrator
     final_output = await orchestrator(
         llm=llm,
+	prediction_llm=llm,
         tool_registry={},
         task_plan=task_plan,
         test_mode=False,

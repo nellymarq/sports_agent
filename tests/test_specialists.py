@@ -38,6 +38,7 @@ async def test_all_specialists_run():
     # Orchestrator runs in test mode (safe)
     final_output = await orchestrator(
         llm=llm,
+	prediction_llm=llm,
         tool_registry=TOOL_REGISTRY,
         task_plan=task_plan,
         test_mode=True,

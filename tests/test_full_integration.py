@@ -65,9 +65,14 @@ async def test_full_integration_end_to_end():
         mock_memory_store.write_long_term = MagicMock()
         mock_memory_store.write_evidence = MagicMock()
         mock_memory_store.write_specialist_note = MagicMock()
+        mock_memory_store.decay_long_term = MagicMock()
+        mock_memory_store.dedupe_long_term = MagicMock()
+        mock_memory_store.cap_long_term = MagicMock()
+        mock_memory_store.decay_short_term = MagicMock()
 
         final_output_str = await orchestrator(
             llm=llm,
+            prediction_llm=llm,
             tool_registry=TOOL_REGISTRY,
             task_plan=task_plan,
             test_mode=False,  # prediction must run

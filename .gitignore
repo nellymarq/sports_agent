@@ -1,3 +1,7 @@
+# secrets
+.env
+.env.*
+
 # runtime state
 state/
 cache/
@@ -6,6 +10,25 @@ tests/cache/
 # python artifacts
 __pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
 
 # virtual environments
 .venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# browser profile (playwright)
+tools/browser_profile/
+
+# memory data (per-instance)
+memory/memory.json
+memory/memory.md

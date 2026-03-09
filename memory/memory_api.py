@@ -72,3 +72,17 @@ class MemoryStore:
             item for item in self.long_term
             if now - item["timestamp"] < threshold_seconds
         ]
+
+    def decay_short_term(self, threshold_seconds: float = 86400):
+        """Remove short-term memories older than threshold (default 24h)."""
+        now = time.time()
+        self.short_term = [
+            item for item in self.short_term
+            if now - item.get("timestamp", 0) > 0 and now - item["timestamp"] < threshold_seconds
+        ]
+
+    def cap_long_term(self, max_entries: int = 500):
+        """Keep only the most recent N long-term entries."""
+        if len(self.long_term) > max_entries:
+            self.long_term.sort(key=lambda x: x.get("timestamp", 0), reverse=True)
+            self.long_term = self.long_term[:max_entries]
