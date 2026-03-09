@@ -1,0 +1,80 @@
+[
+  {
+    "id": "ufc_313",
+    "code": "UFC 313",
+    "name": "UFC 313",
+    "location": "",
+    "main_event": {
+      "fighters": []
+    },
+    "co_main_event": {
+      "fighters": []
+    },
+    "card": []
+  },
+  {
+    "id": "ufc_314",
+    "code": "UFC 314",
+    "name": "UFC 314",
+    "location": "",
+    "main_event": {
+      "fighters": []
+    },
+    "co_main_event": {
+      "fighters": []
+    },
+    "card": []
+  },
+  {
+    "id": "ufc_315",
+    "code": "UFC 315",
+    "name": "UFC 315",
+    "location": "",
+    "main_event": {
+      "fighters": []
+    },
+    "co_main_event": {
+      "fighters": []
+    },
+    "card": []
+  },
+  {
+    "id": "ufc_316",
+    "code": "UFC 316",
+    "name": "UFC 316",
+    "location": "",
+    "main_event": {
+      "fighters": []
+    },
+    "co_main_event": {
+      "fighters": []
+    },
+    "card": []
+  },
+  {
+    "id": "ufc_317",
+    "code": "UFC 317",
+    "name": "UFC 317",
+    "location": "",
+    "main_event": {
+      "fighters": []
+    },
+    "co_main_event": {
+      "fighters": []
+    },
+    "card": []
+  },
+  {
+    "id": "ufc_318",
+    "code": "UFC 318",
+    "name": "UFC 318",
+    "location": "",
+    "main_event": {
+      "fighters": []
+    },
+    "co_main_event": {
+      "fighters": []
+    },
+    "card": []
+  }
+]
