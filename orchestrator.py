@@ -57,6 +57,9 @@ from pipeline.event_pipeline import EventPipeline
 # === PRE-FETCH ===
 from tools.prefetch import prefetch_fighter_stats, format_prefetched_stats
 
+# === DOMAIN PROMPTS ===
+from specialists.domain_prompts import get_domain_guidance
+
 # === MEMORY STORE INSTANCE (patchable in tests) ===
 MEMORY_STORE = MemoryStore()
 
@@ -148,6 +151,12 @@ async def _run_single_specialist(
             metadata={"error_message": "unknown_specialist"},
         )
 
+    # Inject domain-specific guidance into retrieved context
+    domain_guidance = get_domain_guidance(specialist_key)
+    enriched_context = retrieved_context
+    if domain_guidance:
+        enriched_context = domain_guidance + "\n\n" + (retrieved_context or "")
+
     try:
         output = await asyncio.wait_for(
             specialist_fn(
@@ -155,7 +164,7 @@ async def _run_single_specialist(
                 tool_registry=tool_registry,
                 user_input=user_input,
                 history=history,
-                retrieved_context=retrieved_context,
+                retrieved_context=enriched_context,
                 semantic_memory=semantic_memory,
                 episodic_memory=episodic_memory,
                 context=context,
