@@ -6,6 +6,7 @@
 state/
 cache/
 tests/cache/
+*.tmp
 
 # python artifacts
 __pycache__/

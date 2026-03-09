@@ -81,12 +81,18 @@ install:
 	$(PIP) install -r requirements.lock
 
 # =====================================================================
+#  PREDICTION CALIBRATION
+# =====================================================================
+calibration:
+	$(PYTHON) -c "from prediction_tracker import get_calibration_stats; import json; print(json.dumps(get_calibration_stats(), indent=2))"
+
+# =====================================================================
 #  HELP
 # =====================================================================
 help:
 	@echo ""
 	@echo "Available commands:"
-	@echo "  make app                - Run Streamlit app"
+	@echo "  make agent              - Run CLI agent"
 	@echo "  make backend            - Run FastAPI backend"
 	@echo "  make frontend           - Run Next.js frontend"
 	@echo "  make dev                - Run backend + frontend together"
@@ -97,4 +103,5 @@ help:
 	@echo "  make clean              - Remove caches"
 	@echo "  make install            - Install dependencies"
 	@echo "  make shell              - Open shell with venv"
+	@echo "  make calibration        - Show prediction calibration stats"
 	@echo ""
