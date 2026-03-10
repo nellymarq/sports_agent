@@ -45,16 +45,20 @@ def _detect_question_type(text: str) -> str:
     ):
         return "event_who_wins"
 
-    if any(k in t for k in ["who wins", "who takes", "who do you favor", "who would win"]):
+    if any(k in t for k in ["who wins", "who takes", "who do you favor", "who would win", "predict", "prediction", "pick"]):
         return "who_wins"
-    if any(k in t for k in ["style", "archetype", "how does he fight", "what kind of fighter"]):
+    if any(k in t for k in ["style", "archetype", "how does he fight", "what kind of fighter", "fighting style"]):
         return "style_profile"
-    if any(k in t for k in ["weakness", "vulnerable", "susceptible", "path to beat", "how do you beat"]):
+    if any(k in t for k in ["weakness", "vulnerable", "susceptible", "path to beat", "how do you beat", "exploit"]):
         return "weakness"
-    if any(k in t for k in ["gameplan", "strategy", "approach", "path to victory", "how should", "keys to victory"]):
+    if any(k in t for k in ["gameplan", "strategy", "approach", "path to victory", "how should", "keys to victory", "game plan"]):
         return "gameplan"
-    if any(k in t for k in ["breakdown", "full analysis", "scouting", "profile", "vs", "versus", "matchup"]):
+    if any(k in t for k in ["breakdown", "full analysis", "scouting", "profile", "vs", "versus", "matchup", "break down", "analyze"]):
         return "who_wins"
+    if any(k in t for k in ["odds", "value bet", "value bets", "betting", "edge"]):
+        return "who_wins"
+    if any(k in t for k in ["card breakdown", "full card", "entire card", "all fights"]):
+        return "event_who_wins"
 
     return "general"
 
@@ -200,7 +204,8 @@ async def router_agent(
         "profile", "vs", "versus", "how does", "compare", "analysis",
         "stylistic", "fight iq", "gameplan", "scramble", "durability",
         "judging", "knowledge graph", "who wins", "who would win",
-        "main event",
+        "main event", "predict", "prediction", "break down", "analyze",
+        "odds", "value bet", "betting", "full card",
     ]
 
     if any(t in text for t in full_triggers) and qtype in ("who_wins", "event_who_wins", "general"):
