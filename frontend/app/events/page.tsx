@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
+import { CardSkeleton } from "@/components/ui/skeleton";
 
 type FighterRef = {
   name: string;
@@ -156,11 +157,10 @@ export default function EventsPage() {
       </div>
 
       {loading && (
-        <Card className="p-5">
-          <p className="text-sm text-slate-400 animate-pulse">
-            Loading events...
-          </p>
-        </Card>
+        <div className="space-y-3">
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
       )}
 
       {error && (

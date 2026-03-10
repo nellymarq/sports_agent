@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton, CardSkeleton, StatsSkeleton } from "@/components/ui/skeleton";
 
 type Prediction = {
   id: string;
@@ -315,11 +316,11 @@ export default function PredictionsPage() {
       </div>
 
       {loading && (
-        <Card className="p-5">
-          <p className="text-sm text-slate-400 animate-pulse">
-            Loading predictions...
-          </p>
-        </Card>
+        <div className="space-y-3">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
       )}
 
       {error && (
