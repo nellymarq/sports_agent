@@ -2,10 +2,13 @@
 # Fully async UFCStats ingestion provider (2026-compatible)
 
 from __future__ import annotations
+import logging
 from typing import Optional, Dict, Any
 
 from data.providers.ufcstats_list import find_ufcstats_event_url
 from data.providers.ufcstats_event import parse_ufcstats_event
+
+_logger = logging.getLogger("providers.ufc")
 
 
 async def fetch_event_from_ufc(event_id: str) -> Optional[Dict[str, Any]]:
@@ -19,12 +22,12 @@ async def fetch_event_from_ufc(event_id: str) -> Optional[Dict[str, Any]]:
     """
     stats_url = await find_ufcstats_event_url(event_id)
     if not stats_url:
-        print("DEBUG: UFCStats URL not found for", event_id)
+        _logger.debug(f"UFCStats URL not found for {event_id}")
         return None
 
     data = await parse_ufcstats_event(stats_url)
     if not data:
-        print("DEBUG: UFCStats event parse failed for", stats_url)
+        _logger.warning(f"UFCStats event parse failed for {stats_url}")
         return None
 
     return data

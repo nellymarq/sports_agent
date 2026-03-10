@@ -2,11 +2,14 @@
 # Fully async UFCStats event-details parser (2026-compatible)
 
 from __future__ import annotations
+import logging
 from typing import Dict, Any, List, Optional
 import time
 from bs4 import BeautifulSoup
 
 from tools.browser_fetch import browser_fetch
+
+_logger = logging.getLogger("providers.ufcstats_event")
 
 
 async def parse_ufcstats_event(url: str) -> Optional[Dict[str, Any]]:
@@ -79,7 +82,7 @@ async def parse_ufcstats_event(url: str) -> Optional[Dict[str, Any]]:
             "is_co_main_event": idx == 2,
         })
 
-    print(f"DEBUG: Parsed {len(bouts)} bouts from UFCStats")
+    _logger.debug(f"Parsed {len(bouts)} bouts from UFCStats")
 
     return {
         "name": event_name,

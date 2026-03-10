@@ -21,10 +21,19 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
 # Import the shared engine entrypoint (async pipeline)
-from engine_entry import _run_full_pipeline, clear_task_queue, LLM_ROUTING, LLM_ORCHESTRATOR
+from engine_entry import _run_full_pipeline, clear_task_queue, LLM_ROUTING, LLM_ORCHESTRATOR, get_pipeline_timings
 from prediction_tracker import get_calibration_stats, record_result
+from config import validate_config
 
 _logger = logging.getLogger("backend")
+
+# -------------------------------------------------
+# Startup validation
+# -------------------------------------------------
+_config_errors = validate_config()
+if _config_errors:
+    for err in _config_errors:
+        _logger.warning(f"CONFIG WARNING: {err}")
 
 app = FastAPI(
     title="UFC Analytics Backend",
@@ -80,10 +89,13 @@ def health() -> Dict[str, Any]:
 
 @app.get("/stats")
 def stats() -> Dict[str, Any]:
-    """Return LLM usage stats for monitoring."""
+    """Return LLM usage stats and pipeline timings for monitoring."""
+    timings = get_pipeline_timings()
     return {
         "routing_llm": LLM_ROUTING.stats,
         "prediction_llm": LLM_ORCHESTRATOR.stats,
+        "recent_pipelines": len(timings),
+        "pipeline_timings": timings[-5:] if timings else [],
     }
 
 

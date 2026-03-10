@@ -1,5 +1,6 @@
 import os
 import asyncio
+import time
 from dotenv import load_dotenv
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -46,10 +47,24 @@ else:
 
 
 # ============================================================
-# FULL MULTI-AGENT PIPELINE (ASYNC)
+# PIPELINE PROFILING
 # ============================================================
 
-from typing import AsyncGenerator, Callable, Optional
+from typing import Callable, Dict, List, Optional
+
+# Store recent pipeline timings for /stats
+_pipeline_timings: List[Dict[str, float]] = []
+_MAX_TIMING_HISTORY = 20
+
+
+def get_pipeline_timings() -> List[Dict]:
+    """Return recent pipeline stage timings."""
+    return list(_pipeline_timings)
+
+
+# ============================================================
+# FULL MULTI-AGENT PIPELINE (ASYNC)
+# ============================================================
 
 
 async def _run_full_pipeline(
@@ -60,10 +75,22 @@ async def _run_full_pipeline(
     history = [f"{role}: {content}" for role, content in history_pairs]
     episodic_memory_text = "\n".join(history) if history else ""
 
+    stage_times: Dict[str, float] = {}
+    _current_stage_start = [time.monotonic()]
+
     def _stage(name: str) -> None:
+        now = time.monotonic()
+        # Record elapsed time for previous stage
+        if stage_times:
+            last_key = list(stage_times.keys())[-1]
+            stage_times[last_key] = round(now - _current_stage_start[0], 2)
+        stage_times[name] = 0.0
+        _current_stage_start[0] = now
         _logger.info(f"Pipeline stage: {name}")
         if on_stage:
             on_stage(name)
+
+    pipeline_t0 = time.monotonic()
 
     # 1. Retrieval
     _stage("retrieval")
@@ -104,6 +131,21 @@ async def _run_full_pipeline(
         task_plan=task_plan,
         test_mode=USE_TEST_MODE,
     )
+
+    # Finalize timing for last stage
+    now = time.monotonic()
+    if stage_times:
+        last_key = list(stage_times.keys())[-1]
+        stage_times[last_key] = round(now - _current_stage_start[0], 2)
+
+    stage_times["total"] = round(now - pipeline_t0, 2)
+
+    _logger.info(f"Pipeline timings: {stage_times}")
+
+    # Store for /stats endpoint
+    _pipeline_timings.append(stage_times)
+    if len(_pipeline_timings) > _MAX_TIMING_HISTORY:
+        _pipeline_timings.pop(0)
 
     append_to_history("assistant", result)
     return result

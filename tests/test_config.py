@@ -45,3 +45,36 @@ class TestConfigOverrides:
         # Reset
         monkeypatch.delenv("TOOL_CACHE_TTL", raising=False)
         importlib.reload(config)
+
+
+class TestConfigValidation:
+    def test_validate_with_groq_key_set(self, monkeypatch):
+        monkeypatch.setenv("GROQ_API_KEY", "test-key")
+        import importlib
+        importlib.reload(config)
+        errors = config.validate_config()
+        # Should have no GROQ_API_KEY error
+        assert not any("GROQ_API_KEY" in e for e in errors)
+
+    def test_validate_without_groq_key(self, monkeypatch):
+        monkeypatch.delenv("GROQ_API_KEY", raising=False)
+        import importlib
+        importlib.reload(config)
+        errors = config.validate_config()
+        assert any("GROQ_API_KEY" in e for e in errors)
+        # Restore
+        monkeypatch.setenv("GROQ_API_KEY", "restore")
+        importlib.reload(config)
+
+    def test_validate_returns_list(self):
+        errors = config.validate_config()
+        assert isinstance(errors, list)
+
+    def test_validate_bad_specialist_timeout(self, monkeypatch):
+        monkeypatch.setenv("SPECIALIST_TIMEOUT", "-1")
+        import importlib
+        importlib.reload(config)
+        errors = config.validate_config()
+        assert any("SPECIALIST_TIMEOUT" in e for e in errors)
+        monkeypatch.delenv("SPECIALIST_TIMEOUT", raising=False)
+        importlib.reload(config)

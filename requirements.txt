@@ -1,9 +1,11 @@
 # Core LLM
 groq
 
-# Web scraping & API
+# Web scraping & browser automation
 requests
 beautifulsoup4
+lxml
+playwright
 
 # Environment
 python-dotenv
@@ -15,6 +17,7 @@ numpy
 # Backend API
 fastapi
 uvicorn[standard]
+pydantic
 
 # Testing
 pytest

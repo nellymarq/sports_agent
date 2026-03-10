@@ -67,3 +67,31 @@ EMBEDDING_DIMENSION = int(os.getenv("EMBEDDING_DIMENSION", "384"))
 # EVENT PIPELINE
 # ============================================================
 EVENT_PROVIDER_TIMEOUT = float(os.getenv("EVENT_PROVIDER_TIMEOUT", "15"))
+
+
+# ============================================================
+# STARTUP VALIDATION
+# ============================================================
+
+def validate_config() -> list[str]:
+    """
+    Validate required configuration at startup.
+    Returns a list of error messages (empty = all good).
+    """
+    errors = []
+
+    # Required env vars
+    if not os.getenv("GROQ_API_KEY"):
+        errors.append("GROQ_API_KEY is not set. LLM calls will fail.")
+
+    # Sanity checks on numeric values
+    if SPECIALIST_TIMEOUT_SECONDS <= 0:
+        errors.append(f"SPECIALIST_TIMEOUT must be > 0, got {SPECIALIST_TIMEOUT_SECONDS}")
+    if LLM_ROUTING_MAX_TOKENS < 100:
+        errors.append(f"LLM_ROUTING_MAX_TOKENS too low: {LLM_ROUTING_MAX_TOKENS}")
+    if TOOL_CACHE_TTL_SECONDS < 0:
+        errors.append(f"TOOL_CACHE_TTL must be >= 0, got {TOOL_CACHE_TTL_SECONDS}")
+    if RETRIEVAL_TOP_K < 1:
+        errors.append(f"RETRIEVAL_TOP_K must be >= 1, got {RETRIEVAL_TOP_K}")
+
+    return errors

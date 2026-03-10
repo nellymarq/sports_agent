@@ -23,7 +23,7 @@ async def _safe_fetch(coro, provider_name: str) -> Dict[str, Any]:
         result = await asyncio.wait_for(coro, timeout=EVENT_PROVIDER_TIMEOUT)
         return result or {}
     except asyncio.TimeoutError:
-        _logger.warning(f"Provider '{provider_name}' timed out after 15s")
+        _logger.warning(f"Provider '{provider_name}' timed out after {EVENT_PROVIDER_TIMEOUT}s")
         return {}
     except Exception as e:
         _logger.warning(f"Provider '{provider_name}' failed: {e}")
