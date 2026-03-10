@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 type Prediction = {
   id: string;
@@ -55,7 +56,98 @@ function ResultBadge({ correct }: { correct: boolean | null }) {
   );
 }
 
-function PredictionCard({ pred }: { pred: Prediction }) {
+function RecordResultForm({
+  pred,
+  onRecorded,
+}: {
+  pred: Prediction;
+  onRecorded: (updated: Prediction) => void;
+}) {
+  const [winner, setWinner] = useState("");
+  const [method, setMethod] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = () => {
+    if (!winner) return;
+    setSubmitting(true);
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+    fetch(`${apiUrl}/result`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event_id: pred.event_id,
+        fighter_a: pred.fighter_a,
+        fighter_b: pred.fighter_b,
+        actual_winner: winner,
+        actual_method: method,
+      }),
+    })
+      .then((res) => res.json())
+      .then((d) => {
+        if (d.status === "ok" && d.prediction) {
+          onRecorded(d.prediction);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setSubmitting(false));
+  };
+
+  return (
+    <div className="mt-3 pt-3 border-t border-slate-800/50">
+      <p className="text-[10px] text-slate-500 mb-2">Record actual result:</p>
+      <div className="flex gap-2 items-end">
+        <div className="flex-1">
+          <label className="text-[10px] text-slate-500 block mb-0.5">Winner</label>
+          <select
+            value={winner}
+            onChange={(e) => setWinner(e.target.value)}
+            className="w-full rounded bg-black/40 border border-slate-800 px-2 py-1 text-xs outline-none focus:border-accent"
+          >
+            <option value="">Select winner...</option>
+            <option value={pred.fighter_a}>{pred.fighter_a}</option>
+            <option value={pred.fighter_b}>{pred.fighter_b}</option>
+            <option value="Draw">Draw</option>
+            <option value="No Contest">No Contest</option>
+          </select>
+        </div>
+        <div className="flex-1">
+          <label className="text-[10px] text-slate-500 block mb-0.5">Method</label>
+          <select
+            value={method}
+            onChange={(e) => setMethod(e.target.value)}
+            className="w-full rounded bg-black/40 border border-slate-800 px-2 py-1 text-xs outline-none focus:border-accent"
+          >
+            <option value="">Select method...</option>
+            <option value="KO/TKO">KO/TKO</option>
+            <option value="Submission">Submission</option>
+            <option value="Decision - Unanimous">Decision - Unanimous</option>
+            <option value="Decision - Split">Decision - Split</option>
+            <option value="Decision - Majority">Decision - Majority</option>
+            <option value="DQ">DQ</option>
+          </select>
+        </div>
+        <Button
+          onClick={handleSubmit}
+          disabled={!winner || submitting}
+          className="text-xs px-3 py-1"
+        >
+          {submitting ? "..." : "Save"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function PredictionCard({
+  pred,
+  onResultRecorded,
+}: {
+  pred: Prediction;
+  onResultRecorded: (id: string, updated: Prediction) => void;
+}) {
+  const [showForm, setShowForm] = useState(false);
   const prob = (pred.win_probability * 100).toFixed(0);
   const date = new Date(pred.timestamp * 1000).toLocaleDateString();
 
@@ -100,6 +192,26 @@ function PredictionCard({ pred }: { pred: Prediction }) {
           </span>
         </div>
       )}
+
+      {/* Record result for pending predictions */}
+      {pred.correct === null && !showForm && (
+        <button
+          onClick={() => setShowForm(true)}
+          className="mt-2 text-[10px] text-accent hover:underline"
+        >
+          Record result
+        </button>
+      )}
+
+      {showForm && pred.correct === null && (
+        <RecordResultForm
+          pred={pred}
+          onRecorded={(updated) => {
+            onResultRecorded(pred.id, updated);
+            setShowForm(false);
+          }}
+        />
+      )}
     </Card>
   );
 }
@@ -110,7 +222,7 @@ export default function PredictionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "resolved" | "pending">("all");
 
-  useEffect(() => {
+  const fetchPredictions = () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     const params = filter === "resolved" ? "?resolved_only=true" : "";
 
@@ -128,7 +240,17 @@ export default function PredictionsPage() {
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchPredictions();
   }, [filter]);
+
+  const handleResultRecorded = (id: string, updated: Prediction) => {
+    setPredictions((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, ...updated } : p))
+    );
+  };
 
   const stats = {
     total: predictions.length,
@@ -216,7 +338,11 @@ export default function PredictionsPage() {
 
       <div className="space-y-3">
         {predictions.map((pred) => (
-          <PredictionCard key={pred.id} pred={pred} />
+          <PredictionCard
+            key={pred.id}
+            pred={pred}
+            onResultRecorded={handleResultRecorded}
+          />
         ))}
       </div>
     </div>
