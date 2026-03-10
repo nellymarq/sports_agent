@@ -96,12 +96,37 @@ def build_comparison(
     edge = _edge_label(def_a, def_b)
     lines.append(f"  Str. Defense: {fighter_a.get('str_def', 'N/A')} vs {fighter_b.get('str_def', 'N/A')} — Edge: {edge.replace('Fighter A', name_a).replace('Fighter B', name_b)}")
 
-    # Count edges
+    # Grappling stats
+    lines.append(f"\nGrappling Stats:")
+
+    td_avg_a = _parse_float(fighter_a.get("td_avg", ""))
+    td_avg_b = _parse_float(fighter_b.get("td_avg", ""))
+    edge = _edge_label(td_avg_a, td_avg_b)
+    lines.append(f"  TD Avg (per 15 min): {fighter_a.get('td_avg', 'N/A')} vs {fighter_b.get('td_avg', 'N/A')} — Edge: {edge.replace('Fighter A', name_a).replace('Fighter B', name_b)}")
+
+    td_acc_a = _parse_pct(fighter_a.get("td_acc", ""))
+    td_acc_b = _parse_pct(fighter_b.get("td_acc", ""))
+    edge = _edge_label(td_acc_a, td_acc_b)
+    lines.append(f"  TD Accuracy: {fighter_a.get('td_acc', 'N/A')} vs {fighter_b.get('td_acc', 'N/A')} — Edge: {edge.replace('Fighter A', name_a).replace('Fighter B', name_b)}")
+
+    td_def_a = _parse_pct(fighter_a.get("td_def", ""))
+    td_def_b = _parse_pct(fighter_b.get("td_def", ""))
+    edge = _edge_label(td_def_a, td_def_b)
+    lines.append(f"  TD Defense: {fighter_a.get('td_def', 'N/A')} vs {fighter_b.get('td_def', 'N/A')} — Edge: {edge.replace('Fighter A', name_a).replace('Fighter B', name_b)}")
+
+    sub_avg_a = _parse_float(fighter_a.get("sub_avg", ""))
+    sub_avg_b = _parse_float(fighter_b.get("sub_avg", ""))
+    edge = _edge_label(sub_avg_a, sub_avg_b)
+    lines.append(f"  Sub Avg (per 15 min): {fighter_a.get('sub_avg', 'N/A')} vs {fighter_b.get('sub_avg', 'N/A')} — Edge: {edge.replace('Fighter A', name_a).replace('Fighter B', name_b)}")
+
+    # Count edges (striking + grappling)
     edges_a = 0
     edges_b = 0
     for a_val, b_val, higher_better in [
         (slpm_a, slpm_b, True), (acc_a, acc_b, True),
         (sapm_a, sapm_b, False), (def_a, def_b, True),
+        (td_avg_a, td_avg_b, True), (td_acc_a, td_acc_b, True),
+        (td_def_a, td_def_b, True), (sub_avg_a, sub_avg_b, True),
     ]:
         lbl = _edge_label(a_val, b_val, higher_better)
         if lbl == "Fighter A":
@@ -110,6 +135,18 @@ def build_comparison(
             edges_b += 1
 
     lines.append(f"\nStatistical Edge Count: {name_a} ({edges_a}) vs {name_b} ({edges_b})")
+
+    # Method distribution from record
+    for fighter, name in [(fighter_a, name_a), (fighter_b, name_b)]:
+        detail = fighter.get("detail_stats", {})
+        win_methods = detail.get("win_methods", {})
+        if win_methods:
+            ko = win_methods.get("ko_tko", 0)
+            sub = win_methods.get("submission", 0)
+            dec = win_methods.get("decision", 0)
+            total = ko + sub + dec
+            if total > 0:
+                lines.append(f"\n{name} Win Methods: KO/TKO {ko} ({ko*100//total}%) | Sub {sub} ({sub*100//total}%) | Dec {dec} ({dec*100//total}%)")
 
     # Recent fights summary
     for fighter, name in [(fighter_a, name_a), (fighter_b, name_b)]:

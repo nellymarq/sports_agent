@@ -102,6 +102,8 @@ def get_calibration_stats() -> Dict[str, Any]:
     - Accuracy by confidence tier
     - Accuracy by probability bucket (50-60%, 60-70%, 70-80%, 80%+)
     - Brier score (lower is better)
+    - Method prediction accuracy
+    - Event-level breakdown
     """
     preds = _load_predictions()
     resolved = [p for p in preds if p.get("correct") is not None]
@@ -161,6 +163,48 @@ def get_calibration_stats() -> Dict[str, Any]:
                 "accuracy": round(sum(results) / len(results), 3),
             }
 
+    # Method prediction accuracy
+    method_stats: Dict[str, Dict[str, int]] = {}
+    for p in resolved:
+        method_lean = p.get("method_lean", "").strip()
+        actual_method = (p.get("actual_method") or "").strip().lower()
+        if not method_lean or method_lean.lower() == "no strong lean":
+            continue
+        lean_key = method_lean.split("/")[0].strip().lower() if "/" in method_lean else method_lean.lower()
+        if lean_key not in method_stats:
+            method_stats[lean_key] = {"total": 0, "correct": 0}
+        method_stats[lean_key]["total"] += 1
+        if lean_key in actual_method or actual_method in lean_key:
+            method_stats[lean_key]["correct"] += 1
+
+    method_accuracy = {
+        method: {
+            "total": s["total"],
+            "correct": s["correct"],
+            "accuracy": round(s["correct"] / s["total"], 3) if s["total"] > 0 else None,
+        }
+        for method, s in method_stats.items()
+    }
+
+    # By event
+    event_stats: Dict[str, Dict[str, int]] = {}
+    for p in resolved:
+        eid = p.get("event_id", "unknown")
+        if eid not in event_stats:
+            event_stats[eid] = {"total": 0, "correct": 0}
+        event_stats[eid]["total"] += 1
+        if p["correct"]:
+            event_stats[eid]["correct"] += 1
+
+    event_accuracy = {
+        eid: {
+            "total": s["total"],
+            "correct": s["correct"],
+            "accuracy": round(s["correct"] / s["total"], 3) if s["total"] > 0 else None,
+        }
+        for eid, s in event_stats.items()
+    }
+
     return {
         "total_predictions": len(preds),
         "resolved": total,
@@ -169,4 +213,6 @@ def get_calibration_stats() -> Dict[str, Any]:
         "brier_score": round(brier, 4),
         "by_tier": tier_accuracy,
         "by_probability": bucket_accuracy,
+        "by_method": method_accuracy,
+        "by_event": event_accuracy,
     }
