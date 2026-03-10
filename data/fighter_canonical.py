@@ -60,17 +60,19 @@ class FighterCanonicalizer:
 
     def to_fighter_ref(self, raw_name: str, extra: Optional[Dict[str, Any]] = None) -> FighterRef:
         cf = self.build_canonical_fighter(raw_name, extra)
+        meta = dict(cf.metadata or {})
+        if cf.nickname:
+            meta["nickname"] = cf.nickname
         return FighterRef(
             fighter_id=cf.fighter_id,
             name=cf.canonical_name,
-            nickname=cf.metadata.get("nickname"),
-            record=cf.metadata.get("record"),
-            stance=cf.metadata.get("stance"),
-            height=cf.metadata.get("height"),
-            reach=cf.metadata.get("reach"),
-            age=cf.metadata.get("age"),
-            camp=cf.metadata.get("camp"),
-            metadata=cf.metadata,
+            record=meta.get("record"),
+            stance=meta.get("stance"),
+            height=meta.get("height"),
+            reach=meta.get("reach"),
+            age=meta.get("age"),
+            camp=meta.get("camp"),
+            metadata=meta,
         )
 
     def get_history_summary(self, fighter_id: str) -> Dict[str, Any]:
