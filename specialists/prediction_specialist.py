@@ -57,10 +57,27 @@ Apply these frameworks IN ORDER to build your prediction:
 5. **Contextual Factors**
    - Title fight implications (5 rounds vs 3) — championship rounds favor
      cardio-superior fighters; first-time title challengers win ~40% historically
-   - Venue/altitude effects
+   - Venue/altitude effects (Mexico City = significant cardio concern)
    - Weight cut history and size differential
    - Camp changes or injury reports
    - Momentum and career crossroads dynamics
+
+6. **Momentum & Win Streak Analysis**
+   - Active win streaks of 3+ fights: ~5% prediction boost (momentum factor)
+   - Coming off a loss: context matters — a competitive loss to an elite opponent
+     is less predictive than a dominant loss to a gatekeeper
+   - Two consecutive losses: significant concern (~8-10% negative adjustment)
+   - Finish rate regression: fighters with >80% finish rate in first 5-8 fights
+     often regress to 50-60% against ranked opposition — do not overweight early finishes
+   - Late-career fighters (35+) on win streaks: discount momentum if opposition quality dropped
+
+7. **Division Depth & Ranking Context**
+   - Top 5 vs Top 5: tighter spreads (rarely >70/30), higher unpredictability
+   - Ranked vs Unranked: wider spreads acceptable, but UFC-level unranked fighters
+     still upset at ~25-30% rates
+   - Champion vs Challenger: champions have ~55-60% historical win rate in title defenses
+   - Moving up in weight: fighters moving up historically win ~45% (size disadvantage)
+   - Moving down in weight: fighters moving down win ~60% but watch for cut-related issues
 
 ---
 
@@ -136,6 +153,8 @@ You MUST output your prediction in this exact format:
 
 **BETTING ANGLE:** [If odds data available: note if prediction diverges from market odds,
 quantify the edge (e.g., "Model: 65% vs Market: 55% = +10% edge"), identify value side]
+
+**LIVE LINE SUGGESTION:** [Over/Under rounds lean if applicable, prop bet angles worth considering]
 """
 
 
@@ -333,6 +352,16 @@ def parse_prediction_output(text: str) -> Dict[str, Any]:
     m = re.search(r"\*\*ROUND LEAN:\*\*\s*(.+?)(?:\n|$)", text)
     if m:
         result["round_lean"] = m.group(1).strip()
+
+    # Betting angle
+    m = re.search(r"\*\*BETTING ANGLE:\*\*\s*(.+?)(?:\n\*\*|$)", text, re.DOTALL)
+    if m:
+        result["betting_angle"] = m.group(1).strip()
+
+    # Live line suggestion
+    m = re.search(r"\*\*LIVE LINE SUGGESTION:\*\*\s*(.+?)(?:\n\*\*|$)", text, re.DOTALL)
+    if m:
+        result["live_line_suggestion"] = m.group(1).strip()
 
     return result
 

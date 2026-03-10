@@ -138,6 +138,33 @@ class TestPredictionParser:
     def test_no_match(self):
         assert parse_prediction_output("Just some random text") == {}
 
+    def test_parses_betting_angle(self):
+        text = """**PREDICTED WINNER:** Pereira
+**WIN PROBABILITY:** 65% vs 35%
+**CONFIDENCE TIER:** High
+**METHOD LEAN:** KO/TKO
+**ROUND LEAN:** Early (R1-2)
+**BETTING ANGLE:** Model: 65% vs Market: 55% = +10% edge on Pereira
+**LIVE LINE SUGGESTION:** Over 1.5 rounds looks solid given Ankalaev's durability
+"""
+        result = parse_prediction_output(text)
+        assert "betting_angle" in result
+        assert "+10% edge" in result["betting_angle"]
+        assert "live_line_suggestion" in result
+        assert "Over 1.5" in result["live_line_suggestion"]
+
+    def test_parses_without_optional_fields(self):
+        text = """**PREDICTED WINNER:** Islam Makhachev
+**WIN PROBABILITY:** 70% vs 30%
+**CONFIDENCE TIER:** High
+**METHOD LEAN:** Decision
+**ROUND LEAN:** Distance
+"""
+        result = parse_prediction_output(text)
+        assert result["predicted_winner"] == "Islam Makhachev"
+        assert "betting_angle" not in result
+        assert "live_line_suggestion" not in result
+
 
 class TestConfidenceFromTier:
     def test_very_high(self):
