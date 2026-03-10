@@ -120,3 +120,103 @@ class TestSupervisorAgent:
         assert plan["user_input"] == "test query"
         assert plan["question_type"] == "who_wins"
         assert plan["debug_specialists"] == ["routing_debug"]
+
+
+class TestSupervisorTaskGraph:
+    """Tests for the individual task builder functions."""
+
+    def test_build_specialist_task(self):
+        from supervisor import _build_specialist_task
+        task = _build_specialist_task(
+            task_id=0,
+            specialist="style",
+            user_input="Who wins?",
+            history=["prev"],
+            retrieved_context="ctx",
+        )
+        assert task["id"] == 0
+        assert task["task_type"] == "specialist"
+        assert task["specialist"] == "style"
+        assert task["user_input"] == "Who wins?"
+        assert task["depends_on"] == []
+        assert task["history"] == ["prev"]
+        assert task["retrieved_context"] == "ctx"
+
+    def test_build_coordinator_task(self):
+        from supervisor import _build_coordinator_task
+        task = _build_coordinator_task(task_id=5, parent_ids=[0, 1, 2, 3, 4])
+        assert task["id"] == 5
+        assert task["task_type"] == "coordinator_merge"
+        assert task["depends_on"] == [0, 1, 2, 3, 4]
+
+    def test_build_critic_task(self):
+        from supervisor import _build_critic_task
+        task = _build_critic_task(task_id=6, coordinator_id=5)
+        assert task["id"] == 6
+        assert task["task_type"] == "critic_review"
+        assert task["depends_on"] == [5]
+
+    @pytest.mark.asyncio
+    async def test_full_specialist_list_ids_sequential(self):
+        """Task IDs should be sequential from 0."""
+        llm = MockLLM()
+        specs = ["style", "form", "sentiment", "weightcut", "metadata",
+                 "pace", "grappling", "fight_iq", "scramble"]
+        router_output = {
+            "mode": "autonomous",
+            "specialists": specs,
+            "question_type": "who_wins",
+            "debug_specialists": [],
+        }
+        plan = await supervisor_agent(llm, router_output, "test", [])
+        tasks = plan["tasks"]
+        for i, t in enumerate(tasks):
+            assert t["id"] == i
+
+    @pytest.mark.asyncio
+    async def test_single_specialist_graph(self):
+        """With 1 specialist: specialist(0) -> coordinator(1) -> critic(2)."""
+        llm = MockLLM()
+        router_output = {
+            "mode": "autonomous",
+            "specialists": ["style"],
+            "question_type": "general",
+            "debug_specialists": [],
+        }
+        plan = await supervisor_agent(llm, router_output, "test", [])
+        tasks = plan["tasks"]
+        assert len(tasks) == 3
+        assert tasks[0]["task_type"] == "specialist"
+        assert tasks[1]["task_type"] == "coordinator_merge"
+        assert tasks[1]["depends_on"] == [0]
+        assert tasks[2]["task_type"] == "critic_review"
+        assert tasks[2]["depends_on"] == [1]
+
+    @pytest.mark.asyncio
+    async def test_mode_preserved(self):
+        llm = MockLLM()
+        router_output = {
+            "mode": "autonomous",
+            "specialists": ["style"],
+            "question_type": "general",
+            "debug_specialists": [],
+        }
+        plan = await supervisor_agent(llm, router_output, "test", [])
+        assert plan["mode"] == "autonomous"
+
+    @pytest.mark.asyncio
+    async def test_retrieved_context_passed_to_specialists(self):
+        llm = MockLLM()
+        router_output = {
+            "mode": "autonomous",
+            "specialists": ["style", "form"],
+            "question_type": "general",
+            "debug_specialists": [],
+        }
+        plan = await supervisor_agent(
+            llm, router_output, "test", [],
+            retrieved_context="fighter stats here",
+        )
+        specialist_tasks = [t for t in plan["tasks"] if t["task_type"] == "specialist"]
+        for t in specialist_tasks:
+            assert t["retrieved_context"] == "fighter stats here"

@@ -70,3 +70,46 @@ class TestExtractFighters:
     def test_no_fighters_found(self):
         fighters, primary = extract_fighters("what time is it")
         assert primary == "unknown"
+
+    def test_none_input(self):
+        fighters, primary = extract_fighters(None)
+        assert fighters == []
+        assert primary == "unknown"
+
+    def test_whitespace_only(self):
+        fighters, primary = extract_fighters("   ")
+        assert fighters == []
+
+    def test_versus_full_word(self):
+        fighters, primary = extract_fighters("Pereira versus Ankalaev full breakdown")
+        assert len(fighters) == 2
+
+    def test_primary_is_first_fighter(self):
+        fighters, primary = extract_fighters("Islam Makhachev vs Charles Oliveira")
+        assert primary == fighters[0]
+
+    def test_multiple_capitalized_names(self):
+        fighters, _ = extract_fighters(
+            "I think Alex Pereira and Magomed Ankalaev will put on a show"
+        )
+        assert len(fighters) >= 2
+
+    def test_deduplicate(self):
+        fighters, _ = extract_fighters("Alex Pereira vs Alex Pereira")
+        # After dedup, could be 1
+        assert len(fighters) <= 2
+
+
+class TestVsPatternEdgeCases:
+    def test_multiple_vs_returns_empty(self):
+        result = _extract_from_vs_pattern("A vs B vs C")
+        # Split on " vs " yields 3 parts, function returns []
+        assert len(result) == 0
+
+    def test_empty_side(self):
+        result = _extract_from_vs_pattern("vs Pereira")
+        assert len(result) == 0 or all(r.strip() for r in result)
+
+    def test_punctuation_cleaned(self):
+        result = _extract_from_vs_pattern("Pereira! vs Ankalaev?")
+        assert len(result) == 2

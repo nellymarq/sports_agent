@@ -153,3 +153,142 @@ class TestRouterAgent:
         llm = MockLLM()
         result = await router_agent(llm, "")
         assert isinstance(result["specialists"], list)
+
+    @pytest.mark.asyncio
+    async def test_memory_full_mode(self):
+        llm = MockLLM()
+        result = await router_agent(
+            llm, "Tell me about Islam",
+            semantic_memory="Islam Makhachev analysis context",
+        )
+        assert len(result["specialists"]) == len(FULL_SPECIALIST_LIST)
+
+    @pytest.mark.asyncio
+    async def test_multiple_debug_triggers(self):
+        llm = MockLLM()
+        result = await router_agent(llm, "explain routing and explain critic")
+        assert "routing_debug" in result["debug_specialists"]
+        assert "critic_debug" in result["debug_specialists"]
+
+
+# ============================================================
+# Extended Question Type Detection
+# ============================================================
+
+class TestQuestionTypeExtended:
+    def test_predict(self):
+        assert _detect_question_type("Predict the outcome") == "who_wins"
+
+    def test_prediction(self):
+        assert _detect_question_type("Give me your prediction") == "who_wins"
+
+    def test_pick(self):
+        assert _detect_question_type("Who's your pick?") == "who_wins"
+
+    def test_exploit_is_weakness(self):
+        assert _detect_question_type("What can you exploit?") == "weakness"
+
+    def test_game_plan_two_words(self):
+        assert _detect_question_type("What's the game plan?") == "gameplan"
+
+    def test_path_to_victory(self):
+        assert _detect_question_type("Path to victory for Ankalaev") == "gameplan"
+
+    def test_full_card(self):
+        # "break down" triggers who_wins before "full card" check
+        assert _detect_question_type("Break down the full card") == "who_wins"
+
+    def test_entire_card(self):
+        # "analyze" triggers who_wins before "entire card" check
+        assert _detect_question_type("Analyze the entire card") == "who_wins"
+
+    def test_odds_is_who_wins(self):
+        assert _detect_question_type("What are the odds?") == "who_wins"
+
+    def test_value_bet(self):
+        assert _detect_question_type("Any value bets?") == "who_wins"
+
+    def test_betting(self):
+        assert _detect_question_type("What should I be betting on?") == "who_wins"
+
+    def test_analyze(self):
+        assert _detect_question_type("Analyze this fight") == "who_wins"
+
+    def test_how_does_he_fight(self):
+        assert _detect_question_type("How does he fight?") == "style_profile"
+
+    def test_how_do_you_beat(self):
+        assert _detect_question_type("How do you beat Makhachev?") == "weakness"
+
+    def test_how_should_strategy(self):
+        assert _detect_question_type("How should Poirier approach this?") == "gameplan"
+
+    def test_ufc_who_wins(self):
+        assert _detect_question_type("UFC 316 who wins?") == "event_who_wins"
+
+    def test_card_breakdown(self):
+        # "breakdown" triggers who_wins before "card breakdown" check
+        assert _detect_question_type("Card breakdown for Saturday") == "who_wins"
+
+    def test_all_fights_card(self):
+        # "all fights" matches event_who_wins when no earlier trigger fires
+        assert _detect_question_type("Show me all fights on the card") == "event_who_wins"
+
+
+# ============================================================
+# Extended Keyword Routing
+# ============================================================
+
+class TestKeywordRoutingExtended:
+    def test_metadata_reach(self):
+        assert "metadata" in _base_keyword_routing("What's his reach?")
+
+    def test_metadata_stance(self):
+        assert "metadata" in _base_keyword_routing("He's a southpaw stance")
+
+    def test_scramble_chain_wrestling(self):
+        assert "scramble" in _base_keyword_routing("chain wrestling ability")
+
+    def test_judging_scorecard(self):
+        assert "judging" in _base_keyword_routing("scorecard prediction")
+
+    def test_knowledge_career_arc(self):
+        assert "knowledge" in _base_keyword_routing("career arc trajectory")
+
+    def test_gameplan_tactics(self):
+        assert "gameplan" in _base_keyword_routing("tactical approach")
+
+    def test_multiple_specialists(self):
+        result = _base_keyword_routing("wrestling pace pressure ground")
+        assert "grappling" in result
+        assert "pace" in result
+
+    def test_order_core_four_first(self):
+        result = _base_keyword_routing("grappling pace damage")
+        for i, s in enumerate(CORE_FOUR):
+            assert result[i] == s
+
+
+# ============================================================
+# Intent Routing Extended
+# ============================================================
+
+class TestIntentRoutingExtended:
+    def test_event_who_wins_gets_all(self):
+        result = _intent_enhanced_routing("event_who_wins", CORE_FOUR.copy())
+        assert len(result) == len(FULL_SPECIALIST_LIST)
+
+    def test_gameplan_adds_specific(self):
+        result = _intent_enhanced_routing("gameplan", CORE_FOUR.copy())
+        assert "gameplan" in result
+        assert "fight_iq" in result
+        assert "pace" in result
+        assert "grappling" in result
+        assert "damage" in result
+
+    def test_preserves_full_specialist_order(self):
+        result = _intent_enhanced_routing("who_wins", CORE_FOUR.copy())
+        for i in range(len(result) - 1):
+            idx_a = FULL_SPECIALIST_LIST.index(result[i])
+            idx_b = FULL_SPECIALIST_LIST.index(result[i + 1])
+            assert idx_a < idx_b
