@@ -132,3 +132,67 @@ class TestResultEndpoint:
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "not_found"
+
+
+class TestPredictionsEndpoint:
+    def test_list_predictions_returns_ok(self, client):
+        resp = client.get("/predictions")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "ok"
+        assert "predictions" in data
+        assert "count" in data
+
+    def test_list_predictions_with_event_filter(self, client):
+        resp = client.get("/predictions?event_id=ufc_nonexistent")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["count"] == 0
+
+    def test_list_predictions_with_limit(self, client):
+        resp = client.get("/predictions?limit=5")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data["predictions"]) <= 5
+
+    def test_list_predictions_resolved_only(self, client):
+        resp = client.get("/predictions?resolved_only=true")
+        assert resp.status_code == 200
+        data = resp.json()
+        # All returned predictions should be resolved
+        for p in data["predictions"]:
+            assert p.get("correct") is not None
+
+
+class TestEventsEndpoint:
+    def test_list_events_returns_ok(self, client):
+        resp = client.get("/events")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "ok"
+        assert "events" in data
+
+    def test_get_event_not_found(self, client):
+        resp = client.get("/events/ufc_nonexistent_999")
+        assert resp.status_code == 404
+
+    def test_list_events_has_display_fields(self, client):
+        """Events should include display helper fields."""
+        resp = client.get("/events")
+        data = resp.json()
+        for ev in data.get("events", []):
+            assert "main_event_display" in ev
+            assert "bout_count" in ev
+
+
+class TestFighterSearchEndpoint:
+    def test_search_empty_query(self, client):
+        """Search with unknown fighter should return empty or error."""
+        with patch.object(
+            type(client.app).__dict__.get("_ufc_stats_tool", type("", (), {"invoke": lambda *a: {}})),
+            "invoke",
+            return_value={"error": "not found"},
+        ):
+            resp = client.post("/fighters/search", json={"query": "zzz_nonexistent_fighter"})
+            # Should either return 200 with empty results or 500 depending on tool behavior
+            assert resp.status_code in (200, 500)

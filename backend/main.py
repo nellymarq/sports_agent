@@ -35,6 +35,7 @@ from data.value_bets import (
 )
 from tools import UFCStatsTool
 from tools.comparison import build_comparison
+from data.events_schema import Event
 
 _logger = logging.getLogger("backend")
 
@@ -92,6 +93,10 @@ class ValueBetRequest(BaseModel):
     min_edge: float = 0.03
     bankroll: float = 1000
     kelly_fraction: float = 0.25
+
+
+class FighterSearchRequest(BaseModel):
+    query: str
 
 
 # -------------------------------------------------
@@ -358,3 +363,157 @@ def convert_odds(american: Optional[str] = None, decimal: Optional[float] = None
         }
     else:
         raise HTTPException(status_code=400, detail="Provide either 'american' or 'decimal' query parameter.")
+
+
+# -------------------------------------------------
+# Prediction History Endpoint
+# -------------------------------------------------
+@app.get("/predictions")
+def list_predictions(
+    event_id: Optional[str] = None,
+    resolved_only: bool = False,
+    limit: int = 50,
+) -> Dict[str, Any]:
+    """
+    Browse prediction history with optional filtering.
+    Useful for reviewing past predictions and tracking performance over time.
+    """
+    preds = _load_predictions()
+
+    if event_id:
+        preds = [p for p in preds if p.get("event_id") == event_id]
+
+    if resolved_only:
+        preds = [p for p in preds if p.get("correct") is not None]
+
+    # Sort by timestamp descending (most recent first)
+    preds.sort(key=lambda p: p.get("timestamp", 0), reverse=True)
+
+    # Apply limit
+    preds = preds[:limit]
+
+    return {
+        "status": "ok",
+        "count": len(preds),
+        "predictions": preds,
+    }
+
+
+# -------------------------------------------------
+# Upcoming Events Endpoint
+# -------------------------------------------------
+@app.get("/events")
+def list_events() -> Dict[str, Any]:
+    """
+    Return all known events from the events data store.
+    Includes fight cards with fighter details.
+    """
+    import json
+    from pathlib import Path
+
+    events_path = ROOT / "data" / "events.json"
+    if not events_path.exists():
+        return {"status": "ok", "events": [], "message": "No events data found."}
+
+    try:
+        raw = json.loads(events_path.read_text(encoding="utf-8"))
+        events_list = raw if isinstance(raw, list) else raw.get("events", [])
+
+        # Enrich each event with structured card data
+        enriched = []
+        for ev_data in events_list:
+            event = Event.from_legacy_dict(ev_data)
+            ev_dict = event.to_dict()
+            # Add a summary for quick display
+            main_fighters = []
+            if event.main_event and event.main_event.fighters:
+                main_fighters = [f.name for f in event.main_event.fighters]
+            ev_dict["main_event_display"] = " vs ".join(main_fighters) if main_fighters else "TBA"
+            ev_dict["bout_count"] = len(event.card) + (1 if event.main_event else 0) + (1 if event.co_main_event else 0)
+            enriched.append(ev_dict)
+
+        return {
+            "status": "ok",
+            "count": len(enriched),
+            "events": enriched,
+        }
+    except Exception as e:
+        _logger.exception("Failed to load events")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------
+# Single Event Card Endpoint
+# -------------------------------------------------
+@app.get("/events/{event_id}")
+def get_event(event_id: str) -> Dict[str, Any]:
+    """
+    Return detailed card data for a specific event.
+    Includes all bouts, fighters, and available odds.
+    """
+    import json
+    from pathlib import Path
+
+    events_path = ROOT / "data" / "events.json"
+    if not events_path.exists():
+        raise HTTPException(status_code=404, detail="Events data not found.")
+
+    try:
+        raw = json.loads(events_path.read_text(encoding="utf-8"))
+        events_list = raw if isinstance(raw, list) else raw.get("events", [])
+
+        for ev_data in events_list:
+            if ev_data.get("id") == event_id:
+                event = Event.from_legacy_dict(ev_data)
+                ev_dict = event.to_dict()
+
+                # Add display helpers
+                main_fighters = []
+                if event.main_event and event.main_event.fighters:
+                    main_fighters = [f.name for f in event.main_event.fighters]
+                ev_dict["main_event_display"] = " vs ".join(main_fighters) if main_fighters else "TBA"
+
+                # Count total bouts
+                ev_dict["bout_count"] = len(event.card) + (1 if event.main_event else 0) + (1 if event.co_main_event else 0)
+
+                # Check for existing predictions for this event
+                event_preds = [p for p in _load_predictions() if p.get("event_id") == event_id]
+                ev_dict["prediction_count"] = len(event_preds)
+
+                return {"status": "ok", "event": ev_dict}
+
+        raise HTTPException(status_code=404, detail=f"Event '{event_id}' not found.")
+    except HTTPException:
+        raise
+    except Exception as e:
+        _logger.exception("Failed to load event")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------
+# Fighter Search Endpoint
+# -------------------------------------------------
+@app.post("/fighters/search")
+def search_fighters(req: FighterSearchRequest) -> Dict[str, Any]:
+    """
+    Search for a fighter by name using UFCStats data.
+    Returns structured fighter data including stats and recent fights.
+    """
+    try:
+        data = _ufc_stats_tool.invoke({"fighter_name": req.query})
+        if data.get("error"):
+            return {
+                "status": "ok",
+                "results": [],
+                "message": f"No fighters found matching '{req.query}'",
+            }
+
+        fighter = data.get("best_match", {})
+        return {
+            "status": "ok",
+            "results": [fighter] if fighter else [],
+            "query": req.query,
+        }
+    except Exception as e:
+        _logger.exception("Fighter search failed")
+        raise HTTPException(status_code=500, detail=str(e))
