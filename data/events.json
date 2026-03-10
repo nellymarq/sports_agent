@@ -19,18 +19,6 @@
     "card": [
       {
         "fighters": [
-          "Alex Pereira",
-          "Magomed Ankalaev"
-        ]
-      },
-      {
-        "fighters": [
-          "Jailton Almeida",
-          "Derrick Lewis"
-        ]
-      },
-      {
-        "fighters": [
           "Arman Tsarukyan",
           "Renato Moicano"
         ]
@@ -50,30 +38,115 @@
     ]
   },
   {
-    "id": "ufc_314",
-    "code": "UFC 314",
-    "name": "UFC 314",
-    "date": "2025-04-12",
-    "location": "T-Mobile Arena, Las Vegas, NV",
+    "id": "ufc_fn_252",
+    "code": "UFC Fight Night 252",
+    "name": "UFC Fight Night: Sandhagen vs Figueiredo",
+    "date": "2025-03-15",
+    "location": "UFC APEX, Las Vegas, NV",
+    "status": "scheduled",
     "main_event": {
-      "fighters": []
+      "fighters": [
+        "Cory Sandhagen",
+        "Deiveson Figueiredo"
+      ],
+      "weight_class": "Bantamweight"
     },
     "co_main_event": {
-      "fighters": []
+      "fighters": [
+        "Sergei Pavlovich",
+        "Jairzinho Rozenstruik"
+      ],
+      "weight_class": "Heavyweight"
     },
-    "card": []
+    "card": [
+      {
+        "fighters": [
+          "Grant Dawson",
+          "Benoit Saint Denis"
+        ],
+        "weight_class": "Lightweight"
+      }
+    ]
+  },
+  {
+    "id": "ufc_314",
+    "code": "UFC 314",
+    "name": "UFC 314: Volkanovski vs Lopes",
+    "date": "2025-04-12",
+    "location": "T-Mobile Arena, Las Vegas, NV",
+    "status": "scheduled",
+    "main_event": {
+      "fighters": [
+        "Alexander Volkanovski",
+        "Diego Lopes"
+      ],
+      "weight_class": "Featherweight",
+      "is_title_fight": true
+    },
+    "co_main_event": {
+      "fighters": [
+        "Belal Muhammad",
+        "Jack Della Maddalena"
+      ],
+      "weight_class": "Welterweight",
+      "is_title_fight": true
+    },
+    "card": [
+      {
+        "fighters": [
+          "Paddy Pimblett",
+          "Michael Chandler"
+        ],
+        "weight_class": "Lightweight"
+      },
+      {
+        "fighters": [
+          "Kayla Harrison",
+          "Julianna Pena"
+        ],
+        "weight_class": "Women's Bantamweight"
+      }
+    ]
   },
   {
     "id": "ufc_315",
     "code": "UFC 315",
     "name": "UFC 315",
     "date": "2025-05-03",
-    "location": "",
+    "location": "Montreal, Canada",
+    "status": "scheduled",
     "main_event": {
-      "fighters": []
+      "fighters": [
+        "Alexandre Pantoja",
+        "Brandon Royval"
+      ],
+      "weight_class": "Flyweight",
+      "is_title_fight": true
     },
     "co_main_event": {
-      "fighters": []
+      "fighters": [],
+      "weight_class": ""
+    },
+    "card": []
+  },
+  {
+    "id": "ufc_316",
+    "code": "UFC 316",
+    "name": "UFC 316",
+    "date": "2025-06-14",
+    "location": "Salt Lake City, UT",
+    "status": "scheduled",
+    "main_event": {
+      "fighters": [
+        "Islam Makhachev",
+        "Arman Tsarukyan"
+      ],
+      "weight_class": "Lightweight",
+      "is_title_fight": true
+    },
+    "co_main_event": {
+      "fighters": [],
+      "weight_class": ""
     },
     "card": []
   }
