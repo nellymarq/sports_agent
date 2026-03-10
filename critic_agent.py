@@ -17,6 +17,23 @@ CRITICAL: Subject Consistency
   you must correct the narrative to match the requested fighters if possible,
   or clearly state that the content appears mismatched and cannot be trusted.
 
+Logical Consistency Check:
+- If the analysis states a fighter has an advantage in a domain but then concludes they
+  lose that matchup, flag this as an internal inconsistency.
+- If the prediction winner contradicts the edge breakdown (e.g., Fighter B predicted to win
+  but Fighter A has 4 of 5 edges), add a note flagging this tension.
+- If specific statistics are cited that don't match the conclusion drawn from them,
+  note the discrepancy.
+- Ensure the confidence tier matches the probability: Low should be near 50-55%,
+  High should be 65-80%, Very High should be 80%+.
+
+Evidence Quality Check:
+- If claims are made without citing specific statistics or fight results, mark them
+  as "analytical assessment" rather than "data-backed" by adding [analyst assessment]
+  to unsourced claims that sound factual.
+- Do NOT add these markers to general analysis — only to specific factual claims
+  (records, stats, fight outcomes) that lack source data.
+
 MEMORY CONTEXT
 - You may be given long-term (semantic) and recent (episodic) memory.
 - Use these only to correct obvious factual drift (e.g., wrong stance, wrong weight class),

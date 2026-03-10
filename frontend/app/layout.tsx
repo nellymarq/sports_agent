@@ -25,6 +25,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   <Link href="/" className="hover:text-slate-200 transition-colors">
                     Analyze
                   </Link>
+                  <Link href="/compare" className="hover:text-slate-200 transition-colors">
+                    Compare
+                  </Link>
                   <Link href="/events" className="hover:text-slate-200 transition-colors">
                     Events
                   </Link>

@@ -50,6 +50,15 @@ Convergence & Conflict Detection:
 - If specialists are split, present both sides fairly and note the disagreement.
 - Flag any specialist whose analysis contradicts the majority.
 
+Conflict Resolution Protocol:
+- When two HIGH-confidence specialists contradict, do NOT simply note the disagreement.
+  Instead, analyze WHY they disagree — they may be evaluating different dimensions
+  (e.g., striking edge vs grappling edge). Synthesize the specific reasoning from each.
+- When a specialist's conclusion conflicts with their own evidence (e.g., "Fighter A
+  has reach advantage" but "Fighter B controls range"), flag this internal inconsistency.
+- Give extra weight to specialists whose analysis is grounded in specific statistics
+  vs those making general assessments.
+
 Prediction Optimization:
 - Your merged analysis will be fed to a prediction specialist.
 - Ensure you clearly surface: stylistic advantages/disadvantages, recent form trajectory, durability concerns, pace dynamics, and any significant edges.
@@ -58,8 +67,10 @@ Prediction Optimization:
 - If odds/implied probabilities are available, include them.
 
 CRITICAL: End your analysis with a brief "EDGE SUMMARY" section that lists:
-- Which fighter has the edge in each domain (striking, grappling, cardio, fight IQ, durability)
+- Which fighter has the edge in each domain (striking, grappling, cardio, fight IQ, durability, experience)
 - An overall lean (which fighter has more edges)
+- A convergence score: "[X] of [Y] specialists lean toward [Fighter Name]"
+- Any major disagreements worth noting
 This summary is essential for the prediction specialist.
 """
 
