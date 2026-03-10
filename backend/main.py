@@ -6,7 +6,7 @@ import sys
 import time
 import logging
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,8 +22,19 @@ if str(ROOT) not in sys.path:
 
 # Import the shared engine entrypoint (async pipeline)
 from engine_entry import _run_full_pipeline, clear_task_queue, LLM_ROUTING, LLM_ORCHESTRATOR, get_pipeline_timings
-from prediction_tracker import get_calibration_stats, record_result
+from prediction_tracker import get_calibration_stats, record_result, _load_predictions
 from config import validate_config
+from data.providers.odds_provider import fetch_all_ufc_odds
+from data.value_bets import (
+    identify_value_bets,
+    format_value_bet_report,
+    american_to_implied,
+    decimal_to_implied,
+    implied_to_american,
+    remove_vig,
+)
+from tools import UFCStatsTool
+from tools.comparison import build_comparison
 
 _logger = logging.getLogger("backend")
 
@@ -37,7 +48,7 @@ if _config_errors:
 
 app = FastAPI(
     title="UFC Analytics Backend",
-    version="2.1.0",
+    version="2.2.0",
 )
 
 # -------------------------------------------------
@@ -70,6 +81,17 @@ class RecordResultRequest(BaseModel):
     fighter_b: str
     actual_winner: str
     actual_method: str = ""
+
+
+class CompareRequest(BaseModel):
+    fighter_a: str
+    fighter_b: str
+
+
+class ValueBetRequest(BaseModel):
+    min_edge: float = 0.03
+    bankroll: float = 1000
+    kelly_fraction: float = 0.25
 
 
 # -------------------------------------------------
@@ -201,3 +223,138 @@ def submit_result(req: RecordResultRequest) -> Dict[str, Any]:
     if updated:
         return {"status": "ok", "prediction": updated}
     return {"status": "not_found", "message": "No matching prediction found."}
+
+
+# -------------------------------------------------
+# Live Odds Endpoint
+# -------------------------------------------------
+@app.get("/odds")
+def get_odds() -> Dict[str, Any]:
+    """Fetch live UFC odds from all available providers."""
+    try:
+        odds = fetch_all_ufc_odds()
+        bout_count = len(odds.get("bouts", {}))
+        return {
+            "status": "ok",
+            "bout_count": bout_count,
+            "odds": odds,
+        }
+    except Exception as e:
+        _logger.exception("Failed to fetch odds")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------
+# Value Bet Identification Endpoint
+# -------------------------------------------------
+@app.post("/value-bets")
+def get_value_bets(req: ValueBetRequest) -> Dict[str, Any]:
+    """
+    Identify value bets by comparing stored predictions against live market odds.
+    Requires existing predictions in the tracker.
+    """
+    try:
+        predictions = _load_predictions()
+        # Filter to unresolved predictions only
+        active = [
+            p for p in predictions
+            if p.get("actual_winner") is None and p.get("win_probability", 0) > 0
+        ]
+
+        if not active:
+            return {
+                "status": "ok",
+                "value_bets": [],
+                "message": "No active predictions to compare against odds.",
+            }
+
+        odds = fetch_all_ufc_odds()
+        value_bets = identify_value_bets(
+            predictions=active,
+            odds_data=odds,
+            min_edge=req.min_edge,
+            bankroll=req.bankroll,
+            kelly_fraction_pct=req.kelly_fraction,
+        )
+
+        return {
+            "status": "ok",
+            "active_predictions": len(active),
+            "odds_bouts": len(odds.get("bouts", {})),
+            "value_bets": value_bets,
+            "report": format_value_bet_report(value_bets),
+        }
+    except Exception as e:
+        _logger.exception("Failed to identify value bets")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------
+# Fighter Comparison Endpoint
+# -------------------------------------------------
+_ufc_stats_tool = UFCStatsTool()
+
+
+@app.post("/compare")
+def compare_fighters(req: CompareRequest) -> Dict[str, Any]:
+    """
+    Head-to-head fighter comparison using live UFCStats data.
+    Returns structured comparison with statistical edges.
+    """
+    try:
+        data_a = _ufc_stats_tool.invoke({"fighter_name": req.fighter_a})
+        data_b = _ufc_stats_tool.invoke({"fighter_name": req.fighter_b})
+
+        if data_a.get("error"):
+            raise HTTPException(status_code=404, detail=f"Fighter not found: {req.fighter_a}")
+        if data_b.get("error"):
+            raise HTTPException(status_code=404, detail=f"Fighter not found: {req.fighter_b}")
+
+        fighter_a = data_a.get("best_match", {})
+        fighter_b = data_b.get("best_match", {})
+
+        comparison_text = build_comparison(fighter_a, fighter_b)
+
+        return {
+            "status": "ok",
+            "fighter_a": fighter_a,
+            "fighter_b": fighter_b,
+            "comparison": comparison_text,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        _logger.exception("Fighter comparison failed")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------
+# Odds Converter Utility Endpoint
+# -------------------------------------------------
+@app.get("/odds/convert")
+def convert_odds(american: Optional[str] = None, decimal: Optional[float] = None) -> Dict[str, Any]:
+    """Convert between odds formats (American <-> Decimal <-> Implied)."""
+    if american:
+        implied = american_to_implied(american)
+        if implied is None:
+            raise HTTPException(status_code=400, detail=f"Invalid American odds: {american}")
+        dec = round(1.0 / implied, 4) if implied > 0 else None
+        return {
+            "american": american,
+            "decimal": dec,
+            "implied_probability": implied,
+            "implied_pct": f"{implied * 100:.1f}%",
+        }
+    elif decimal is not None:
+        implied = decimal_to_implied(decimal)
+        if implied is None:
+            raise HTTPException(status_code=400, detail=f"Invalid decimal odds: {decimal}")
+        am = implied_to_american(implied)
+        return {
+            "american": am,
+            "decimal": decimal,
+            "implied_probability": implied,
+            "implied_pct": f"{implied * 100:.1f}%",
+        }
+    else:
+        raise HTTPException(status_code=400, detail="Provide either 'american' or 'decimal' query parameter.")

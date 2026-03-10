@@ -37,6 +37,9 @@ memory/memory.md
 # scraped HTML cache
 *.html
 
+# loop logs
+claude-loop.log
+
 # frontend build artifacts
 frontend/node_modules/
 frontend/.next/
