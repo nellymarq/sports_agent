@@ -118,6 +118,8 @@ class Event:
             return Bout(
                 bout_id=f"{ev_id}_bout_{order}",
                 order=order,
+                weight_class=block.get("weight_class"),
+                is_title_fight=block.get("is_title_fight", False),
                 is_main_event=is_main,
                 is_co_main_event=is_co,
                 fighters=fighters,
@@ -145,7 +147,9 @@ class Event:
             id=ev_id,
             code=code,
             name=name,
+            date=data.get("date") or None,
             location=data.get("location") or None,
+            status=data.get("status") or None,
             main_event=main_bout,
             co_main_event=co_main_bout,
             card=card_bouts,
