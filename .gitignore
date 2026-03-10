@@ -4,7 +4,8 @@
 
 # runtime state
 state/
-cache/
+cache/runtime_cache.json
+cache/runtime_cache.json.tmp
 tests/cache/
 *.tmp
 

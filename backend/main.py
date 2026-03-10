@@ -36,8 +36,12 @@ from data.value_bets import (
 from tools import UFCStatsTool
 from tools.comparison import build_comparison
 from data.events_schema import Event
+from cache.cache_manager import CacheManager
 
 _logger = logging.getLogger("backend")
+
+# Shared cache instance
+_cache = CacheManager()
 
 # -------------------------------------------------
 # Startup validation
@@ -49,7 +53,7 @@ if _config_errors:
 
 app = FastAPI(
     title="UFC Analytics Backend",
-    version="2.2.0",
+    version="2.3.0",
 )
 
 # -------------------------------------------------
@@ -517,3 +521,19 @@ def search_fighters(req: FighterSearchRequest) -> Dict[str, Any]:
     except Exception as e:
         _logger.exception("Fighter search failed")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------
+# Cache Management Endpoints
+# -------------------------------------------------
+@app.get("/cache/stats")
+def cache_stats() -> Dict[str, Any]:
+    """Return cache statistics."""
+    return _cache.stats()
+
+
+@app.post("/cache/cleanup")
+def cache_cleanup() -> Dict[str, Any]:
+    """Remove expired cache entries."""
+    removed = _cache.cleanup_expired()
+    return {"status": "ok", "removed": removed, **_cache.stats()}
