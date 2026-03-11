@@ -44,6 +44,8 @@ from backend.response_cache import response_cache
 from data.elo_rating import ELORatingSystem, elo_probability_to_american_odds
 from data.bet_sizing import recommend_bet_size, format_bet_recommendation, compute_edge
 from data.line_tracker import record_odds_snapshot, get_line_movement, get_all_movements, format_line_movement
+from data.style_classifier import classify_style, classify_matchup
+from data.fighter_profile import build_fighter_profile
 
 _logger = logging.getLogger("backend")
 
@@ -354,6 +356,23 @@ def compare_fighters(req: CompareRequest) -> Dict[str, Any]:
         comparison_text = build_comparison(fighter_a, fighter_b)
         enhanced = build_enhanced_comparison(fighter_a, fighter_b)
 
+        # Style classification for both fighters
+        style_a = classify_style(fighter_a)
+        style_b = classify_style(fighter_b)
+        matchup = classify_matchup(fighter_a, fighter_b)
+
+        # ELO matchup prediction
+        elo_matchup = _elo_system.get_matchup_prediction(
+            req.fighter_a.lower().replace(" ", "_"),
+            req.fighter_b.lower().replace(" ", "_"),
+        )
+        elo_matchup["fighter_a_odds"] = elo_probability_to_american_odds(
+            elo_matchup["fighter_a_win_prob"]
+        )
+        elo_matchup["fighter_b_odds"] = elo_probability_to_american_odds(
+            elo_matchup["fighter_b_win_prob"]
+        )
+
         result = {
             "status": "ok",
             "fighter_a": fighter_a,
@@ -363,6 +382,14 @@ def compare_fighters(req: CompareRequest) -> Dict[str, Any]:
             "stat_edges": enhanced.get("stat_edges", []),
             "fighter_a_profile": enhanced.get("fighter_a_profile", {}),
             "fighter_b_profile": enhanced.get("fighter_b_profile", {}),
+            "style_analysis": {
+                "fighter_a_style": style_a,
+                "fighter_b_style": style_b,
+                "matchup_type": matchup.get("matchup_type", "unknown"),
+                "matchup_description": matchup.get("matchup_description", ""),
+                "recommended_specialists": matchup.get("recommended_specialists", []),
+            },
+            "elo_matchup": elo_matchup,
         }
         response_cache.set("/compare", cache_params, result, ttl=120)
         return result
@@ -860,3 +887,125 @@ def cache_cleanup() -> Dict[str, Any]:
     """Remove expired cache entries."""
     removed = _cache.cleanup_expired()
     return {"status": "ok", "removed": removed, **_cache.stats()}
+
+
+# -------------------------------------------------
+# Fighter Profile Endpoint
+# -------------------------------------------------
+@app.get("/fighters/{name}/profile")
+def fighter_profile(name: str) -> Dict[str, Any]:
+    """
+    Get a comprehensive fighter profile combining UFCStats data,
+    style classification, ELO rating, and computed analytics.
+    Cached for 5 minutes per fighter.
+    """
+    cache_params = {"name": name.lower().strip()}
+    cached = response_cache.get("/fighters/profile", cache_params)
+    if cached:
+        return cached
+
+    try:
+        data = _ufc_stats_tool.invoke({"fighter_name": name})
+        if data.get("error"):
+            raise HTTPException(status_code=404, detail=f"Fighter not found: {name}")
+
+        fighter_data = data.get("best_match", {})
+        fighter_name = fighter_data.get("name", name)
+
+        # Build comprehensive profile
+        profile = build_fighter_profile(
+            name=fighter_name,
+            ufc_stats=fighter_data,
+        )
+
+        # Style classification
+        style = classify_style(fighter_data)
+        profile["style"] = style
+
+        # ELO rating
+        elo_rating = _elo_system.get_rating(fighter_name.lower().replace(" ", "_"))
+        elo_fights = _elo_system.get_fight_count(fighter_name.lower().replace(" ", "_"))
+        elo_history = _elo_system.rating_history.get(
+            fighter_name.lower().replace(" ", "_"), []
+        )
+        profile["elo"] = {
+            "rating": elo_rating,
+            "fights_rated": elo_fights,
+            "history": elo_history[-10:],  # last 10 rating changes
+        }
+
+        # Computed risk profile
+        profile["risk_profile"] = _compute_risk_profile(fighter_data, profile)
+
+        result = {"status": "ok", "fighter": profile}
+        response_cache.set("/fighters/profile", cache_params, result, ttl=300)
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        _logger.exception("Fighter profile failed")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+def _compute_risk_profile(
+    stats: Dict[str, Any], profile: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Compute durability/risk indicators from fighter data."""
+    risk = {}
+
+    # Chin risk: high SApM + losses by KO/TKO
+    sapm = None
+    try:
+        sapm = float(str(stats.get("sapm", "0")).strip())
+    except (ValueError, TypeError):
+        pass
+
+    md = profile.get("method_distribution", {})
+    losses = md.get("losses", {})
+    ko_losses = losses.get("ko_tko", 0)
+    total_losses = md.get("total_losses", 0)
+
+    if sapm is not None and sapm > 4.0:
+        risk["chin_risk"] = "high"
+    elif sapm is not None and sapm > 3.0:
+        risk["chin_risk"] = "moderate"
+    else:
+        risk["chin_risk"] = "low"
+
+    if total_losses > 0 and ko_losses / total_losses > 0.5:
+        risk["ko_vulnerability"] = "high"
+    else:
+        risk["ko_vulnerability"] = "low"
+
+    # Submission vulnerability
+    sub_losses = losses.get("submission", 0)
+    td_def = None
+    try:
+        td_def = float(str(stats.get("td_def", "0")).replace("%", "").strip())
+    except (ValueError, TypeError):
+        pass
+
+    if td_def is not None and td_def < 55:
+        risk["takedown_vulnerability"] = "high"
+    elif td_def is not None and td_def < 70:
+        risk["takedown_vulnerability"] = "moderate"
+    else:
+        risk["takedown_vulnerability"] = "low"
+
+    if total_losses > 0 and sub_losses / total_losses > 0.4:
+        risk["submission_vulnerability"] = "high"
+    else:
+        risk["submission_vulnerability"] = "low"
+
+    # Activity risk
+    activity = profile.get("activity", {})
+    days_ago = activity.get("last_fight_days_ago")
+    if days_ago is not None:
+        if days_ago > 365:
+            risk["layoff_risk"] = "high"
+        elif days_ago > 180:
+            risk["layoff_risk"] = "moderate"
+        else:
+            risk["layoff_risk"] = "low"
+
+    return risk

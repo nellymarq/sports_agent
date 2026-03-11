@@ -14,6 +14,9 @@ from prediction_tracker import (
     _load_predictions,
     _save_predictions,
     _compute_rolling_accuracy,
+    _compute_log_loss,
+    _compute_calibration_curve,
+    _compute_confidence_weighted_accuracy,
     PREDICTIONS_PATH,
 )
 
@@ -233,3 +236,135 @@ class TestPredictionTracker:
         stats = get_calibration_stats()
         assert "accuracy_trend" in stats
         assert len(stats["accuracy_trend"]) == 2
+
+    def test_calibration_includes_log_loss(self):
+        record_prediction("e1", "A", "B", "A", 0.7)
+        record_prediction("e2", "C", "D", "C", 0.6)
+        record_result("e1", "A", "B", "A")
+        record_result("e2", "C", "D", "D")
+
+        stats = get_calibration_stats()
+        assert "log_loss" in stats
+        assert stats["log_loss"] is not None
+        assert stats["log_loss"] > 0
+
+    def test_calibration_includes_calibration_curve(self):
+        record_prediction("e1", "A", "B", "A", 0.55)
+        record_prediction("e2", "C", "D", "C", 0.65)
+        record_prediction("e3", "E", "F", "E", 0.75)
+        record_result("e1", "A", "B", "A")
+        record_result("e2", "C", "D", "C")
+        record_result("e3", "E", "F", "E")
+
+        stats = get_calibration_stats()
+        assert "calibration_curve" in stats
+        assert len(stats["calibration_curve"]) > 0
+        for point in stats["calibration_curve"]:
+            assert "predicted_avg" in point
+            assert "actual_rate" in point
+            assert "count" in point
+
+    def test_calibration_includes_confidence_weighted(self):
+        record_prediction("e1", "A", "B", "A", 0.85)  # high confidence
+        record_prediction("e2", "C", "D", "C", 0.52)  # low confidence
+        record_result("e1", "A", "B", "A")  # correct on high conf
+        record_result("e2", "C", "D", "D")  # wrong on low conf
+
+        stats = get_calibration_stats()
+        assert "confidence_weighted_accuracy" in stats
+        assert stats["confidence_weighted_accuracy"] is not None
+        # Should be > 0.5 since we got the high-confidence one right
+        assert stats["confidence_weighted_accuracy"] > 0.5
+
+
+class TestLogLoss:
+    def test_log_loss_empty(self):
+        assert _compute_log_loss([]) is None
+
+    def test_log_loss_perfect(self):
+        resolved = [
+            {"correct": True, "win_probability": 0.99},
+            {"correct": True, "win_probability": 0.95},
+        ]
+        ll = _compute_log_loss(resolved)
+        assert ll is not None
+        assert ll < 0.1  # near perfect
+
+    def test_log_loss_bad(self):
+        resolved = [
+            {"correct": False, "win_probability": 0.95},
+            {"correct": False, "win_probability": 0.90},
+        ]
+        ll = _compute_log_loss(resolved)
+        assert ll is not None
+        assert ll > 1.0  # high loss for wrong + confident
+
+    def test_log_loss_random_baseline(self):
+        """50% predictions should give ~0.693 log loss."""
+        resolved = [{"correct": True, "win_probability": 0.5} for _ in range(20)]
+        ll = _compute_log_loss(resolved)
+        assert abs(ll - 0.693) < 0.01
+
+
+class TestCalibrationCurve:
+    def test_curve_empty(self):
+        assert _compute_calibration_curve([]) == []
+
+    def test_curve_bins(self):
+        resolved = [
+            {"correct": True, "win_probability": 0.55},
+            {"correct": False, "win_probability": 0.56},
+            {"correct": True, "win_probability": 0.75},
+            {"correct": True, "win_probability": 0.78},
+        ]
+        curve = _compute_calibration_curve(resolved)
+        assert len(curve) >= 2
+        for point in curve:
+            assert 0 <= point["actual_rate"] <= 1
+            assert point["count"] > 0
+
+    def test_curve_gap_calculation(self):
+        """Perfect calibration should have gap near 0."""
+        resolved = [
+            {"correct": True, "win_probability": 0.55},
+            {"correct": False, "win_probability": 0.55},
+            # ~50% actual at 55% predicted => gap ~ -0.05
+        ]
+        curve = _compute_calibration_curve(resolved)
+        if curve:
+            assert abs(curve[0]["gap"]) < 0.15
+
+
+class TestConfidenceWeightedAccuracy:
+    def test_cwa_empty(self):
+        assert _compute_confidence_weighted_accuracy([]) is None
+
+    def test_cwa_high_confidence_correct(self):
+        """All correct at high confidence should be ~1.0."""
+        resolved = [
+            {"correct": True, "win_probability": 0.90},
+            {"correct": True, "win_probability": 0.85},
+        ]
+        cwa = _compute_confidence_weighted_accuracy(resolved)
+        assert cwa is not None
+        assert cwa > 0.9
+
+    def test_cwa_high_confidence_wrong(self):
+        """All wrong at high confidence should be ~0.0."""
+        resolved = [
+            {"correct": False, "win_probability": 0.90},
+            {"correct": False, "win_probability": 0.85},
+        ]
+        cwa = _compute_confidence_weighted_accuracy(resolved)
+        assert cwa is not None
+        assert cwa < 0.1
+
+    def test_cwa_mixed(self):
+        """Right when confident, wrong when uncertain should be high."""
+        resolved = [
+            {"correct": True, "win_probability": 0.85},   # high conf, correct (weight 0.7)
+            {"correct": False, "win_probability": 0.52},   # low conf, wrong (weight ~0.1)
+        ]
+        cwa = _compute_confidence_weighted_accuracy(resolved)
+        assert cwa is not None
+        assert cwa > 0.7

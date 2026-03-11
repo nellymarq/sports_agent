@@ -336,7 +336,7 @@
   {
     "id": "ufc_328",
     "code": "UFC 328",
-    "name": "UFC 328",
+    "name": "UFC 328: Makhachev vs Tsarukyan 2",
     "location": "T-Mobile Arena, Las Vegas, NV",
     "main_event": {
       "fighters": [
@@ -369,12 +369,15 @@
     "id": "fn_253",
     "code": "FN 253",
     "name": "UFC Fight Night 253",
+    "date": "2025-02-22",
     "location": "UFC APEX, Las Vegas, NV",
+    "status": "completed",
     "main_event": {
       "fighters": [
         "Jailton Almeida",
         "Alexandr Romanov"
-      ]
+      ],
+      "weight_class": "Heavyweight"
     },
     "co_main_event": {
       "fighters": []

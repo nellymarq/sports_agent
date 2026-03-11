@@ -28,6 +28,13 @@ type CacheData = {
   default_ttl: number;
 };
 
+type TrendPoint = {
+  index: number;
+  rolling_accuracy: number;
+  rolling_brier: number;
+  cumulative_accuracy: number;
+};
+
 type CalibrationData = {
   total_predictions: number;
   resolved: number;
@@ -37,6 +44,21 @@ type CalibrationData = {
   favorite_accuracy: { total: number; correct: number; accuracy: number | null };
   underdog_accuracy: { total: number; correct: number; accuracy: number | null };
   by_weight_class: Record<string, { total: number; correct: number; accuracy: number | null }>;
+  accuracy_trend?: TrendPoint[];
+};
+
+type ELORanking = {
+  rank: number;
+  fighter_id: string;
+  name: string;
+  rating: number;
+  fights: number;
+  trend: string;
+};
+
+type ELOData = {
+  total_rated: number;
+  rankings: ELORanking[];
 };
 
 function StatusDot({ ok }: { ok: boolean }) {
@@ -74,6 +96,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [cache, setCache] = useState<CacheData | null>(null);
   const [calibration, setCalibration] = useState<CalibrationData | null>(null);
+  const [elo, setElo] = useState<ELOData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -96,13 +119,17 @@ export default function DashboardPage() {
       fetch(`${apiUrl}/calibration`).then((r) =>
         r.ok ? r.json() : null
       ).catch(() => null),
+      fetch(`${apiUrl}/elo/rankings?top_n=10`).then((r) =>
+        r.ok ? r.json() : null
+      ).catch(() => null),
     ])
-      .then(([h, s, c, cal]) => {
+      .then(([h, s, c, cal, eloData]) => {
         setHealth(h);
         setStats(s);
         // Handle both nested and flat cache formats
         setCache(c?.tool_cache || c);
         setCalibration(cal);
+        setElo(eloData);
       })
       .catch((e) => setError(String(e)))
       .finally(() => setLoading(false));
@@ -363,6 +390,86 @@ export default function DashboardPage() {
         </Card>
       )}
 
+      {/* Accuracy Trend */}
+      {calibration?.accuracy_trend && calibration.accuracy_trend.length > 3 && (
+        <Card className="p-4">
+          <h2 className="text-sm font-semibold mb-3">Accuracy Trend</h2>
+          <div className="flex items-end gap-0.5 h-20">
+            {calibration.accuracy_trend.slice(-30).map((point, i) => (
+              <div
+                key={i}
+                className="flex-1 rounded-t-sm transition-all"
+                style={{
+                  height: `${point.rolling_accuracy * 100}%`,
+                  backgroundColor:
+                    point.rolling_accuracy >= 0.6
+                      ? "rgb(52, 211, 153)"
+                      : point.rolling_accuracy >= 0.5
+                      ? "rgb(250, 204, 21)"
+                      : "rgb(248, 113, 113)",
+                  opacity: 0.7 + (i / 30) * 0.3,
+                }}
+                title={`#${point.index}: ${(point.rolling_accuracy * 100).toFixed(0)}% rolling, ${(point.cumulative_accuracy * 100).toFixed(0)}% cumulative`}
+              />
+            ))}
+          </div>
+          <div className="flex justify-between text-[10px] text-slate-500 mt-1">
+            <span>
+              Rolling (10):{" "}
+              {(
+                calibration.accuracy_trend[calibration.accuracy_trend.length - 1]
+                  ?.rolling_accuracy * 100
+              ).toFixed(0)}
+              %
+            </span>
+            <span>
+              Cumulative:{" "}
+              {(
+                calibration.accuracy_trend[calibration.accuracy_trend.length - 1]
+                  ?.cumulative_accuracy * 100
+              ).toFixed(0)}
+              %
+            </span>
+          </div>
+        </Card>
+      )}
+
+      {/* ELO Power Rankings */}
+      {elo && elo.rankings.length > 0 && (
+        <Card className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold">Power Rankings (ELO)</h2>
+            <span className="text-[10px] text-slate-500">
+              {elo.total_rated} rated fighters
+            </span>
+          </div>
+          <div className="space-y-1">
+            {elo.rankings.map((r) => (
+              <div
+                key={r.fighter_id}
+                className="flex items-center justify-between text-xs border-b border-slate-800/40 pb-1"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-500 w-5 text-right">
+                    #{r.rank}
+                  </span>
+                  <span className="text-slate-200 font-medium">
+                    {r.name || r.fighter_id}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-slate-500">{r.fights} fights</span>
+                  <span className="font-medium text-accent w-12 text-right">
+                    {Math.round(r.rating)}
+                  </span>
+                  <span className="w-4 text-center">{r.trend}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
       {/* Quick Links */}
       <Card className="p-4">
         <h2 className="text-sm font-semibold mb-3">Quick Actions</h2>
@@ -390,6 +497,18 @@ export default function DashboardPage() {
             className="text-xs px-3 py-1.5 rounded-lg border border-slate-800 hover:border-accent/40 transition-colors"
           >
             Events Browser
+          </Link>
+          <Link
+            href="/bet-calculator"
+            className="text-xs px-3 py-1.5 rounded-lg border border-slate-800 hover:border-accent/40 transition-colors"
+          >
+            Bet Calculator
+          </Link>
+          <Link
+            href="/fighters"
+            className="text-xs px-3 py-1.5 rounded-lg border border-slate-800 hover:border-accent/40 transition-colors"
+          >
+            Fighter Profiles
           </Link>
         </div>
       </Card>

@@ -368,3 +368,137 @@ class TestFighterSearchEndpoint:
             resp = client.post("/fighters/search", json={"query": "zzz_nonexistent_fighter"})
             # Should either return 200 with empty results or 500 depending on tool behavior
             assert resp.status_code in (200, 500)
+
+
+class TestFighterProfileEndpoint:
+    def test_profile_not_found(self, client):
+        """Unknown fighter should return 404."""
+        with patch("backend.main._ufc_stats_tool") as mock_tool:
+            mock_tool.invoke.return_value = {"error": "not found"}
+            resp = client.get("/fighters/zzz_nonexistent_fighter_xyz/profile")
+            assert resp.status_code == 404
+
+    def test_profile_success(self, client):
+        """Profile with mocked stats should return full profile data."""
+        mock_stats = {
+            "best_match": {
+                "name": "Test Fighter",
+                "record": "20-5-0",
+                "height": "6' 0\"",
+                "weight": "185 lbs",
+                "reach": "74\"",
+                "stance": "Orthodox",
+                "slpm": "5.2",
+                "str_acc": "52%",
+                "sapm": "3.1",
+                "str_def": "58%",
+                "td_avg": "1.5",
+                "td_acc": "45%",
+                "td_def": "72%",
+                "sub_avg": "0.3",
+                "detail_stats": {
+                    "recent_fights": [
+                        {"result": "Win", "opponent": "Opp A", "method": "KO/TKO", "round": 2},
+                        {"result": "Win", "opponent": "Opp B", "method": "Decision", "round": 3},
+                        {"result": "Loss", "opponent": "Opp C", "method": "Submission", "round": 1},
+                    ],
+                    "win_methods": {"ko_tko": 10, "submission": 3, "decision": 7},
+                },
+            }
+        }
+        with patch("backend.main._ufc_stats_tool") as mock_tool:
+            mock_tool.invoke.return_value = mock_stats
+            resp = client.get("/fighters/Test%20Fighter/profile")
+            assert resp.status_code == 200
+            data = resp.json()
+            assert data["status"] == "ok"
+            fighter = data["fighter"]
+            assert fighter["name"] == "Test Fighter"
+            assert "style" in fighter
+            assert "elo" in fighter
+            assert "risk_profile" in fighter
+            assert fighter["style"]["primary_style"] != "unknown"
+
+    def test_profile_includes_risk_assessment(self, client):
+        """Profile should include risk/vulnerability data."""
+        mock_stats = {
+            "best_match": {
+                "name": "Glass Chin Fighter",
+                "record": "10-8-0",
+                "sapm": "5.5",
+                "slpm": "3.0",
+                "str_acc": "45%",
+                "str_def": "40%",
+                "td_avg": "0.5",
+                "td_acc": "30%",
+                "td_def": "45%",
+                "sub_avg": "0.1",
+                "detail_stats": {
+                    "recent_fights": [
+                        {"result": "Loss", "method": "KO/TKO"},
+                        {"result": "Loss", "method": "KO/TKO"},
+                        {"result": "Win", "method": "Decision"},
+                    ],
+                },
+            }
+        }
+        with patch("backend.main._ufc_stats_tool") as mock_tool:
+            mock_tool.invoke.return_value = mock_stats
+            resp = client.get("/fighters/Glass%20Chin%20Fighter/profile")
+            assert resp.status_code == 200
+            data = resp.json()
+            risk = data["fighter"]["risk_profile"]
+            assert risk["chin_risk"] == "high"
+            assert risk["takedown_vulnerability"] == "high"
+
+
+class TestCompareEndpointEnhanced:
+    def test_compare_includes_style_and_elo(self, client):
+        """Compare endpoint should include style and ELO matchup data."""
+        mock_stats_a = {
+            "best_match": {
+                "name": "Fighter A",
+                "record": "15-2-0",
+                "slpm": "6.0",
+                "str_acc": "55%",
+                "sapm": "3.0",
+                "str_def": "60%",
+                "td_avg": "0.5",
+                "td_acc": "30%",
+                "td_def": "80%",
+                "sub_avg": "0.1",
+                "detail_stats": {},
+            }
+        }
+        mock_stats_b = {
+            "best_match": {
+                "name": "Fighter B",
+                "record": "12-5-0",
+                "slpm": "3.0",
+                "str_acc": "48%",
+                "sapm": "2.5",
+                "str_def": "55%",
+                "td_avg": "3.5",
+                "td_acc": "50%",
+                "td_def": "60%",
+                "sub_avg": "1.2",
+                "detail_stats": {},
+            }
+        }
+        with patch("backend.main._ufc_stats_tool") as mock_tool:
+            mock_tool.invoke.side_effect = [mock_stats_a, mock_stats_b]
+            resp = client.post("/compare", json={
+                "fighter_a": "Fighter A",
+                "fighter_b": "Fighter B",
+            })
+            assert resp.status_code == 200
+            data = resp.json()
+            assert data["status"] == "ok"
+            assert "style_analysis" in data
+            assert "elo_matchup" in data
+            assert data["style_analysis"]["matchup_type"] in (
+                "striker_vs_grappler", "grappler_vs_striker",
+                "striker_vs_striker", "grappler_vs_grappler", "mixed",
+            )
+            elo = data["elo_matchup"]
+            assert abs(elo["fighter_a_win_prob"] + elo["fighter_b_win_prob"] - 1.0) < 0.001

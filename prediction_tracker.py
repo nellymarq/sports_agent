@@ -278,6 +278,15 @@ def get_calibration_stats() -> Dict[str, Any]:
     # Method distribution accuracy (for predictions with method_probabilities)
     method_dist_log_loss = _compute_method_dist_score(resolved)
 
+    # Log loss (binary classification)
+    log_loss = _compute_log_loss(resolved)
+
+    # Calibration curve data (for plotting predicted vs actual)
+    calibration_curve = _compute_calibration_curve(resolved)
+
+    # Confidence-weighted accuracy
+    cw_accuracy = _compute_confidence_weighted_accuracy(resolved)
+
     # Favorite/underdog split
     fav_stats = {"total": 0, "correct": 0}
     dog_stats = {"total": 0, "correct": 0}
@@ -317,8 +326,92 @@ def get_calibration_stats() -> Dict[str, Any]:
             "accuracy": round(dog_stats["correct"] / dog_stats["total"], 3) if dog_stats["total"] > 0 else None,
         },
         "method_distribution_score": method_dist_log_loss,
+        "log_loss": log_loss,
+        "calibration_curve": calibration_curve,
+        "confidence_weighted_accuracy": cw_accuracy,
         "accuracy_trend": accuracy_trend,
     }
+
+
+def _compute_log_loss(resolved: List[Dict[str, Any]]) -> Optional[float]:
+    """
+    Compute binary log loss over resolved predictions.
+    Lower is better (0 = perfect). Random baseline ~0.693.
+    """
+    import math
+    if not resolved:
+        return None
+
+    total = 0.0
+    for p in resolved:
+        prob = p.get("win_probability", 0.5)
+        prob = max(min(prob, 0.99), 0.01)  # clip to avoid log(0)
+        actual = 1.0 if p["correct"] else 0.0
+        total += -(actual * math.log(prob) + (1 - actual) * math.log(1 - prob))
+
+    return round(total / len(resolved), 4)
+
+
+def _compute_calibration_curve(
+    resolved: List[Dict[str, Any]], n_bins: int = 5
+) -> List[Dict[str, Any]]:
+    """
+    Compute calibration curve data: for each predicted probability bin,
+    what was the actual win rate? Perfect calibration = diagonal line.
+    """
+    if not resolved:
+        return []
+
+    # Bins: 50-60%, 60-70%, 70-80%, 80-90%, 90-100%
+    bins = []
+    edges = [(0.5 + i * 0.1, 0.5 + (i + 1) * 0.1) for i in range(n_bins)]
+
+    for low, high in edges:
+        bucket = [p for p in resolved if low <= p.get("win_probability", 0) < high]
+        if not bucket:
+            continue
+        predicted_avg = sum(p["win_probability"] for p in bucket) / len(bucket)
+        actual_rate = sum(1 for p in bucket if p["correct"]) / len(bucket)
+        bins.append({
+            "bin_range": f"{int(low * 100)}-{int(high * 100)}%",
+            "bin_low": round(low, 2),
+            "bin_high": round(high, 2),
+            "count": len(bucket),
+            "predicted_avg": round(predicted_avg, 3),
+            "actual_rate": round(actual_rate, 3),
+            "gap": round(actual_rate - predicted_avg, 3),
+        })
+
+    return bins
+
+
+def _compute_confidence_weighted_accuracy(
+    resolved: List[Dict[str, Any]],
+) -> Optional[float]:
+    """
+    Confidence-weighted accuracy: predictions with higher confidence
+    contribute more to the score. Rewards being right when confident
+    and penalizes being wrong when confident.
+    """
+    if not resolved:
+        return None
+
+    weighted_sum = 0.0
+    weight_total = 0.0
+
+    for p in resolved:
+        prob = p.get("win_probability", 0.5)
+        # Weight = how far from 50% (higher confidence = higher weight)
+        weight = abs(prob - 0.5) * 2  # 0 at 50%, 1 at 100%
+        weight = max(weight, 0.1)  # minimum weight
+        correct = 1.0 if p["correct"] else 0.0
+        weighted_sum += correct * weight
+        weight_total += weight
+
+    if weight_total == 0:
+        return None
+
+    return round(weighted_sum / weight_total, 3)
 
 
 def _compute_rolling_accuracy(
