@@ -6,6 +6,8 @@ import { MobileNav } from "@/components/MobileNav";
 const NAV_LINKS = [
   { href: "/", label: "Analyze" },
   { href: "/compare", label: "Compare" },
+  { href: "/simulate", label: "Simulate" },
+  { href: "/fighters", label: "Fighters" },
   { href: "/events", label: "Events" },
   { href: "/predictions", label: "Predictions" },
   { href: "/value-bets", label: "Value Bets" },
@@ -43,7 +45,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   ))}
                 </nav>
               </div>
-              <span className="text-xs text-slate-400 hidden sm:block">
+              <span className="text-xs text-slate-400 hidden md:block">
                 14 Specialists · Memory-Aware · Prediction Tracking
               </span>
               <MobileNav links={NAV_LINKS} />
