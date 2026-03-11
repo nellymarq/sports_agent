@@ -37,7 +37,7 @@ from data.value_bets import (
     suggest_parlays,
 )
 from tools import UFCStatsTool
-from tools.comparison import build_comparison
+from tools.comparison import build_comparison, build_enhanced_comparison
 from data.events_schema import Event
 from cache.cache_manager import CacheManager
 
@@ -341,12 +341,17 @@ def compare_fighters(req: CompareRequest) -> Dict[str, Any]:
         fighter_b = data_b.get("best_match", {})
 
         comparison_text = build_comparison(fighter_a, fighter_b)
+        enhanced = build_enhanced_comparison(fighter_a, fighter_b)
 
         return {
             "status": "ok",
             "fighter_a": fighter_a,
             "fighter_b": fighter_b,
             "comparison": comparison_text,
+            "tale_of_the_tape": enhanced.get("tale_of_the_tape", ""),
+            "stat_edges": enhanced.get("stat_edges", []),
+            "fighter_a_profile": enhanced.get("fighter_a_profile", {}),
+            "fighter_b_profile": enhanced.get("fighter_b_profile", {}),
         }
     except HTTPException:
         raise

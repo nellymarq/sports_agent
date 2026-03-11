@@ -4,6 +4,13 @@
 from __future__ import annotations
 from typing import Dict, Any, Optional, List
 
+from data.fighter_profile import (
+    build_fighter_profile,
+    format_tale_of_the_tape,
+    compute_streak,
+    compute_method_distribution,
+)
+
 
 def _parse_record(record: str) -> Dict[str, int]:
     """Parse '27-1-0' into {'wins': 27, 'losses': 1, 'draws': 0}."""
@@ -160,3 +167,61 @@ def build_comparison(
                 lines.append(f"  {f.get('result', '?')} vs {f.get('opponent', '?')} ({f.get('method', '')} R{f.get('round', '?')})")
 
     return "\n".join(lines)
+
+
+def build_enhanced_comparison(
+    fighter_a: Dict[str, Any],
+    fighter_b: Dict[str, Any],
+) -> Dict[str, Any]:
+    """
+    Build an enhanced comparison with structured data and tale-of-the-tape.
+    Returns both the formatted text and structured data for frontend rendering.
+    """
+    profile_a = build_fighter_profile(
+        name=fighter_a.get("name", "Fighter A"),
+        ufc_stats=fighter_a,
+    )
+    profile_b = build_fighter_profile(
+        name=fighter_b.get("name", "Fighter B"),
+        ufc_stats=fighter_b,
+    )
+
+    tale = format_tale_of_the_tape(profile_a, profile_b)
+    comparison_text = build_comparison(fighter_a, fighter_b)
+
+    # Compute stat edges for structured output
+    stat_edges = []
+    for label, key, higher_better in [
+        ("SLpM", "slpm", True),
+        ("Striking Accuracy", "str_acc", True),
+        ("Strikes Absorbed/Min", "sapm", False),
+        ("Striking Defense", "str_def", True),
+        ("TD Average", "td_avg", True),
+        ("TD Accuracy", "td_acc", True),
+        ("TD Defense", "td_def", True),
+        ("Sub Average", "sub_avg", True),
+    ]:
+        val_a_raw = fighter_a.get(key, "")
+        val_b_raw = fighter_b.get(key, "")
+        val_a = _parse_pct(val_a_raw) if "%" in str(val_a_raw) else _parse_float(str(val_a_raw))
+        val_b = _parse_pct(val_b_raw) if "%" in str(val_b_raw) else _parse_float(str(val_b_raw))
+
+        edge = _edge_label(val_a, val_b, higher_better)
+        name_a = fighter_a.get("name", "Fighter A")
+        name_b = fighter_b.get("name", "Fighter B")
+        edge_name = edge.replace("Fighter A", name_a).replace("Fighter B", name_b)
+
+        stat_edges.append({
+            "stat": label,
+            "fighter_a_value": val_a_raw or "N/A",
+            "fighter_b_value": val_b_raw or "N/A",
+            "edge": edge_name,
+        })
+
+    return {
+        "fighter_a_profile": profile_a,
+        "fighter_b_profile": profile_b,
+        "tale_of_the_tape": tale,
+        "comparison_text": comparison_text,
+        "stat_edges": stat_edges,
+    }
