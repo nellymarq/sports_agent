@@ -126,7 +126,8 @@ class TestCacheEndpoints:
         resp = client.get("/cache/stats")
         assert resp.status_code == 200
         data = resp.json()
-        assert "total_entries" in data
+        assert "tool_cache" in data
+        assert "total_entries" in data["tool_cache"]
 
     def test_cache_cleanup_endpoint(self, client):
         resp = client.post("/cache/cleanup")

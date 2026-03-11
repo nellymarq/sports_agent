@@ -100,7 +100,8 @@ export default function DashboardPage() {
       .then(([h, s, c, cal]) => {
         setHealth(h);
         setStats(s);
-        setCache(c);
+        // Handle both nested and flat cache formats
+        setCache(c?.tool_cache || c);
         setCalibration(cal);
       })
       .catch((e) => setError(String(e)))

@@ -40,6 +40,7 @@ from tools import UFCStatsTool
 from tools.comparison import build_comparison, build_enhanced_comparison
 from data.events_schema import Event
 from cache.cache_manager import CacheManager
+from backend.response_cache import response_cache
 
 _logger = logging.getLogger("backend")
 
@@ -56,7 +57,7 @@ if _config_errors:
 
 app = FastAPI(
     title="UFC Analytics Backend",
-    version="2.3.0",
+    version="2.4.0",
 )
 
 # -------------------------------------------------
@@ -327,7 +328,14 @@ def compare_fighters(req: CompareRequest) -> Dict[str, Any]:
     """
     Head-to-head fighter comparison using live UFCStats data.
     Returns structured comparison with statistical edges.
+    Cached for 2 minutes per fighter pair.
     """
+    # Check response cache
+    cache_params = {"a": req.fighter_a.lower(), "b": req.fighter_b.lower()}
+    cached = response_cache.get("/compare", cache_params)
+    if cached:
+        return cached
+
     try:
         data_a = _ufc_stats_tool.invoke({"fighter_name": req.fighter_a})
         data_b = _ufc_stats_tool.invoke({"fighter_name": req.fighter_b})
@@ -343,7 +351,7 @@ def compare_fighters(req: CompareRequest) -> Dict[str, Any]:
         comparison_text = build_comparison(fighter_a, fighter_b)
         enhanced = build_enhanced_comparison(fighter_a, fighter_b)
 
-        return {
+        result = {
             "status": "ok",
             "fighter_a": fighter_a,
             "fighter_b": fighter_b,
@@ -353,6 +361,8 @@ def compare_fighters(req: CompareRequest) -> Dict[str, Any]:
             "fighter_a_profile": enhanced.get("fighter_a_profile", {}),
             "fighter_b_profile": enhanced.get("fighter_b_profile", {}),
         }
+        response_cache.set("/compare", cache_params, result, ttl=120)
+        return result
     except HTTPException:
         raise
     except Exception as e:
@@ -733,8 +743,11 @@ def event_preview(event_id: str) -> Dict[str, Any]:
 # -------------------------------------------------
 @app.get("/cache/stats")
 def cache_stats() -> Dict[str, Any]:
-    """Return cache statistics."""
-    return _cache.stats()
+    """Return cache statistics for both tool cache and response cache."""
+    return {
+        "tool_cache": _cache.stats(),
+        "response_cache": response_cache.stats(),
+    }
 
 
 @app.post("/cache/cleanup")
