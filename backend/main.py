@@ -47,6 +47,7 @@ from data.line_tracker import record_odds_snapshot, get_line_movement, get_all_m
 from data.style_classifier import classify_style, classify_matchup
 from data.fighter_profile import build_fighter_profile
 from data.prop_analysis import analyze_method_props, analyze_round_props, generate_prop_card
+from data.fight_simulation import simulate_fight
 
 _logger = logging.getLogger("backend")
 
@@ -653,6 +654,65 @@ def parlay_suggest(req: ValueBetRequest) -> Dict[str, Any]:
         }
     except Exception as e:
         _logger.exception("Parlay suggestion failed")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------
+# Fight Simulation Endpoint
+# -------------------------------------------------
+class SimulationRequest(BaseModel):
+    fighter_a: str
+    fighter_b: str
+    n_simulations: int = 10000
+    is_five_round: bool = False
+
+
+@app.post("/simulate")
+def run_simulation(req: SimulationRequest) -> Dict[str, Any]:
+    """
+    Monte Carlo fight simulation using statistical profiles.
+    Simulates thousands of fight outcomes to generate probability distributions.
+    """
+    cache_params = {
+        "a": req.fighter_a.lower(),
+        "b": req.fighter_b.lower(),
+        "five": str(req.is_five_round),
+    }
+    cached = response_cache.get("/simulate", cache_params)
+    if cached:
+        return cached
+
+    try:
+        data_a = _ufc_stats_tool.invoke({"fighter_name": req.fighter_a})
+        data_b = _ufc_stats_tool.invoke({"fighter_name": req.fighter_b})
+
+        if data_a.get("error"):
+            raise HTTPException(status_code=404, detail=f"Fighter not found: {req.fighter_a}")
+        if data_b.get("error"):
+            raise HTTPException(status_code=404, detail=f"Fighter not found: {req.fighter_b}")
+
+        stats_a = data_a.get("best_match", {})
+        stats_b = data_b.get("best_match", {})
+
+        # Determine matchup type via style classifier
+        matchup = classify_matchup(stats_a, stats_b)
+        matchup_type = matchup.get("matchup_type", "mixed")
+
+        sim_result = simulate_fight(
+            stats_a=stats_a,
+            stats_b=stats_b,
+            n_simulations=min(req.n_simulations, 50000),
+            matchup_type=matchup_type,
+            is_five_round=req.is_five_round,
+        )
+
+        result = {"status": "ok", **sim_result}
+        response_cache.set("/simulate", cache_params, result, ttl=300)
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        _logger.exception("Simulation failed")
         raise HTTPException(status_code=500, detail=str(e))
 
 

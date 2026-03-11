@@ -78,6 +78,7 @@ This summary is essential for the prediction specialist.
 def _detect_fighter_leans(specialist_outputs: List[SpecialistOutput], fighters: List[str]) -> Dict[str, Any]:
     """
     Detect which fighter each specialist leans toward by analyzing content.
+    Uses confidence-weighted voting: higher-confidence specialists count more.
     Returns convergence data for the coordinator.
     """
     if not fighters or len(fighters) < 2:
@@ -86,18 +87,36 @@ def _detect_fighter_leans(specialist_outputs: List[SpecialistOutput], fighters: 
     f_a = fighters[0].lower()
     f_b = fighters[1].lower()
     leans: Dict[str, str] = {}
+    lean_details: Dict[str, Dict[str, Any]] = {}
 
     for s in specialist_outputs:
         content = s.content.lower()
         edge_keywords = ["advantage", "edge", "superior", "better", "stronger", "favors", "wins"]
-        a_score = sum(
+        concern_keywords = ["concern", "weakness", "vulnerable", "struggles", "poor", "limited"]
+
+        # Positive edge signals (fighter mentioned near edge keywords)
+        a_pos = sum(
             1 for kw in edge_keywords
             if f_a in content and kw in content[max(0, content.find(f_a) - 100):content.find(f_a) + 100]
         )
-        b_score = sum(
+        b_pos = sum(
             1 for kw in edge_keywords
             if f_b in content and kw in content[max(0, content.find(f_b) - 100):content.find(f_b) + 100]
         )
+
+        # Negative concern signals (fighter mentioned near concern keywords)
+        a_neg = sum(
+            1 for kw in concern_keywords
+            if f_a in content and kw in content[max(0, content.find(f_a) - 100):content.find(f_a) + 100]
+        )
+        b_neg = sum(
+            1 for kw in concern_keywords
+            if f_b in content and kw in content[max(0, content.find(f_b) - 100):content.find(f_b) + 100]
+        )
+
+        # Net score: positive mentions minus negative mentions for opponent
+        a_score = a_pos + b_neg
+        b_score = b_pos + a_neg
 
         if a_score > b_score:
             leans[s.specialist] = fighters[0]
@@ -106,18 +125,43 @@ def _detect_fighter_leans(specialist_outputs: List[SpecialistOutput], fighters: 
         else:
             leans[s.specialist] = "neutral"
 
+        lean_details[s.specialist] = {
+            "lean": leans[s.specialist],
+            "confidence": s.confidence,
+            "weight": s.confidence,  # confidence IS the vote weight
+            "a_signals": a_score,
+            "b_signals": b_score,
+        }
+
+    # Unweighted counts
     a_count = sum(1 for v in leans.values() if v == fighters[0])
     b_count = sum(1 for v in leans.values() if v == fighters[1])
     neutral_count = sum(1 for v in leans.values() if v == "neutral")
     total = len(leans) or 1
 
+    # Confidence-weighted vote totals
+    a_weighted = sum(
+        d["confidence"] for d in lean_details.values() if d["lean"] == fighters[0]
+    )
+    b_weighted = sum(
+        d["confidence"] for d in lean_details.values() if d["lean"] == fighters[1]
+    )
+    total_weight = a_weighted + b_weighted or 1.0
+
+    # Weighted convergence
+    weighted_pct = round(max(a_weighted, b_weighted) / total_weight * 100, 1)
+
     return {
         "leans": leans,
+        "lean_details": lean_details,
         "fighter_a_count": a_count,
         "fighter_b_count": b_count,
         "neutral_count": neutral_count,
         "convergence_pct": round(max(a_count, b_count) / total * 100, 1),
-        "consensus_fighter": fighters[0] if a_count > b_count else fighters[1] if b_count > a_count else "split",
+        "weighted_convergence_pct": weighted_pct,
+        "fighter_a_weighted": round(a_weighted, 2),
+        "fighter_b_weighted": round(b_weighted, 2),
+        "consensus_fighter": fighters[0] if a_weighted > b_weighted else fighters[1] if b_weighted > a_weighted else "split",
     }
 
 
@@ -140,12 +184,17 @@ def _build_structured_block(specialist_outputs: List[SpecialistOutput], fighters
     if convergence.get("consensus_fighter") != "unknown":
         lines.append("=== PRE-MERGE CONVERGENCE ANALYSIS ===")
         lines.append(f"Consensus: {convergence['consensus_fighter']} "
-                     f"({convergence['convergence_pct']}% of specialists)")
-        lines.append(f"Fighter A leans: {convergence['fighter_a_count']}, "
-                     f"Fighter B leans: {convergence['fighter_b_count']}, "
+                     f"({convergence['convergence_pct']}% unweighted, "
+                     f"{convergence.get('weighted_convergence_pct', 0)}% confidence-weighted)")
+        lines.append(f"Fighter A leans: {convergence['fighter_a_count']} "
+                     f"(weighted: {convergence.get('fighter_a_weighted', 0)}), "
+                     f"Fighter B leans: {convergence['fighter_b_count']} "
+                     f"(weighted: {convergence.get('fighter_b_weighted', 0)}), "
                      f"Neutral: {convergence['neutral_count']}")
-        for spec, lean in convergence.get("leans", {}).items():
-            lines.append(f"  - {spec}: {lean}")
+        for spec, details in convergence.get("lean_details", {}).items():
+            lines.append(f"  - {spec}: {details['lean']} "
+                         f"(conf={details['confidence']:.2f}, "
+                         f"signals: A={details['a_signals']}, B={details['b_signals']})")
         lines.append("")
 
     for idx, s in enumerate(sorted_outputs, start=1):
