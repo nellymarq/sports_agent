@@ -166,6 +166,69 @@ class TestPredictionParser:
         assert "live_line_suggestion" not in result
 
 
+    def test_parses_method_probabilities(self):
+        text = """**PREDICTED WINNER:** Alex Pereira
+**WIN PROBABILITY:** 65% vs 35%
+**CONFIDENCE TIER:** High
+**METHOD LEAN:** KO/TKO
+**ROUND LEAN:** Early (R1-2)
+
+**METHOD PROBABILITIES:**
+- KO/TKO: 45%
+- Submission: 5%
+- Decision: 50%
+"""
+        result = parse_prediction_output(text)
+        assert "method_probabilities" in result
+        mp = result["method_probabilities"]
+        assert mp["ko_tko"] == 45
+        assert mp["submission"] == 5
+        assert mp["decision"] == 50
+
+    def test_parses_round_probabilities(self):
+        text = """**PREDICTED WINNER:** Alex Pereira
+**WIN PROBABILITY:** 65% vs 35%
+**CONFIDENCE TIER:** High
+**METHOD LEAN:** KO/TKO
+**ROUND LEAN:** Early (R1-2)
+
+**ROUND PROBABILITIES:**
+- R1 finish: 20%
+- R2 finish: 15%
+- R3 finish: 10%
+- Goes to decision: 55%
+"""
+        result = parse_prediction_output(text)
+        assert "round_probabilities" in result
+        rp = result["round_probabilities"]
+        assert rp["r1"] == 20
+        assert rp["r2"] == 15
+        assert rp["r3"] == 10
+        assert rp["decision"] == 55
+
+    def test_parses_five_round_probabilities(self):
+        text = """**ROUND PROBABILITIES:**
+- R1 finish: 15%
+- R2 finish: 10%
+- R3 finish: 8%
+- R4 finish: 7%
+- R5 finish: 5%
+- Goes to decision: 55%
+"""
+        result = parse_prediction_output(text)
+        rp = result["round_probabilities"]
+        assert rp["r4"] == 7
+        assert rp["r5"] == 5
+
+    def test_no_method_probabilities_when_absent(self):
+        text = """**PREDICTED WINNER:** Fighter A
+**WIN PROBABILITY:** 55% vs 45%
+"""
+        result = parse_prediction_output(text)
+        assert "method_probabilities" not in result
+        assert "round_probabilities" not in result
+
+
 class TestConfidenceFromTier:
     def test_very_high(self):
         assert _confidence_from_tier("Very High") == 0.9

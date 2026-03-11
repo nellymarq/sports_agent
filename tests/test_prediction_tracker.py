@@ -135,3 +135,69 @@ class TestPredictionTracker:
         assert "50-60%" in stats["by_probability"]
         assert stats["by_probability"]["50-60%"]["accuracy"] == 1.0
         assert "70-80%" in stats["by_probability"]
+
+    def test_weight_class_tracking(self):
+        record_prediction("e1", "A", "B", "A", 0.7, weight_class="Lightweight")
+        record_prediction("e2", "C", "D", "C", 0.65, weight_class="Heavyweight")
+
+        record_result("e1", "A", "B", "A")
+        record_result("e2", "C", "D", "D")
+
+        stats = get_calibration_stats()
+        assert "by_weight_class" in stats
+        assert stats["by_weight_class"]["Lightweight"]["accuracy"] == 1.0
+        assert stats["by_weight_class"]["Heavyweight"]["accuracy"] == 0.0
+
+    def test_method_probabilities_stored(self):
+        entry = record_prediction(
+            "e1", "A", "B", "A", 0.7,
+            method_probabilities={"ko_tko": 40, "submission": 10, "decision": 50},
+        )
+        assert entry["method_probabilities"]["ko_tko"] == 40
+
+    def test_round_probabilities_stored(self):
+        entry = record_prediction(
+            "e1", "A", "B", "A", 0.7,
+            round_probabilities={"r1": 20, "r2": 15, "r3": 10, "decision": 55},
+        )
+        assert entry["round_probabilities"]["r1"] == 20
+
+    def test_record_result_with_round(self):
+        record_prediction("e1", "A", "B", "A", 0.7, method_lean="KO/TKO")
+        updated = record_result("e1", "A", "B", "A", actual_method="KO", actual_round=2)
+        assert updated["actual_round"] == 2
+        assert updated["method_correct"] is True
+
+    def test_method_correct_tracking(self):
+        record_prediction("e1", "A", "B", "A", 0.7, method_lean="Decision")
+        updated = record_result("e1", "A", "B", "A", actual_method="KO/TKO")
+        assert updated["method_correct"] is False
+
+    def test_method_correct_no_lean(self):
+        record_prediction("e1", "A", "B", "A", 0.7, method_lean="No strong lean")
+        updated = record_result("e1", "A", "B", "A", actual_method="Decision")
+        assert updated["method_correct"] is None
+
+    def test_favorite_underdog_accuracy(self):
+        record_prediction("e1", "A", "B", "A", 0.75)  # favorite
+        record_prediction("e2", "C", "D", "D", 0.35)  # underdog pick (prob < 0.4 inverted)
+
+        record_result("e1", "A", "B", "A")  # correct fav
+        record_result("e2", "C", "D", "D")  # correct dog
+
+        stats = get_calibration_stats()
+        assert "favorite_accuracy" in stats
+        assert "underdog_accuracy" in stats
+        assert stats["favorite_accuracy"]["total"] >= 1
+
+    def test_method_distribution_score(self):
+        record_prediction(
+            "e1", "A", "B", "A", 0.7,
+            method_probabilities={"ko_tko": 60, "submission": 10, "decision": 30},
+        )
+        record_result("e1", "A", "B", "A", actual_method="KO/TKO")
+
+        stats = get_calibration_stats()
+        assert stats["method_distribution_score"] is not None
+        # 60% prob on correct method => -log(0.6) ≈ 0.51
+        assert stats["method_distribution_score"] < 1.0

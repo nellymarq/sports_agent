@@ -41,6 +41,9 @@ def record_prediction(
     win_probability: float,
     confidence_tier: str = "",
     method_lean: str = "",
+    weight_class: str = "",
+    method_probabilities: Optional[Dict[str, int]] = None,
+    round_probabilities: Optional[Dict[str, int]] = None,
     metadata: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     """Record a new prediction for later calibration."""
@@ -53,10 +56,15 @@ def record_prediction(
         "win_probability": win_probability,
         "confidence_tier": confidence_tier,
         "method_lean": method_lean,
+        "weight_class": weight_class,
+        "method_probabilities": method_probabilities or {},
+        "round_probabilities": round_probabilities or {},
         "timestamp": time.time(),
         "actual_winner": None,
         "actual_method": None,
+        "actual_round": None,
         "correct": None,
+        "method_correct": None,
         "metadata": metadata or {},
     }
 
@@ -72,6 +80,7 @@ def record_result(
     fighter_b: str,
     actual_winner: str,
     actual_method: str = "",
+    actual_round: Optional[int] = None,
 ) -> Optional[Dict[str, Any]]:
     """Record the actual result for a previously tracked prediction."""
     preds = _load_predictions()
@@ -82,17 +91,59 @@ def record_result(
             p["event_id"] == event_id
             and p["fighter_a"] == fighter_a
             and p["fighter_b"] == fighter_b
-            and p["actual_winner"] is None
+            and p.get("actual_winner") is None
         ):
             p["actual_winner"] = actual_winner
             p["actual_method"] = actual_method
+            p["actual_round"] = actual_round
             p["correct"] = (p["predicted_winner"].lower() == actual_winner.lower())
+
+            # Check method accuracy
+            method_lean = (p.get("method_lean") or "").lower()
+            actual_lower = actual_method.lower()
+            if method_lean and method_lean != "no strong lean":
+                lean_key = method_lean.split("/")[0].strip()
+                p["method_correct"] = (lean_key in actual_lower or actual_lower in lean_key)
+            else:
+                p["method_correct"] = None
+
             updated = p
             break
 
     if updated:
         _save_predictions(preds)
     return updated
+
+
+def _compute_method_dist_score(resolved: List[Dict[str, Any]]) -> Optional[float]:
+    """
+    Compute log-loss for method probability distributions.
+    Only evaluates predictions that have method_probabilities and actual_method.
+    Lower is better (0 = perfect).
+    """
+    import math
+    eligible = []
+    for p in resolved:
+        mp = p.get("method_probabilities")
+        actual = (p.get("actual_method") or "").lower()
+        if not mp or not actual:
+            continue
+        # Map actual method to our categories
+        if "ko" in actual or "tko" in actual:
+            actual_key = "ko_tko"
+        elif "sub" in actual:
+            actual_key = "submission"
+        elif "dec" in actual or "unanimous" in actual or "split" in actual or "majority" in actual:
+            actual_key = "decision"
+        else:
+            continue
+        prob = mp.get(actual_key, 0) / 100.0
+        prob = max(prob, 0.01)  # avoid log(0)
+        eligible.append(-math.log(prob))
+
+    if not eligible:
+        return None
+    return round(sum(eligible) / len(eligible), 4)
 
 
 def get_calibration_stats() -> Dict[str, Any]:
@@ -205,6 +256,42 @@ def get_calibration_stats() -> Dict[str, Any]:
         for eid, s in event_stats.items()
     }
 
+    # By weight class
+    wc_stats: Dict[str, Dict[str, int]] = {}
+    for p in resolved:
+        wc = p.get("weight_class", "").strip() or "Unknown"
+        if wc not in wc_stats:
+            wc_stats[wc] = {"total": 0, "correct": 0}
+        wc_stats[wc]["total"] += 1
+        if p["correct"]:
+            wc_stats[wc]["correct"] += 1
+
+    wc_accuracy = {
+        wc: {
+            "total": s["total"],
+            "correct": s["correct"],
+            "accuracy": round(s["correct"] / s["total"], 3) if s["total"] > 0 else None,
+        }
+        for wc, s in wc_stats.items()
+    }
+
+    # Method distribution accuracy (for predictions with method_probabilities)
+    method_dist_log_loss = _compute_method_dist_score(resolved)
+
+    # Favorite/underdog split
+    fav_stats = {"total": 0, "correct": 0}
+    dog_stats = {"total": 0, "correct": 0}
+    for p in resolved:
+        prob = p.get("win_probability", 0.5)
+        if prob >= 0.6:
+            fav_stats["total"] += 1
+            if p["correct"]:
+                fav_stats["correct"] += 1
+        elif prob <= 0.4:
+            dog_stats["total"] += 1
+            if p["correct"]:
+                dog_stats["correct"] += 1
+
     return {
         "total_predictions": len(preds),
         "resolved": total,
@@ -215,4 +302,16 @@ def get_calibration_stats() -> Dict[str, Any]:
         "by_probability": bucket_accuracy,
         "by_method": method_accuracy,
         "by_event": event_accuracy,
+        "by_weight_class": wc_accuracy,
+        "favorite_accuracy": {
+            "total": fav_stats["total"],
+            "correct": fav_stats["correct"],
+            "accuracy": round(fav_stats["correct"] / fav_stats["total"], 3) if fav_stats["total"] > 0 else None,
+        },
+        "underdog_accuracy": {
+            "total": dog_stats["total"],
+            "correct": dog_stats["correct"],
+            "accuracy": round(dog_stats["correct"] / dog_stats["total"], 3) if dog_stats["total"] > 0 else None,
+        },
+        "method_distribution_score": method_dist_log_loss,
     }

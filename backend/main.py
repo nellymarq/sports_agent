@@ -32,6 +32,9 @@ from data.value_bets import (
     decimal_to_implied,
     implied_to_american,
     remove_vig,
+    simulate_roi,
+    calculate_parlay,
+    suggest_parlays,
 )
 from tools import UFCStatsTool
 from tools.comparison import build_comparison
@@ -86,6 +89,20 @@ class RecordResultRequest(BaseModel):
     fighter_b: str
     actual_winner: str
     actual_method: str = ""
+    actual_round: Optional[int] = None
+
+
+class ROISimulationRequest(BaseModel):
+    strategy: str = "flat"
+    bankroll: float = 1000
+    flat_stake: float = 50
+    kelly_fraction: float = 0.25
+    min_edge: float = 0.0
+
+
+class ParlayRequest(BaseModel):
+    legs: List[Dict[str, Any]]
+    stake: float = 100
 
 
 class CompareRequest(BaseModel):
@@ -228,6 +245,7 @@ def submit_result(req: RecordResultRequest) -> Dict[str, Any]:
         fighter_b=req.fighter_b,
         actual_winner=req.actual_winner,
         actual_method=req.actual_method,
+        actual_round=req.actual_round,
     )
     if updated:
         return {"status": "ok", "prediction": updated}
@@ -520,6 +538,75 @@ def search_fighters(req: FighterSearchRequest) -> Dict[str, Any]:
         }
     except Exception as e:
         _logger.exception("Fighter search failed")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------
+# ROI Simulation Endpoint
+# -------------------------------------------------
+@app.post("/roi/simulate")
+def roi_simulate(req: ROISimulationRequest) -> Dict[str, Any]:
+    """
+    Simulate betting ROI over resolved predictions using different staking strategies.
+    Strategies: 'flat', 'kelly', 'proportional'.
+    """
+    preds = _load_predictions()
+    result = simulate_roi(
+        predictions=preds,
+        strategy=req.strategy,
+        bankroll=req.bankroll,
+        flat_stake=req.flat_stake,
+        kelly_fraction_pct=req.kelly_fraction,
+        min_edge=req.min_edge,
+    )
+    return {"status": "ok", **result}
+
+
+# -------------------------------------------------
+# Parlay Calculator Endpoint
+# -------------------------------------------------
+@app.post("/parlay/calculate")
+def parlay_calculate(req: ParlayRequest) -> Dict[str, Any]:
+    """Calculate parlay odds, payouts, and expected value."""
+    result = calculate_parlay(req.legs, req.stake)
+    if "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    return {"status": "ok", **result}
+
+
+@app.post("/parlay/suggest")
+def parlay_suggest(req: ValueBetRequest) -> Dict[str, Any]:
+    """
+    Suggest +EV parlays from current value bets.
+    First identifies value bets, then generates parlay combinations.
+    """
+    try:
+        predictions = _load_predictions()
+        active = [
+            p for p in predictions
+            if p.get("actual_winner") is None and p.get("win_probability", 0) > 0
+        ]
+
+        if not active:
+            return {"status": "ok", "parlays": [], "message": "No active predictions."}
+
+        odds = fetch_all_ufc_odds()
+        value_bets = identify_value_bets(
+            predictions=active,
+            odds_data=odds,
+            min_edge=req.min_edge,
+            bankroll=req.bankroll,
+            kelly_fraction_pct=req.kelly_fraction,
+        )
+
+        parlays = suggest_parlays(value_bets)
+        return {
+            "status": "ok",
+            "value_bets_found": len(value_bets),
+            "parlays": parlays,
+        }
+    except Exception as e:
+        _logger.exception("Parlay suggestion failed")
         raise HTTPException(status_code=500, detail=str(e))
 
 

@@ -15,6 +15,9 @@ from data.value_bets import (
     confidence_label,
     identify_value_bets,
     format_value_bet_report,
+    simulate_roi,
+    calculate_parlay,
+    suggest_parlays,
 )
 
 
@@ -292,6 +295,141 @@ class TestIdentifyValueBets:
         assert len(bets) == 2
         # A has 30% edge, C has 10% edge — A should be first
         assert bets[0]["fighter"] == "A"
+
+
+# ── Report formatting ────────────────────────────────────
+
+# ── ROI simulation ──────────────────────────────────────
+
+class TestSimulateROI:
+    def _make_preds(self):
+        return [
+            {"predicted_winner": "A", "win_probability": 0.65, "correct": True, "metadata": {"odds_decimal": 2.0}},
+            {"predicted_winner": "B", "win_probability": 0.60, "correct": False, "metadata": {"odds_decimal": 1.8}},
+            {"predicted_winner": "C", "win_probability": 0.70, "correct": True, "metadata": {"odds_decimal": 1.5}},
+            {"predicted_winner": "D", "win_probability": 0.55, "correct": True, "metadata": {"odds_decimal": 2.2}},
+            {"predicted_winner": "E", "win_probability": 0.60, "correct": False, "metadata": {"odds_decimal": 1.9}},
+        ]
+
+    def test_flat_strategy(self):
+        result = simulate_roi(self._make_preds(), strategy="flat", bankroll=1000, flat_stake=100)
+        assert result["total_bets"] == 5
+        assert result["strategy"] == "flat"
+        assert "roi_pct" in result
+        assert "profit" in result
+        assert "max_drawdown_pct" in result
+
+    def test_kelly_strategy(self):
+        result = simulate_roi(self._make_preds(), strategy="kelly", bankroll=1000)
+        assert result["total_bets"] > 0
+        assert result["strategy"] == "kelly"
+
+    def test_proportional_strategy(self):
+        result = simulate_roi(self._make_preds(), strategy="proportional", bankroll=1000)
+        assert result["total_bets"] > 0
+        assert result["strategy"] == "proportional"
+
+    def test_empty_predictions(self):
+        result = simulate_roi([], strategy="flat")
+        assert result["total_bets"] == 0
+
+    def test_no_resolved(self):
+        preds = [{"predicted_winner": "A", "win_probability": 0.6}]
+        result = simulate_roi(preds)
+        assert result["total_bets"] == 0
+
+    def test_winning_increases_bankroll(self):
+        preds = [
+            {"predicted_winner": "A", "win_probability": 0.7, "correct": True, "metadata": {"odds_decimal": 2.0}},
+        ]
+        result = simulate_roi(preds, strategy="flat", bankroll=1000, flat_stake=100)
+        assert result["ending_bankroll"] > 1000
+
+    def test_losing_decreases_bankroll(self):
+        preds = [
+            {"predicted_winner": "A", "win_probability": 0.7, "correct": False, "metadata": {"odds_decimal": 2.0}},
+        ]
+        result = simulate_roi(preds, strategy="flat", bankroll=1000, flat_stake=100)
+        assert result["ending_bankroll"] < 1000
+
+
+# ── Parlay calculator ──────────────────────────────────
+
+class TestCalculateParlay:
+    def test_two_leg_parlay(self):
+        legs = [
+            {"fighter": "A", "decimal_odds": 2.0, "model_probability": 0.6},
+            {"fighter": "B", "decimal_odds": 1.5, "model_probability": 0.7},
+        ]
+        result = calculate_parlay(legs, stake=100)
+        assert "error" not in result
+        assert result["num_legs"] == 2
+        assert abs(result["combined_decimal_odds"] - 3.0) < 0.01
+        assert result["potential_payout"] == 300.0
+        assert result["potential_profit"] == 200.0
+
+    def test_three_leg_parlay(self):
+        legs = [
+            {"fighter": "A", "decimal_odds": 2.0},
+            {"fighter": "B", "decimal_odds": 1.5},
+            {"fighter": "C", "decimal_odds": 3.0},
+        ]
+        result = calculate_parlay(legs, stake=50)
+        assert result["num_legs"] == 3
+        assert abs(result["combined_decimal_odds"] - 9.0) < 0.01
+
+    def test_single_leg_error(self):
+        result = calculate_parlay([{"fighter": "A", "decimal_odds": 2.0}])
+        assert "error" in result
+
+    def test_empty_error(self):
+        result = calculate_parlay([])
+        assert "error" in result
+
+    def test_invalid_odds_filtered(self):
+        legs = [
+            {"fighter": "A", "decimal_odds": 2.0},
+            {"fighter": "B", "decimal_odds": 0.5},  # invalid
+        ]
+        result = calculate_parlay(legs)
+        assert "error" in result
+
+    def test_ev_calculation(self):
+        legs = [
+            {"fighter": "A", "decimal_odds": 2.0, "model_probability": 0.6},
+            {"fighter": "B", "decimal_odds": 2.0, "model_probability": 0.6},
+        ]
+        result = calculate_parlay(legs, stake=100)
+        # Combined model prob = 0.36, combined odds = 4.0
+        # EV = 0.36 * 400 - 100 = 44
+        assert result["expected_value"] > 0
+        assert result["ev_positive"] is True
+
+
+class TestSuggestParlays:
+    def test_suggests_from_value_bets(self):
+        vbs = [
+            {"fighter": "A", "edge": 0.10, "odds_decimal": 2.0, "model_probability": 0.6},
+            {"fighter": "B", "edge": 0.08, "odds_decimal": 1.8, "model_probability": 0.65},
+            {"fighter": "C", "edge": 0.05, "odds_decimal": 1.5, "model_probability": 0.7},
+        ]
+        parlays = suggest_parlays(vbs, max_legs=3, stake=25)
+        assert len(parlays) > 0
+        for p in parlays:
+            assert p["ev_positive"] is True
+            assert p["num_legs"] >= 2
+
+    def test_insufficient_bets(self):
+        parlays = suggest_parlays([{"fighter": "A", "edge": 0.1}])
+        assert parlays == []
+
+    def test_no_positive_edge(self):
+        vbs = [
+            {"fighter": "A", "edge": -0.05, "odds_decimal": 2.0, "model_probability": 0.4},
+            {"fighter": "B", "edge": -0.03, "odds_decimal": 1.8, "model_probability": 0.5},
+        ]
+        parlays = suggest_parlays(vbs)
+        assert parlays == []
 
 
 # ── Report formatting ────────────────────────────────────

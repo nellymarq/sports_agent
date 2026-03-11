@@ -63,65 +63,55 @@
     "id": "ufc_fn_269",
     "code": "UFC Fight Night 269",
     "name": "UFC Fight Night: Emmett vs Vallejos",
-    "date": "2026-03-14",
     "location": "Meta Apex, Enterprise, NV",
-    "status": "scheduled",
     "main_event": {
       "fighters": [
         "Josh Emmett",
         "Kevin Vallejos"
-      ],
-      "weight_class": "Featherweight"
+      ]
     },
     "co_main_event": {
       "fighters": [
         "Amanda Lemos",
         "Gillian Robertson"
-      ],
-      "weight_class": "Women's Strawweight"
+      ]
     },
     "card": [
       {
         "fighters": [
           "Ion Cutelaba",
           "Oumar Sy"
-        ],
-        "weight_class": "Light Heavyweight"
+        ]
       },
       {
         "fighters": [
           "Marwan Rahiki",
           "Harry Hardwick"
-        ],
-        "weight_class": "Featherweight"
+        ]
       },
       {
         "fighters": [
           "Vitor Petrino",
           "Steven Asplund"
-        ],
-        "weight_class": "Heavyweight"
+        ]
       },
       {
         "fighters": [
           "Charles Johnson",
           "Bruno Silva"
-        ],
-        "weight_class": "Flyweight"
+        ]
       },
       {
         "fighters": [
           "Eryk Anders",
           "Brad Tavares"
-        ],
-        "weight_class": "Middleweight"
+        ]
       },
       {
         "fighters": [
           "Chris Curtis",
           "Myktybek Orolbai"
-        ],
-        "weight_class": "Welterweight"
+        ]
       }
     ]
   },
@@ -129,58 +119,49 @@
     "id": "ufc_fn_270",
     "code": "UFC Fight Night 270",
     "name": "UFC Fight Night: Evloev vs Murphy",
-    "date": "2026-03-21",
     "location": "O2 Arena, London, England",
-    "status": "scheduled",
     "main_event": {
       "fighters": [
         "Movsar Evloev",
         "Lerone Murphy"
-      ],
-      "weight_class": "Featherweight"
+      ]
     },
     "co_main_event": {
       "fighters": [
         "Michael Page",
         "Sam Patterson"
-      ],
-      "weight_class": "Welterweight"
+      ]
     },
     "card": [
       {
         "fighters": [
           "Roman Dolidze",
           "Christian Leroy Duncan"
-        ],
-        "weight_class": "Middleweight"
+        ]
       },
       {
         "fighters": [
           "Iwo Baraniewski",
           "Austen Lane"
-        ],
-        "weight_class": "Light Heavyweight"
+        ]
       },
       {
         "fighters": [
           "Luke Riley",
           "Michael Aswell"
-        ],
-        "weight_class": "Featherweight"
+        ]
       },
       {
         "fighters": [
           "Nathaniel Wood",
           "Losene Keita"
-        ],
-        "weight_class": "Featherweight"
+        ]
       },
       {
         "fighters": [
           "Mason Jones",
           "Axel Sola"
-        ],
-        "weight_class": "Lightweight"
+        ]
       }
     ]
   },
@@ -188,58 +169,49 @@
     "id": "ufc_fn_271",
     "code": "UFC Fight Night 271",
     "name": "UFC Fight Night: Adesanya vs Pyfer",
-    "date": "2026-03-28",
     "location": "Climate Pledge Arena, Seattle, WA",
-    "status": "scheduled",
     "main_event": {
       "fighters": [
         "Israel Adesanya",
         "Joe Pyfer"
-      ],
-      "weight_class": "Middleweight"
+      ]
     },
     "co_main_event": {
       "fighters": [
         "Alexa Grasso",
         "Maycee Barber"
-      ],
-      "weight_class": "Women's Flyweight"
+      ]
     },
     "card": [
       {
         "fighters": [
           "Michael Chiesa",
           "Carlston Harris"
-        ],
-        "weight_class": "Welterweight"
+        ]
       },
       {
         "fighters": [
           "Chase Hooper",
           "Lance Gibson Jr."
-        ],
-        "weight_class": "Featherweight"
+        ]
       },
       {
         "fighters": [
           "Terrance McKinney",
           "Kyle Nelson"
-        ],
-        "weight_class": "Featherweight"
+        ]
       },
       {
         "fighters": [
           "Casey O'Neill",
           "Gabriella Fernandes"
-        ],
-        "weight_class": "Women's Flyweight"
+        ]
       },
       {
         "fighters": [
           "Mansur Abdul-Malik",
           "Yousri Belgaroui"
-        ],
-        "weight_class": "Middleweight"
+        ]
       }
     ]
   },
@@ -247,95 +219,117 @@
     "id": "ufc_327",
     "code": "UFC 327",
     "name": "UFC 327: Procházka vs Ulberg",
-    "date": "2026-04-11",
     "location": "Kaseya Center, Miami, FL",
-    "status": "scheduled",
     "main_event": {
       "fighters": [
         "Jiří Procházka",
         "Carlos Ulberg"
-      ],
-      "weight_class": "Light Heavyweight",
-      "is_title_fight": true
+      ]
     },
     "co_main_event": {
       "fighters": [
         "Joshua Van",
         "Tatsuro Taira"
-      ],
-      "weight_class": "Flyweight",
-      "is_title_fight": true
+      ]
     },
     "card": [
       {
         "fighters": [
           "Dominick Reyes",
           "Johnny Walker"
-        ],
-        "weight_class": "Light Heavyweight"
+        ]
       },
       {
         "fighters": [
           "Curtis Blaydes",
           "Josh Hokit"
-        ],
-        "weight_class": "Heavyweight"
+        ]
       },
       {
         "fighters": [
           "Beneil Dariush",
           "Manuel Torres"
-        ],
-        "weight_class": "Lightweight"
+        ]
       },
       {
         "fighters": [
           "Tatiana Suarez",
           "Loopy Godinez"
-        ],
-        "weight_class": "Women's Strawweight"
+        ]
       },
       {
         "fighters": [
           "Azamat Murzakanov",
           "Paulo Costa"
-        ],
-        "weight_class": "Middleweight"
+        ]
       },
       {
         "fighters": [
           "Nate Landwehr",
           "Cub Swanson"
-        ],
-        "weight_class": "Featherweight"
+        ]
       },
       {
         "fighters": [
           "Randy Brown",
           "Kevin Holland"
-        ],
-        "weight_class": "Welterweight"
+        ]
       },
       {
         "fighters": [
           "Aaron Pico",
           "Patricio Pitbull"
-        ],
-        "weight_class": "Featherweight"
+        ]
       },
       {
         "fighters": [
           "Mateusz Gamrot",
           "Esteban Ribovics"
-        ],
-        "weight_class": "Lightweight"
+        ]
       },
       {
         "fighters": [
           "Kelvin Gastelum",
           "Vicente Luque"
-        ],
-        "weight_class": "Middleweight"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ufc_313",
+    "code": "UFC 313",
+    "name": "UFC 313: Pereira vs Ankalaev",
+    "location": "T-Mobile Arena, Las Vegas, NV",
+    "main_event": {
+      "fighters": [
+        "Alex Pereira",
+        "Magomed Ankalaev"
+      ]
+    },
+    "co_main_event": {
+      "fighters": [
+        "Shavkat Rakhmonov",
+        "Ian Machado Garry"
+      ]
+    },
+    "card": [
+      {
+        "fighters": [
+          "Bo Nickal",
+          "Paul Craig"
+        ]
+      },
+      {
+        "fighters": [
+          "Alex Perez",
+          "Tagir Ulanbekov"
+        ]
+      },
+      {
+        "fighters": [
+          "Amanda Lemos",
+          "Virna Jandiroba"
+        ]
       }
     ]
   }

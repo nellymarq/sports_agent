@@ -151,6 +151,22 @@ You MUST output your prediction in this exact format:
 - Durability: [Fighter A / Fighter B / Even] — [brief why]
 - Experience: [Fighter A / Fighter B / Even] — [brief why]
 
+**METHOD PROBABILITIES:**
+- KO/TKO: [X]%
+- Submission: [Y]%
+- Decision: [Z]%
+(Must sum to 100%. Base rates: ~30% KO/TKO, ~10% Submission, ~55% Decision, ~5% Other.
+Adjust based on fighter profiles — e.g., heavy hitters increase KO%, BJJ specialists increase Sub%.)
+
+**ROUND PROBABILITIES:** [Only if 3-round fight or 5-round fight is known]
+- R1 finish: [X]%
+- R2 finish: [Y]%
+- R3 finish: [Z]%
+- R4 finish: [A]% (5-round only)
+- R5 finish: [B]% (5-round only)
+- Goes to decision: [C]%
+(Must sum to 100%. Base: ~15% R1, ~12% R2, ~10% R3 finish for 3-rounders.)
+
 **BETTING ANGLE:** [If odds data available: note if prediction diverges from market odds,
 quantify the edge (e.g., "Model: 65% vs Market: 55% = +10% edge"), identify value side]
 
@@ -362,6 +378,31 @@ def parse_prediction_output(text: str) -> Dict[str, Any]:
     m = re.search(r"\*\*LIVE LINE SUGGESTION:\*\*\s*(.+?)(?:\n\*\*|$)", text, re.DOTALL)
     if m:
         result["live_line_suggestion"] = m.group(1).strip()
+
+    # Method probabilities
+    method_probs = {}
+    for method_key, pattern in [
+        ("ko_tko", r"KO/TKO:\s*(\d+)%"),
+        ("submission", r"Submission:\s*(\d+)%"),
+        ("decision", r"Decision:\s*(\d+)%"),
+    ]:
+        m = re.search(pattern, text)
+        if m:
+            method_probs[method_key] = int(m.group(1))
+    if method_probs:
+        result["method_probabilities"] = method_probs
+
+    # Round probabilities
+    round_probs = {}
+    for rnd in range(1, 6):
+        m = re.search(rf"R{rnd} finish:\s*(\d+)%", text)
+        if m:
+            round_probs[f"r{rnd}"] = int(m.group(1))
+    m = re.search(r"Goes to decision:\s*(\d+)%", text)
+    if m:
+        round_probs["decision"] = int(m.group(1))
+    if round_probs:
+        result["round_probabilities"] = round_probs
 
     return result
 
