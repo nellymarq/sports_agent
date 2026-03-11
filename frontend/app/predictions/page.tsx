@@ -66,6 +66,7 @@ function RecordResultForm({
 }) {
   const [winner, setWinner] = useState("");
   const [method, setMethod] = useState("");
+  const [round, setRound] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = () => {
@@ -83,6 +84,7 @@ function RecordResultForm({
         fighter_b: pred.fighter_b,
         actual_winner: winner,
         actual_method: method,
+        actual_round: round ? parseInt(round) : null,
       }),
     })
       .then((res) => res.json())
@@ -127,6 +129,21 @@ function RecordResultForm({
             <option value="Decision - Split">Decision - Split</option>
             <option value="Decision - Majority">Decision - Majority</option>
             <option value="DQ">DQ</option>
+          </select>
+        </div>
+        <div className="w-16">
+          <label className="text-[10px] text-slate-500 block mb-0.5">Round</label>
+          <select
+            value={round}
+            onChange={(e) => setRound(e.target.value)}
+            className="w-full rounded bg-black/40 border border-slate-800 px-2 py-1 text-xs outline-none focus:border-accent"
+          >
+            <option value="">—</option>
+            <option value="1">R1</option>
+            <option value="2">R2</option>
+            <option value="3">R3</option>
+            <option value="4">R4</option>
+            <option value="5">R5</option>
           </select>
         </div>
         <Button

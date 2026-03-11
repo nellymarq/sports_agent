@@ -23,11 +23,33 @@ type FighterData = {
   recent_fights?: Array<{ opponent: string; result: string; method?: string; date?: string }>;
 };
 
+type StatEdge = {
+  stat: string;
+  fighter_a_value: string;
+  fighter_b_value: string;
+  edge: string;
+};
+
+type FighterProfile = {
+  name: string;
+  streak?: { current_streak: number; streak_type: string; form_last_5: string };
+  method_distribution?: {
+    finish_rate: number;
+    ko_rate: number;
+    sub_rate: number;
+    been_finished_rate: number;
+  };
+};
+
 type CompareResponse = {
   status: string;
   fighter_a: FighterData;
   fighter_b: FighterData;
   comparison: string;
+  tale_of_the_tape?: string;
+  stat_edges?: StatEdge[];
+  fighter_a_profile?: FighterProfile;
+  fighter_b_profile?: FighterProfile;
 };
 
 function StatRow({
@@ -201,6 +223,101 @@ export default function ComparePage() {
             <StatRow label="TD Def." valA={data.fighter_a.td_def} valB={data.fighter_b.td_def} />
             <StatRow label="Sub Avg" valA={data.fighter_a.sub_avg} valB={data.fighter_b.sub_avg} />
           </Card>
+
+          {/* Stat Edges */}
+          {data.stat_edges && data.stat_edges.length > 0 && (
+            <Card className="p-4">
+              <h3 className="text-xs font-semibold text-slate-400 mb-2">
+                Statistical Edge Breakdown
+              </h3>
+              <div className="space-y-1">
+                {data.stat_edges.map((se, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between text-xs py-1 border-b border-slate-800/30"
+                  >
+                    <span className="text-slate-400 w-28">{se.stat}</span>
+                    <span
+                      className={`font-medium ${
+                        se.edge === (data.fighter_a.name || fighterA)
+                          ? "text-cyan-400"
+                          : se.edge === (data.fighter_b.name || fighterB)
+                          ? "text-orange-400"
+                          : "text-slate-500"
+                      }`}
+                    >
+                      {se.edge}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* Fighter Profiles - Streak & Methods */}
+          {(data.fighter_a_profile || data.fighter_b_profile) && (
+            <Card className="p-4">
+              <h3 className="text-xs font-semibold text-slate-400 mb-3">
+                Form & Method Distribution
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { profile: data.fighter_a_profile, name: data.fighter_a.name || fighterA },
+                  { profile: data.fighter_b_profile, name: data.fighter_b.name || fighterB },
+                ].map(({ profile, name }) =>
+                  profile ? (
+                    <div key={name} className="space-y-2">
+                      <p className="text-xs font-semibold text-center">{name}</p>
+                      {profile.streak && (
+                        <div className="text-center">
+                          <span className="text-xs text-slate-400">
+                            Streak:{" "}
+                            <span
+                              className={
+                                profile.streak.streak_type === "W"
+                                  ? "text-emerald-400 font-medium"
+                                  : profile.streak.streak_type === "L"
+                                  ? "text-red-400 font-medium"
+                                  : "text-slate-300"
+                              }
+                            >
+                              {profile.streak.current_streak}
+                              {profile.streak.streak_type}
+                            </span>
+                          </span>
+                          <span className="text-xs text-slate-500 ml-2">
+                            Form: {profile.streak.form_last_5}
+                          </span>
+                        </div>
+                      )}
+                      {profile.method_distribution && (
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-[10px]">
+                            <span className="text-slate-500">Finish Rate</span>
+                            <span className="text-slate-300">
+                              {profile.method_distribution.finish_rate}%
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-[10px]">
+                            <span className="text-slate-500">KO Rate</span>
+                            <span className="text-slate-300">
+                              {profile.method_distribution.ko_rate}%
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-[10px]">
+                            <span className="text-slate-500">Sub Rate</span>
+                            <span className="text-slate-300">
+                              {profile.method_distribution.sub_rate}%
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : null
+                )}
+              </div>
+            </Card>
+          )}
 
           {/* Text comparison */}
           {data.comparison && (
