@@ -1,7 +1,8 @@
 # router_agent.py
 # S-tier dynamic routing with robust debug specialist triggers
+# and style-aware specialist selection.
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from logger import info, debug, error
 
 CORE_FOUR = ["style", "form", "sentiment", "weightcut"]
@@ -127,11 +128,46 @@ def _intent_enhanced_routing(question_type: str, current: List[str]) -> List[str
     return ordered
 
 
+def _style_enhanced_routing(
+    specialists: List[str],
+    fighter_stats: Optional[List[Dict[str, Any]]] = None,
+) -> List[str]:
+    """
+    Enhance specialist selection based on fighter style classifications.
+    Only applies when prefetched fighter stats are available.
+    """
+    if not fighter_stats or len(fighter_stats) < 2:
+        return specialists
+
+    try:
+        from data.style_classifier import classify_matchup
+        matchup = classify_matchup(fighter_stats[0], fighter_stats[1])
+        recommended = matchup.get("recommended_specialists", [])
+
+        # Add recommended specialists that aren't already included
+        enhanced = list(specialists)
+        for spec in recommended:
+            if spec not in enhanced and spec in FULL_SPECIALIST_LIST:
+                enhanced.append(spec)
+
+        # Reorder to match FULL_SPECIALIST_LIST order
+        ordered = [s for s in FULL_SPECIALIST_LIST if s in enhanced]
+        # Add any extras not in FULL_SPECIALIST_LIST (like debug)
+        for s in enhanced:
+            if s not in ordered:
+                ordered.append(s)
+
+        return ordered
+    except Exception:
+        return specialists
+
+
 async def router_agent(
     llm,
     user_input: str,
     semantic_memory=None,
     episodic_memory=None,
+    fighter_stats: Optional[List[Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     """
     S-tier router:
@@ -222,6 +258,10 @@ async def router_agent(
     # KEYWORD-BASED ROUTING
     specialists = _base_keyword_routing(text)
     specialists = _intent_enhanced_routing(qtype, specialists)
+
+    # STYLE-AWARE ENHANCEMENT (when fighter stats available)
+    if fighter_stats:
+        specialists = _style_enhanced_routing(specialists, fighter_stats)
 
     specialists.extend(requested_debug)
     specialists = list(dict.fromkeys(specialists))

@@ -616,6 +616,119 @@ def parlay_suggest(req: ValueBetRequest) -> Dict[str, Any]:
 
 
 # -------------------------------------------------
+# Full Card Preview Endpoint
+# -------------------------------------------------
+@app.get("/events/{event_id}/preview")
+def event_preview(event_id: str) -> Dict[str, Any]:
+    """
+    Generate a full card preview with fighter profiles and matchup classifications
+    for each bout on the card. Does NOT call the LLM — uses stats and classifiers only.
+    """
+    from data.fighter_profile import build_fighter_profile
+    from data.style_classifier import classify_matchup
+
+    events_path = ROOT / "data" / "events.json"
+    if not events_path.exists():
+        raise HTTPException(status_code=404, detail="Events data not found.")
+
+    try:
+        raw = json.loads(events_path.read_text(encoding="utf-8"))
+        events_list = raw if isinstance(raw, list) else raw.get("events", [])
+
+        target = None
+        for ev_data in events_list:
+            if ev_data.get("id") == event_id:
+                target = ev_data
+                break
+
+        if not target:
+            raise HTTPException(status_code=404, detail=f"Event '{event_id}' not found.")
+
+        # Collect all bouts
+        all_bouts = []
+        for bout_source in ["main_event", "co_main_event"]:
+            bout = target.get(bout_source, {})
+            if bout and bout.get("fighters"):
+                all_bouts.append({
+                    "type": bout_source.replace("_", " ").title(),
+                    "weight_class": bout.get("weight_class", ""),
+                    "fighters": bout.get("fighters", []),
+                })
+
+        for i, bout in enumerate(target.get("card", [])):
+            if bout.get("fighters"):
+                all_bouts.append({
+                    "type": f"Card #{i+1}",
+                    "weight_class": bout.get("weight_class", ""),
+                    "fighters": bout.get("fighters", []),
+                })
+
+        # Build previews
+        bout_previews = []
+        for bout in all_bouts:
+            fighters_raw = bout["fighters"]
+            names = []
+            for f in fighters_raw:
+                if isinstance(f, str):
+                    names.append(f)
+                elif isinstance(f, dict):
+                    names.append(f.get("name", "Unknown"))
+
+            if len(names) < 2:
+                continue
+
+            profiles = []
+            stats_list = []
+            for name in names[:2]:
+                try:
+                    data = _ufc_stats_tool.invoke({"fighter_name": name})
+                    fighter_data = data.get("best_match", {})
+                    profile = build_fighter_profile(name, ufc_stats=fighter_data)
+                    profiles.append(profile)
+                    stats_list.append(fighter_data)
+                except Exception:
+                    profiles.append(build_fighter_profile(name))
+                    stats_list.append({})
+
+            matchup_info = {}
+            if len(stats_list) >= 2:
+                try:
+                    matchup_info = classify_matchup(stats_list[0], stats_list[1])
+                except Exception:
+                    pass
+
+            bout_previews.append({
+                "type": bout["type"],
+                "weight_class": bout["weight_class"],
+                "fighter_a": names[0],
+                "fighter_b": names[1],
+                "fighter_a_profile": profiles[0] if profiles else {},
+                "fighter_b_profile": profiles[1] if len(profiles) > 1 else {},
+                "matchup_type": matchup_info.get("matchup_type", "unknown"),
+                "matchup_description": matchup_info.get("matchup_description", ""),
+                "recommended_specialists": matchup_info.get("recommended_specialists", []),
+            })
+
+        event_preds = [p for p in _load_predictions() if p.get("event_id") == event_id]
+
+        return {
+            "status": "ok",
+            "event_id": event_id,
+            "event_name": target.get("name", ""),
+            "date": target.get("date", ""),
+            "location": target.get("location", ""),
+            "bout_count": len(bout_previews),
+            "bouts": bout_previews,
+            "prediction_count": len(event_preds),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        _logger.exception("Event preview failed")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------
 # Cache Management Endpoints
 # -------------------------------------------------
 @app.get("/cache/stats")
