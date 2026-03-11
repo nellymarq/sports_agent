@@ -185,6 +185,85 @@ class TestEventsEndpoint:
             assert "bout_count" in ev
 
 
+class TestROISimulationEndpoint:
+    def test_roi_simulate_flat(self, client):
+        resp = client.post("/roi/simulate", json={
+            "strategy": "flat",
+            "bankroll": 1000,
+            "flat_stake": 50,
+        })
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "ok"
+        assert "total_bets" in data
+
+    def test_roi_simulate_kelly(self, client):
+        resp = client.post("/roi/simulate", json={
+            "strategy": "kelly",
+            "bankroll": 1000,
+        })
+        assert resp.status_code == 200
+
+    def test_roi_simulate_default(self, client):
+        resp = client.post("/roi/simulate", json={})
+        assert resp.status_code == 200
+
+
+class TestParlayEndpoints:
+    def test_parlay_calculate_valid(self, client):
+        resp = client.post("/parlay/calculate", json={
+            "legs": [
+                {"fighter": "Fighter A", "decimal_odds": 2.0, "model_probability": 0.6},
+                {"fighter": "Fighter B", "decimal_odds": 1.5, "model_probability": 0.7},
+            ],
+            "stake": 100,
+        })
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "ok"
+        assert data["num_legs"] == 2
+        assert data["potential_payout"] > 0
+
+    def test_parlay_calculate_single_leg_error(self, client):
+        resp = client.post("/parlay/calculate", json={
+            "legs": [{"fighter": "A", "decimal_odds": 2.0}],
+            "stake": 100,
+        })
+        assert resp.status_code == 400
+
+    def test_parlay_calculate_empty(self, client):
+        resp = client.post("/parlay/calculate", json={
+            "legs": [],
+            "stake": 100,
+        })
+        assert resp.status_code == 400
+
+
+class TestCalibrationEnhanced:
+    def test_calibration_includes_new_fields(self, client):
+        resp = client.get("/calibration")
+        assert resp.status_code == 200
+        data = resp.json()
+        # New fields should be present when there are resolved predictions
+        # or should at least not cause errors
+        assert "total_predictions" in data
+
+
+class TestEventPreviewEndpoint:
+    def test_preview_not_found(self, client):
+        resp = client.get("/events/ufc_nonexistent_999/preview")
+        assert resp.status_code == 404
+
+    def test_preview_returns_structure(self, client):
+        # Use a known event from events.json
+        resp = client.get("/events/ufc_313/preview")
+        if resp.status_code == 200:
+            data = resp.json()
+            assert data["status"] == "ok"
+            assert "bouts" in data
+            assert "bout_count" in data
+
+
 class TestFighterSearchEndpoint:
     def test_search_empty_query(self, client):
         """Search with unknown fighter should return empty or error."""

@@ -123,6 +123,28 @@ When in doubt, compress toward 50% rather than overstate edges.
 
 ---
 
+### Upset Detection Flags
+
+Watch for these high-upset-probability patterns:
+- **Aging champion syndrome**: Champion is 35+ with 3+ defenses, challenger is 28-31 in peak
+  (historically ~45% upset rate in this scenario)
+- **Style kryptonite**: Opponent's style directly counters the favorite's primary weapon
+  (e.g., elite wrestler vs striker with 40% TD defense — upset rate ~40%)
+- **Weight cut red flags**: If the favorite has a history of difficult cuts or missed weight,
+  the underdog gets a 5-10% boost
+- **Motivation gap**: Favorite has already achieved career goals vs hungry underdog
+  with everything to prove
+- **Short-notice replacement**: Replacement fighters who are sharp and active actually
+  win ~35% of the time — do not dismiss them
+- **Altitude/travel factor**: Fighter traveling internationally for the first time or
+  fighting at altitude when they train at sea level
+- **Post-layoff comeback**: Fighters returning after 18+ months away lose at ~55% rate,
+  even if they were dominant before
+
+When 2+ upset flags are triggered, compress the spread by at least 5-10%.
+
+---
+
 ### Output Format (STRICT — follow exactly)
 
 You MUST output your prediction in this exact format:

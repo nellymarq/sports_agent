@@ -171,6 +171,17 @@ Evaluate output volume, cardio capacity, and pace dynamics:
   that's a 58% decline — quantify the fade rate
 - Pace manipulation strategy: Does either fighter benefit from stalling, clinching,
   or slowing the fight? (fighters who slow pace to recover are harder to finish)
+
+**Championship Rounds Analysis (5-round fights only):**
+- 5-round experience: How many 5-round fights has each fighter had?
+  (first-time 5-rounders win ~40% — significant disadvantage)
+- Championship round activity: Output in R4-5 compared to R1-3.
+  Fighters who maintain >80% of their R1-3 output are "championship-caliber"
+- Decision track record in 5-rounders: Who is more likely to go the distance?
+- Late-fight finish rate: Some fighters (e.g., Holloway, Diaz) get better as
+  fights go longer — these fighters gain value as the fight extends
+- Cardio ceiling: At altitude (Mexico City, Denver) or after tough weight cuts,
+  even elite cardio fighters can hit a wall in R4-5
 """,
 
     "fight_iq": """
