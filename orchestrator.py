@@ -142,6 +142,8 @@ async def _run_single_specialist(
     context: Dict[str, Any],
 ) -> SpecialistOutput:
 
+    _spec_start = time.monotonic()
+
     specialist_fn = SPECIALIST_REGISTRY.get(specialist_key)
     if not specialist_fn:
         return SpecialistOutput.create(
@@ -176,7 +178,10 @@ async def _run_single_specialist(
         )
 
         # === SCHEMA ENFORCEMENT ===
+        _elapsed = round(time.monotonic() - _spec_start, 3)
+
         if isinstance(output, SpecialistOutput):
+            output.metadata = {**(output.metadata or {}), "execution_time_s": _elapsed}
             return output
 
         if isinstance(output, str):
@@ -187,7 +192,7 @@ async def _run_single_specialist(
                 evidence=[],
                 confidence=0.7,
                 lineage={"specialist": specialist_key, "task_name": name},
-                metadata={},
+                metadata={"execution_time_s": _elapsed},
             )
 
         if isinstance(output, dict):
@@ -202,6 +207,8 @@ async def _run_single_specialist(
                     )
                 )
 
+            meta = output.get("metadata", {}) or {}
+            meta["execution_time_s"] = _elapsed
             return SpecialistOutput.create(
                 specialist=specialist_key,
                 content=str(output.get("content", "")).strip(),
@@ -209,7 +216,7 @@ async def _run_single_specialist(
                 evidence=evidence_list,
                 confidence=float(output.get("confidence", 0.7)),
                 lineage={"specialist": specialist_key, "task_name": name},
-                metadata=output.get("metadata", {}) or {},
+                metadata=meta,
             )
 
         return SpecialistOutput.create(
@@ -219,10 +226,11 @@ async def _run_single_specialist(
             evidence=[],
             confidence=0.7,
             lineage={"specialist": specialist_key, "task_name": name},
-            metadata={},
+            metadata={"execution_time_s": _elapsed},
         )
 
     except Exception as e:
+        _elapsed = round(time.monotonic() - _spec_start, 3)
         error(f"Specialist '{specialist_key}' failed: {e}")
         return SpecialistOutput.create(
             specialist=specialist_key,
@@ -231,7 +239,7 @@ async def _run_single_specialist(
             evidence=[],
             confidence=0.0,
             lineage={"specialist": specialist_key, "error": True},
-            metadata={"error_message": str(e)},
+            metadata={"error_message": str(e), "execution_time_s": _elapsed},
         )
 
 # =====================================================================
@@ -648,7 +656,31 @@ async def orchestrator(
     if final_output_meta is None:
         return "[ERROR] Orchestrator failed to produce a final output."
 
-    info(f"Orchestrator: pipeline completed in {time.monotonic() - _t_start:.2f}s")
+    _total_elapsed = round(time.monotonic() - _t_start, 2)
+    info(f"Orchestrator: pipeline completed in {_total_elapsed:.2f}s")
+
+    # === SPECIALIST TIMING SUMMARY ===
+    specialist_timings = {}
+    for s in specialist_outputs:
+        t_s = (s.metadata or {}).get("execution_time_s")
+        if t_s is not None:
+            specialist_timings[s.specialist] = t_s
+    if specialist_timings:
+        slowest = max(specialist_timings, key=specialist_timings.get)
+        fastest = min(specialist_timings, key=specialist_timings.get)
+        info(
+            f"Orchestrator: specialist timings — "
+            f"slowest={slowest} ({specialist_timings[slowest]}s), "
+            f"fastest={fastest} ({specialist_timings[fastest]}s), "
+            f"total_pipeline={_total_elapsed}s"
+        )
+
+    # Attach timing to final output metadata
+    if final_output_meta.metadata is None:
+        final_output_meta.metadata = {}
+    final_output_meta.metadata["specialist_timings"] = specialist_timings
+    final_output_meta.metadata["pipeline_time_s"] = _total_elapsed
+
     final_output_str = final_output_meta.content
 
     # =====================================================================

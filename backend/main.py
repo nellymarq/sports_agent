@@ -48,6 +48,7 @@ from data.style_classifier import classify_style, classify_matchup
 from data.fighter_profile import build_fighter_profile
 from data.prop_analysis import analyze_method_props, analyze_round_props, generate_prop_card
 from data.fight_simulation import simulate_fight
+from data.shared_opponents import get_shared_opponent_analysis, format_shared_opponent_report
 
 _logger = logging.getLogger("backend")
 
@@ -375,6 +376,19 @@ def compare_fighters(req: CompareRequest) -> Dict[str, Any]:
             elo_matchup["fighter_b_win_prob"]
         )
 
+        # Shared opponent analysis (best-effort, DB may not have data)
+        shared_opponent_data = {}
+        try:
+            fighter_a_id = req.fighter_a.lower().replace(" ", "_")
+            fighter_b_id = req.fighter_b.lower().replace(" ", "_")
+            shared_opponent_data = get_shared_opponent_analysis(
+                fighter_a_id, fighter_b_id,
+                fighter_a_name=req.fighter_a,
+                fighter_b_name=req.fighter_b,
+            )
+        except Exception:
+            shared_opponent_data = {"summary": {"count": 0, "edge": "unavailable"}}
+
         result = {
             "status": "ok",
             "fighter_a": fighter_a,
@@ -392,6 +406,7 @@ def compare_fighters(req: CompareRequest) -> Dict[str, Any]:
                 "recommended_specialists": matchup.get("recommended_specialists", []),
             },
             "elo_matchup": elo_matchup,
+            "shared_opponents": shared_opponent_data,
         }
         response_cache.set("/compare", cache_params, result, ttl=120)
         return result
