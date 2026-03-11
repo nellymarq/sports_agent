@@ -46,6 +46,7 @@ from data.bet_sizing import recommend_bet_size, format_bet_recommendation, compu
 from data.line_tracker import record_odds_snapshot, get_line_movement, get_all_movements, format_line_movement
 from data.style_classifier import classify_style, classify_matchup
 from data.fighter_profile import build_fighter_profile
+from data.prop_analysis import analyze_method_props, analyze_round_props, generate_prop_card
 
 _logger = logging.getLogger("backend")
 
@@ -653,6 +654,101 @@ def parlay_suggest(req: ValueBetRequest) -> Dict[str, Any]:
     except Exception as e:
         _logger.exception("Parlay suggestion failed")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------
+# Prop Bet Analysis Endpoint
+# -------------------------------------------------
+class PropAnalysisRequest(BaseModel):
+    prediction_id: Optional[str] = None
+    fighter_a: Optional[str] = None
+    fighter_b: Optional[str] = None
+    method_probabilities: Optional[Dict[str, int]] = None
+    round_probabilities: Optional[Dict[str, int]] = None
+    market_method_props: Optional[Dict[str, str]] = None
+    market_round_props: Optional[Dict[str, str]] = None
+
+
+@app.post("/props/analyze")
+def analyze_props(req: PropAnalysisRequest) -> Dict[str, Any]:
+    """
+    Analyze prop bet value for a fight. Can use either:
+    - An existing prediction_id to look up stored probabilities
+    - Directly provided method/round probabilities
+    Returns method-of-victory and round prop analysis with value identification.
+    """
+    try:
+        # Build prediction data from request or lookup
+        pred_data: Dict[str, Any] = {}
+
+        if req.prediction_id:
+            preds = _load_predictions()
+            match = next(
+                (p for p in preds if p.get("id") == req.prediction_id), None
+            )
+            if not match:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Prediction '{req.prediction_id}' not found.",
+                )
+            pred_data = match
+        else:
+            pred_data = {
+                "fighter_a": req.fighter_a or "Fighter A",
+                "fighter_b": req.fighter_b or "Fighter B",
+                "predicted_winner": req.fighter_a or "Fighter A",
+                "method_probabilities": req.method_probabilities or {},
+                "round_probabilities": req.round_probabilities or {},
+            }
+
+        card = generate_prop_card(
+            prediction_data=pred_data,
+            market_method_props=req.market_method_props,
+            market_round_props=req.market_round_props,
+        )
+
+        return {"status": "ok", **card}
+    except HTTPException:
+        raise
+    except Exception as e:
+        _logger.exception("Prop analysis failed")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/props/event/{event_id}")
+def event_props(event_id: str) -> Dict[str, Any]:
+    """
+    Get prop analysis for all predictions associated with an event.
+    """
+    preds = _load_predictions()
+    event_preds = [
+        p for p in preds
+        if p.get("event_id") == event_id
+        and p.get("method_probabilities")
+    ]
+
+    if not event_preds:
+        return {
+            "status": "ok",
+            "event_id": event_id,
+            "prop_cards": [],
+            "message": "No predictions with method probabilities for this event.",
+        }
+
+    cards = []
+    for pred in event_preds:
+        card = generate_prop_card(prediction_data=pred)
+        card["prediction_id"] = pred.get("id")
+        card["fighter_a"] = pred.get("fighter_a")
+        card["fighter_b"] = pred.get("fighter_b")
+        cards.append(card)
+
+    return {
+        "status": "ok",
+        "event_id": event_id,
+        "prop_cards": cards,
+        "count": len(cards),
+    }
 
 
 # -------------------------------------------------
