@@ -41,6 +41,9 @@ from tools.comparison import build_comparison, build_enhanced_comparison
 from data.events_schema import Event
 from cache.cache_manager import CacheManager
 from backend.response_cache import response_cache
+from data.elo_rating import ELORatingSystem, elo_probability_to_american_odds
+from data.bet_sizing import recommend_bet_size, format_bet_recommendation, compute_edge
+from data.line_tracker import record_odds_snapshot, get_line_movement, get_all_movements, format_line_movement
 
 _logger = logging.getLogger("backend")
 
@@ -57,7 +60,7 @@ if _config_errors:
 
 app = FastAPI(
     title="UFC Analytics Backend",
-    version="2.4.0",
+    version="2.5.0",
 )
 
 # -------------------------------------------------
@@ -747,6 +750,108 @@ def cache_stats() -> Dict[str, Any]:
     return {
         "tool_cache": _cache.stats(),
         "response_cache": response_cache.stats(),
+    }
+
+
+# -------------------------------------------------
+# ELO Rating Endpoints
+# -------------------------------------------------
+_elo_system = ELORatingSystem()
+
+
+class BetSizingRequest(BaseModel):
+    model_probability: float
+    decimal_odds: float
+    confidence_tier: str = "moderate"
+    bankroll: float = 1000.0
+    fighter_name: str = ""
+
+
+@app.get("/elo/rankings")
+def elo_rankings(top_n: int = 15) -> Dict[str, Any]:
+    """Get ELO-based fighter power rankings."""
+    rankings = _elo_system.get_rankings(top_n=top_n)
+    return {
+        "status": "ok",
+        "total_rated": len(_elo_system.ratings),
+        "rankings": rankings,
+    }
+
+
+@app.get("/elo/matchup")
+def elo_matchup(fighter_a: str, fighter_b: str) -> Dict[str, Any]:
+    """Get ELO-based matchup prediction between two fighters."""
+    prediction = _elo_system.get_matchup_prediction(fighter_a, fighter_b)
+    prediction["fighter_a_odds"] = elo_probability_to_american_odds(
+        prediction["fighter_a_win_prob"]
+    )
+    prediction["fighter_b_odds"] = elo_probability_to_american_odds(
+        prediction["fighter_b_win_prob"]
+    )
+    return {"status": "ok", **prediction}
+
+
+@app.post("/bet/size")
+def bet_sizing(req: BetSizingRequest) -> Dict[str, Any]:
+    """Get bet sizing recommendation based on edge and confidence."""
+    rec = recommend_bet_size(
+        model_prob=req.model_probability,
+        decimal_odds=req.decimal_odds,
+        confidence_tier=req.confidence_tier,
+        bankroll=req.bankroll,
+    )
+    rec["formatted"] = format_bet_recommendation(rec, req.fighter_name)
+    return {"status": "ok", **rec}
+
+
+# -------------------------------------------------
+# Line Movement Endpoints
+# -------------------------------------------------
+class OddsSnapshotRequest(BaseModel):
+    bout_key: str
+    fighter_a: str
+    fighter_b: str
+    odds_a: Optional[float] = None
+    odds_b: Optional[float] = None
+    implied_a: Optional[float] = None
+    implied_b: Optional[float] = None
+    source: str = "manual"
+
+
+@app.post("/lines/snapshot")
+def record_line_snapshot(req: OddsSnapshotRequest) -> Dict[str, Any]:
+    """Record an odds snapshot for line movement tracking."""
+    snap = record_odds_snapshot(
+        bout_key=req.bout_key,
+        fighter_a=req.fighter_a,
+        fighter_b=req.fighter_b,
+        odds_a=req.odds_a,
+        odds_b=req.odds_b,
+        implied_a=req.implied_a,
+        implied_b=req.implied_b,
+        source=req.source,
+    )
+    return {"status": "ok", "snapshot": snap}
+
+
+@app.get("/lines/movement/{bout_key}")
+def line_movement(bout_key: str) -> Dict[str, Any]:
+    """Get line movement analysis for a specific bout."""
+    movement = get_line_movement(bout_key)
+    if not movement:
+        raise HTTPException(status_code=404, detail="No line data for this bout")
+    movement["formatted"] = format_line_movement(movement)
+    return {"status": "ok", **movement}
+
+
+@app.get("/lines/all")
+def all_line_movements() -> Dict[str, Any]:
+    """Get line movement data for all tracked bouts."""
+    movements = get_all_movements()
+    return {
+        "status": "ok",
+        "count": len(movements),
+        "movements": movements,
     }
 
 

@@ -13,6 +13,7 @@ from prediction_tracker import (
     get_calibration_stats,
     _load_predictions,
     _save_predictions,
+    _compute_rolling_accuracy,
     PREDICTIONS_PATH,
 )
 
@@ -201,3 +202,34 @@ class TestPredictionTracker:
         assert stats["method_distribution_score"] is not None
         # 60% prob on correct method => -log(0.6) ≈ 0.51
         assert stats["method_distribution_score"] < 1.0
+
+    def test_rolling_accuracy_empty(self):
+        assert _compute_rolling_accuracy([]) == []
+
+    def test_rolling_accuracy_single(self):
+        assert _compute_rolling_accuracy([{"correct": True, "win_probability": 0.7, "timestamp": 1}]) == []
+
+    def test_rolling_accuracy_multiple(self):
+        resolved = [
+            {"correct": True, "win_probability": 0.7, "timestamp": 1},
+            {"correct": False, "win_probability": 0.6, "timestamp": 2},
+            {"correct": True, "win_probability": 0.8, "timestamp": 3},
+            {"correct": True, "win_probability": 0.65, "timestamp": 4},
+        ]
+        trend = _compute_rolling_accuracy(resolved, window=3)
+        assert len(trend) == 4
+        assert trend[0]["index"] == 1
+        assert trend[0]["cumulative_accuracy"] == 1.0  # 1/1
+        assert trend[-1]["cumulative_accuracy"] == 0.75  # 3/4
+        # Rolling window of 3 for last point: [F, T, T] = 2/3
+        assert trend[-1]["rolling_accuracy"] == round(2/3, 3)
+
+    def test_calibration_includes_trend(self):
+        record_prediction("e1", "A", "B", "A", 0.7)
+        record_prediction("e2", "C", "D", "C", 0.6)
+        record_result("e1", "A", "B", "A", "KO")
+        record_result("e2", "C", "D", "D", "Decision")
+
+        stats = get_calibration_stats()
+        assert "accuracy_trend" in stats
+        assert len(stats["accuracy_trend"]) == 2

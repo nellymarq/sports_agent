@@ -292,6 +292,9 @@ def get_calibration_stats() -> Dict[str, Any]:
             if p["correct"]:
                 dog_stats["correct"] += 1
 
+    # Rolling accuracy trend (last N resolved predictions)
+    accuracy_trend = _compute_rolling_accuracy(resolved)
+
     return {
         "total_predictions": len(preds),
         "resolved": total,
@@ -314,4 +317,56 @@ def get_calibration_stats() -> Dict[str, Any]:
             "accuracy": round(dog_stats["correct"] / dog_stats["total"], 3) if dog_stats["total"] > 0 else None,
         },
         "method_distribution_score": method_dist_log_loss,
+        "accuracy_trend": accuracy_trend,
     }
+
+
+def _compute_rolling_accuracy(
+    resolved: List[Dict[str, Any]], window: int = 10
+) -> List[Dict[str, Any]]:
+    """
+    Compute rolling accuracy over resolved predictions.
+    Returns a list of data points for trending charts.
+    Each point: {index, rolling_accuracy, rolling_brier, cumulative_accuracy}
+    """
+    if len(resolved) < 2:
+        return []
+
+    # Sort by timestamp for chronological ordering
+    sorted_preds = sorted(resolved, key=lambda p: p.get("timestamp", 0))
+
+    trend = []
+    for i, p in enumerate(sorted_preds):
+        idx = i + 1
+
+        # Cumulative accuracy
+        cum_correct = sum(1 for pp in sorted_preds[:idx] if pp["correct"])
+        cum_acc = round(cum_correct / idx, 3)
+
+        # Rolling window accuracy
+        window_start = max(0, idx - window)
+        window_preds = sorted_preds[window_start:idx]
+        roll_correct = sum(1 for pp in window_preds if pp["correct"])
+        roll_acc = round(roll_correct / len(window_preds), 3)
+
+        # Rolling Brier score
+        roll_brier = sum(
+            (pp["win_probability"] - (1.0 if pp["correct"] else 0.0)) ** 2
+            for pp in window_preds
+        ) / len(window_preds)
+
+        point = {
+            "index": idx,
+            "rolling_accuracy": roll_acc,
+            "rolling_brier": round(roll_brier, 4),
+            "cumulative_accuracy": cum_acc,
+        }
+
+        # Add timestamp if available
+        ts = p.get("timestamp")
+        if ts:
+            point["timestamp"] = ts
+
+        trend.append(point)
+
+    return trend

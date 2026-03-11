@@ -264,6 +264,99 @@ class TestEventPreviewEndpoint:
             assert "bout_count" in data
 
 
+class TestELOEndpoints:
+    def test_elo_rankings(self, client):
+        resp = client.get("/elo/rankings")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "ok"
+        assert "rankings" in data
+        assert "total_rated" in data
+
+    def test_elo_rankings_with_top_n(self, client):
+        resp = client.get("/elo/rankings?top_n=5")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data["rankings"]) <= 5
+
+    def test_elo_matchup(self, client):
+        resp = client.get("/elo/matchup?fighter_a=test_a&fighter_b=test_b")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "ok"
+        assert "fighter_a_win_prob" in data
+        assert "fighter_b_win_prob" in data
+        assert "fighter_a_odds" in data
+
+    def test_elo_matchup_probs_sum_to_one(self, client):
+        resp = client.get("/elo/matchup?fighter_a=x&fighter_b=y")
+        data = resp.json()
+        total = data["fighter_a_win_prob"] + data["fighter_b_win_prob"]
+        assert abs(total - 1.0) < 0.001
+
+
+class TestBetSizingEndpoint:
+    def test_bet_sizing_strong_bet(self, client):
+        resp = client.post("/bet/size", json={
+            "model_probability": 0.70,
+            "decimal_odds": 2.0,
+            "confidence_tier": "high",
+            "bankroll": 1000,
+            "fighter_name": "Test Fighter",
+        })
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "ok"
+        assert data["action"] in ("BET", "STRONG BET")
+        assert "formatted" in data
+        assert "Test Fighter" in data["formatted"]
+
+    def test_bet_sizing_pass(self, client):
+        resp = client.post("/bet/size", json={
+            "model_probability": 0.45,
+            "decimal_odds": 2.0,
+            "confidence_tier": "moderate",
+        })
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["action"] == "PASS"
+
+    def test_bet_sizing_defaults(self, client):
+        resp = client.post("/bet/size", json={
+            "model_probability": 0.65,
+            "decimal_odds": 2.5,
+        })
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "kelly" in data
+        assert "sizing" in data
+
+
+class TestLineMovementEndpoints:
+    def test_record_snapshot(self, client):
+        resp = client.post("/lines/snapshot", json={
+            "bout_key": "test_bout",
+            "fighter_a": "Fighter A",
+            "fighter_b": "Fighter B",
+            "implied_a": 0.55,
+            "implied_b": 0.45,
+            "source": "test",
+        })
+        assert resp.status_code == 200
+        assert resp.json()["status"] == "ok"
+
+    def test_movement_not_found(self, client):
+        resp = client.get("/lines/movement/nonexistent_bout_xyz")
+        assert resp.status_code == 404
+
+    def test_all_movements(self, client):
+        resp = client.get("/lines/all")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "ok"
+        assert "movements" in data
+
+
 class TestFighterSearchEndpoint:
     def test_search_empty_query(self, client):
         """Search with unknown fighter should return empty or error."""
