@@ -12,6 +12,7 @@ from coordinator_agent import (
     _build_structured_block,
     _compute_overall_confidence,
     _build_diagnostics_block,
+    _detect_fighter_leans,
 )
 from data.metadata import SpecialistOutput
 from tests.mock_llm import MockLLM
@@ -83,6 +84,45 @@ class TestDiagnosticsBlock:
         block = _build_diagnostics_block(outputs, router_output)
         assert "who_wins" in block
         assert "style" in block
+
+
+class TestFighterLeans:
+    def test_detects_fighter_a_consensus(self):
+        outputs = [
+            SpecialistOutput.create(specialist="style", content="Pereira has the striking advantage and edge", confidence=0.8),
+            SpecialistOutput.create(specialist="damage", content="Pereira has superior power, he favors this matchup", confidence=0.7),
+            SpecialistOutput.create(specialist="grappling", content="Ankalaev has better grappling", confidence=0.6),
+        ]
+        result = _detect_fighter_leans(outputs, ["Pereira", "Ankalaev"])
+        assert result["consensus_fighter"] == "Pereira"
+        assert result["fighter_a_count"] >= 2
+
+    def test_split_consensus(self):
+        outputs = [
+            SpecialistOutput.create(specialist="style", content="Pereira has the edge in striking", confidence=0.8),
+            SpecialistOutput.create(specialist="grappling", content="Ankalaev has the advantage on the ground", confidence=0.8),
+        ]
+        result = _detect_fighter_leans(outputs, ["Pereira", "Ankalaev"])
+        assert result["consensus_fighter"] == "split"
+
+    def test_no_fighters(self):
+        outputs = [SpecialistOutput.create(specialist="style", content="test", confidence=0.8)]
+        result = _detect_fighter_leans(outputs, [])
+        assert result["consensus_fighter"] == "unknown"
+
+    def test_convergence_in_structured_block(self):
+        outputs = [
+            SpecialistOutput.create(specialist="style", content="Jones has the advantage", confidence=0.8),
+        ]
+        block = _build_structured_block(outputs, fighters=["Jones", "Aspinall"])
+        assert "CONVERGENCE" in block
+
+    def test_no_convergence_without_fighters(self):
+        outputs = [
+            SpecialistOutput.create(specialist="style", content="analysis", confidence=0.8),
+        ]
+        block = _build_structured_block(outputs)
+        assert "CONVERGENCE" not in block
 
 
 class TestCoordinatorMerge:

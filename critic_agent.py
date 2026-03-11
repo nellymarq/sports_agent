@@ -34,6 +34,22 @@ Evidence Quality Check:
 - Do NOT add these markers to general analysis — only to specific factual claims
   (records, stats, fight outcomes) that lack source data.
 
+Prediction Calibration Check:
+- If **WIN PROBABILITY** is present, verify it matches the analysis:
+  - 50-55%: Analysis should describe a very close, uncertain matchup
+  - 55-65%: Analysis should show a slight edge but acknowledge risks
+  - 65-75%: Analysis should show clear advantages in multiple domains
+  - 75-85%: Analysis should show dominant advantages across most domains
+  - 85%+: Reserved for extreme mismatches only — flag if edge analysis doesn't support this
+- If METHOD LEAN says "KO/TKO" but analysis describes mostly grappling advantages, flag
+- If METHOD PROBABILITIES don't roughly match the analysis narrative, flag
+- If ROUND LEAN contradicts pace/cardio analysis (e.g., "late stoppage" but cardio issues), flag
+
+Method Distribution Sanity:
+- KO/TKO + Submission + Decision should sum to ~100% (allow 5% margin for rounding)
+- If a fighter is described as a "heavy-handed striker" but KO/TKO probability is <20%, flag
+- If a fighter is described as "elite grappler/BJJ" but Submission probability is <5%, flag
+
 MEMORY CONTEXT
 - You may be given long-term (semantic) and recent (episodic) memory.
 - Use these only to correct obvious factual drift (e.g., wrong stance, wrong weight class),

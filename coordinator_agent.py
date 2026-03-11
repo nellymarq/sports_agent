@@ -75,7 +75,53 @@ This summary is essential for the prediction specialist.
 """
 
 
-def _build_structured_block(specialist_outputs: List[SpecialistOutput]) -> str:
+def _detect_fighter_leans(specialist_outputs: List[SpecialistOutput], fighters: List[str]) -> Dict[str, Any]:
+    """
+    Detect which fighter each specialist leans toward by analyzing content.
+    Returns convergence data for the coordinator.
+    """
+    if not fighters or len(fighters) < 2:
+        return {"convergence_pct": 0, "consensus_fighter": "unknown", "leans": {}}
+
+    f_a = fighters[0].lower()
+    f_b = fighters[1].lower()
+    leans: Dict[str, str] = {}
+
+    for s in specialist_outputs:
+        content = s.content.lower()
+        edge_keywords = ["advantage", "edge", "superior", "better", "stronger", "favors", "wins"]
+        a_score = sum(
+            1 for kw in edge_keywords
+            if f_a in content and kw in content[max(0, content.find(f_a) - 100):content.find(f_a) + 100]
+        )
+        b_score = sum(
+            1 for kw in edge_keywords
+            if f_b in content and kw in content[max(0, content.find(f_b) - 100):content.find(f_b) + 100]
+        )
+
+        if a_score > b_score:
+            leans[s.specialist] = fighters[0]
+        elif b_score > a_score:
+            leans[s.specialist] = fighters[1]
+        else:
+            leans[s.specialist] = "neutral"
+
+    a_count = sum(1 for v in leans.values() if v == fighters[0])
+    b_count = sum(1 for v in leans.values() if v == fighters[1])
+    neutral_count = sum(1 for v in leans.values() if v == "neutral")
+    total = len(leans) or 1
+
+    return {
+        "leans": leans,
+        "fighter_a_count": a_count,
+        "fighter_b_count": b_count,
+        "neutral_count": neutral_count,
+        "convergence_pct": round(max(a_count, b_count) / total * 100, 1),
+        "consensus_fighter": fighters[0] if a_count > b_count else fighters[1] if b_count > a_count else "split",
+    }
+
+
+def _build_structured_block(specialist_outputs: List[SpecialistOutput], fighters: List[str] = None) -> str:
     # Sort by confidence descending so higher-confidence analyses appear first
     sorted_outputs = sorted(specialist_outputs, key=lambda s: s.confidence, reverse=True)
 
@@ -88,6 +134,19 @@ def _build_structured_block(specialist_outputs: List[SpecialistOutput]) -> str:
         f"Specialist Outputs ({len(sorted_outputs)} total: "
         f"{len(high_conf)} high-conf, {len(med_conf)} medium, {len(low_conf)} low):\n"
     ]
+
+    # Add convergence analysis
+    convergence = _detect_fighter_leans(sorted_outputs, fighters or [])
+    if convergence.get("consensus_fighter") != "unknown":
+        lines.append("=== PRE-MERGE CONVERGENCE ANALYSIS ===")
+        lines.append(f"Consensus: {convergence['consensus_fighter']} "
+                     f"({convergence['convergence_pct']}% of specialists)")
+        lines.append(f"Fighter A leans: {convergence['fighter_a_count']}, "
+                     f"Fighter B leans: {convergence['fighter_b_count']}, "
+                     f"Neutral: {convergence['neutral_count']}")
+        for spec, lean in convergence.get("leans", {}).items():
+            lines.append(f"  - {spec}: {lean}")
+        lines.append("")
 
     for idx, s in enumerate(sorted_outputs, start=1):
         weight_label = "HIGH WEIGHT" if s.confidence >= 0.8 else "MEDIUM WEIGHT" if s.confidence >= 0.5 else "LOW WEIGHT"
@@ -169,7 +228,7 @@ async def coordinator_merge(
 
     router_output = router_output or {}
 
-    structured_block = _build_structured_block(specialist_outputs)
+    structured_block = _build_structured_block(specialist_outputs, fighters=fighters)
 
     memory_context = ""
     if semantic_memory:
@@ -247,6 +306,9 @@ async def coordinator_merge(
             "fighters": fighters,
         }
 
+        # Compute convergence for metadata
+        convergence = _detect_fighter_leans(specialist_outputs, fighters or [])
+
         return SpecialistOutput.create(
             specialist="coordinator",
             content=merged,
@@ -259,6 +321,7 @@ async def coordinator_merge(
                 "overall_specialist_confidence": overall_conf,
                 "specialist_count": len(specialist_outputs),
                 "debug_appended": bool(debug_specs),
+                "convergence": convergence,
             },
         )
 
