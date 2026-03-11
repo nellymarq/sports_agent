@@ -93,6 +93,24 @@ async def retrieval_agent(
                 primary = fighters[0]
                 debug(f"retrieval_agent: derived fighters from event {event_id}: {fighters}")
 
+    # 2) Fetch next scheduled UFC event
+    event, event_block = await _build_event_context()
+
+    # 1c) If still no fighters, derive from the next event's main event
+    if not fighters and event:
+        main_ev = event.get("main_event") or {}
+        if isinstance(main_ev, dict):
+            me_fighters = main_ev.get("fighters", [])
+            derived = [
+                (f if isinstance(f, str) else f.get("name", ""))
+                for f in me_fighters
+            ]
+            derived = [n for n in derived if n]
+            if len(derived) >= 2:
+                fighters = derived
+                primary = derived[0]
+                debug(f"retrieval_agent: derived fighters from next event: {fighters}")
+
     fighter_lines: List[str] = []
     if fighters:
         fighter_lines.append("Fighters identified:")
@@ -100,9 +118,6 @@ async def retrieval_agent(
             fighter_lines.append(f"- {f}")
     else:
         fighter_lines.append("No clear fighters extracted from the question.")
-
-    # 2) Fetch next scheduled UFC event
-    event, event_block = await _build_event_context()
 
     # 3) Build final retrieval summary string
     sections: List[str] = []

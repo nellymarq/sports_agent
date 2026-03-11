@@ -1,7 +1,8 @@
 # critic_agent.py
 # Chunked critic pipeline for large multi-specialist outputs, now metadata- and memory-aware
 
-from typing import List, Optional
+import re
+from typing import List, Optional, Dict, Any
 from logger import info, debug, error
 
 from data.metadata import SpecialistOutput, FinalOutput
@@ -111,6 +112,97 @@ async def _critic_pass(
     return str(content).strip()
 
 
+def validate_prediction_consistency(text: str) -> List[Dict[str, Any]]:
+    """
+    Post-hoc quantitative validation of the prediction output.
+    Returns a list of warnings/flags found.
+    """
+    warnings: List[Dict[str, Any]] = []
+
+    # Check method probabilities sum to ~100%
+    method_probs = {}
+    for method_key, pattern in [
+        ("ko_tko", r"KO/TKO:\s*(\d+)%"),
+        ("submission", r"Submission:\s*(\d+)%"),
+        ("decision", r"Decision:\s*(\d+)%"),
+    ]:
+        m = re.search(pattern, text)
+        if m:
+            method_probs[method_key] = int(m.group(1))
+
+    if method_probs:
+        total = sum(method_probs.values())
+        if abs(total - 100) > 5:
+            warnings.append({
+                "type": "method_sum_error",
+                "severity": "high",
+                "message": f"Method probabilities sum to {total}%, should be ~100%",
+                "values": method_probs,
+            })
+
+    # Check round probabilities sum to ~100%
+    round_probs = {}
+    for rnd in range(1, 6):
+        m = re.search(rf"R{rnd} finish:\s*(\d+)%", text)
+        if m:
+            round_probs[f"r{rnd}"] = int(m.group(1))
+    m = re.search(r"Goes to decision:\s*(\d+)%", text)
+    if m:
+        round_probs["decision"] = int(m.group(1))
+
+    if round_probs:
+        total = sum(round_probs.values())
+        if abs(total - 100) > 5:
+            warnings.append({
+                "type": "round_sum_error",
+                "severity": "high",
+                "message": f"Round probabilities sum to {total}%, should be ~100%",
+                "values": round_probs,
+            })
+
+    # Check win probability vs confidence tier consistency
+    m_prob = re.search(r"\*\*WIN PROBABILITY:\*\*\s*(\d+)%\s*vs\s*(\d+)%", text)
+    m_tier = re.search(r"\*\*CONFIDENCE TIER:\*\*\s*(.+?)(?:\n|$)", text)
+
+    if m_prob and m_tier:
+        higher_prob = max(int(m_prob.group(1)), int(m_prob.group(2)))
+        tier = m_tier.group(1).strip().lower()
+
+        if "very high" in tier and higher_prob < 75:
+            warnings.append({
+                "type": "tier_probability_mismatch",
+                "severity": "medium",
+                "message": f"Very High confidence with only {higher_prob}% probability",
+            })
+        elif "low" in tier and higher_prob > 65:
+            warnings.append({
+                "type": "tier_probability_mismatch",
+                "severity": "medium",
+                "message": f"Low confidence with {higher_prob}% probability seems underconfident",
+            })
+
+        # Check probabilities sum to 100%
+        prob_sum = int(m_prob.group(1)) + int(m_prob.group(2))
+        if abs(prob_sum - 100) > 2:
+            warnings.append({
+                "type": "win_prob_sum_error",
+                "severity": "high",
+                "message": f"Win probabilities sum to {prob_sum}%, must be 100%",
+            })
+
+    # Check for probabilities below UFC floor (15%)
+    if m_prob:
+        lower_prob = min(int(m_prob.group(1)), int(m_prob.group(2)))
+        if lower_prob < 10:
+            warnings.append({
+                "type": "probability_floor_violation",
+                "severity": "medium",
+                "message": f"Underdog probability at {lower_prob}% is below UFC floor (~15%)",
+            })
+
+    return warnings
+
+
 async def critic_review(
     llm,
     coordinator_output: SpecialistOutput,
@@ -206,12 +298,26 @@ async def critic_review(
     # Clamp to [0, 1]
     final_conf = max(0.0, min(1.0, final_conf))
 
+    # Run quantitative validation on the final output
+    validation_warnings = validate_prediction_consistency(final_text)
+    if validation_warnings:
+        info(f"Critic: found {len(validation_warnings)} validation warnings")
+        # Append warnings to the output if there are high-severity ones
+        high_severity = [w for w in validation_warnings if w.get("severity") == "high"]
+        if high_severity:
+            warning_text = "\n\n**VALIDATION NOTES:**\n"
+            for w in high_severity:
+                warning_text += f"- {w['message']}\n"
+            final_text += warning_text
+
     metadata = {
         "source": "critic",
         "chunk_count": len(chunks),
         "has_prediction": prediction_output is not None,
         "coordinator_confidence": coord_conf,
         "prediction_confidence": pred_conf,
+        "validation_warnings": validation_warnings,
+        "validation_warning_count": len(validation_warnings),
     }
 
     return FinalOutput.create(

@@ -321,8 +321,23 @@ async def orchestrator(
             ev_dict = None
 
         if isinstance(ev_dict, dict):
-            main_ev = ev_dict.get("main_event") or ""
-            if isinstance(main_ev, str) and "vs" in main_ev.lower():
+            main_ev = ev_dict.get("main_event")
+            # Handle dict format: {"fighters": [{"name": "A"}, {"name": "B"}]}
+            if isinstance(main_ev, dict):
+                me_fighters = main_ev.get("fighters", [])
+                derived = []
+                for f in me_fighters:
+                    if isinstance(f, dict):
+                        derived.append(f.get("name", ""))
+                    elif isinstance(f, str):
+                        derived.append(f)
+                derived = [n for n in derived if n]
+                if len(derived) >= 2:
+                    fighters = derived
+                    primary_fighter = derived[0]
+                    info(f"Orchestrator: derived fighters from unified event: {fighters}")
+            # Handle string format: "Fighter A vs Fighter B"
+            elif isinstance(main_ev, str) and "vs" in main_ev.lower():
                 text = main_ev.replace("VS.", "vs.").replace("VS", "vs")
                 parts = text.split("vs")
                 if len(parts) == 2:

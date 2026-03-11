@@ -510,6 +510,12 @@ export default function DashboardPage() {
           >
             Fighter Profiles
           </Link>
+          <Link
+            href="/simulate"
+            className="text-xs px-3 py-1.5 rounded-lg border border-slate-800 hover:border-accent/40 transition-colors"
+          >
+            Fight Simulator
+          </Link>
         </div>
       </Card>
     </div>
