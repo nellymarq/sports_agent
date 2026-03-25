@@ -116,19 +116,23 @@ def validate_edge_conclusion_consistency(text: str) -> List[Dict[str, Any]]:
     """Check that the predicted winner aligns with edge analysis."""
     warnings: List[Dict[str, Any]] = []
 
-    # Extract edge claims like "Fighter A has the striking edge" or "Edge: Fighter B"
+    # Extract edge claims from the structured EDGE BREAKDOWN format:
+    # "- Striking: Fighter Name — reason"
+    # "- Grappling: Fighter Name — reason"
     edge_pattern = re.findall(
-        r"(\b[\w\.\'\-]+(?:\s[\w\.\'\-]+)?)\s+has\s+the\s+\w+\s+edge"
-        r"|edge[:\s]+(\b[\w\.\'\-]+(?:\s[\w\.\'\-]+)?)",
-        text, re.IGNORECASE,
+        r"[-•]\s*(?:Striking|Grappling|Cardio|Fight\s+IQ|Durability|Experience|Pace)"
+        r"[:\s]+([A-Z][\w\.\'\-]+(?:\s[A-Z][\w\.\'\-]+)*)\s*[—\-]",
+        text,
     )
 
     # Count edges per fighter name (normalize to lowercase)
     edge_counts: Dict[str, int] = {}
-    for groups in edge_pattern:
-        name = (groups[0] or groups[1]).strip().lower()
-        if name:
-            edge_counts[name] = edge_counts.get(name, 0) + 1
+    for name in edge_pattern:
+        name_lower = name.strip().lower()
+        # Filter out non-fighter words
+        if name_lower in ("even", "n/a", "unclear", "split", "toss", "neither"):
+            continue
+        edge_counts[name_lower] = edge_counts.get(name_lower, 0) + 1
 
     if not edge_counts:
         return warnings
@@ -163,8 +167,6 @@ def validate_edge_conclusion_consistency(text: str) -> List[Dict[str, Any]]:
 
     # Compare: does the predicted winner have fewer edges?
     other_edges = max_edges if winner_key != max_edge_fighter else 0
-    if winner_key != max_edge_fighter:
-        other_edges = max_edges
 
     if winner_edges < other_edges:
         # Determine severity based on lopsidedness
@@ -242,13 +244,13 @@ def validate_against_base_rates(text: str) -> List[Dict[str, Any]]:
             ),
         })
 
-    if lower_prob < 20:
+    if lower_prob < 15:
         warnings.append({
             "type": "base_rate_underdog_floor",
             "severity": "medium",
             "message": (
-                f"Underdog probability at {lower_prob}% is below UFC historical "
-                f"upset rate (~35%). Probabilities below 20% should be rare."
+                f"Underdog probability at {lower_prob}% is very low. "
+                f"UFC-level fighters rarely have less than 15% chance."
             ),
         })
 

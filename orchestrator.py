@@ -179,8 +179,8 @@ async def _run_single_specialist(
             specialist_payload = format_specialist_payload(analytics_bundle, specialist_key)
             if specialist_payload:
                 enriched_context = specialist_payload + "\n\n" + enriched_context
-        except Exception:
-            pass  # Non-fatal: specialist runs without analytics
+        except Exception as _e:
+            debug(f"Specialist payload injection failed for {specialist_key}: {_e}")
 
     try:
         output = await asyncio.wait_for(
@@ -521,6 +521,14 @@ async def orchestrator(
 
             # ---------------- COORDINATOR TASK ----------------
             if task_type == "coordinator_merge":
+                # Build analytics summary for coordinator grounding
+                _coord_analytics = None
+                if analytics_bundle and format_analytics_summary:
+                    try:
+                        _coord_analytics = format_analytics_summary(analytics_bundle)
+                    except Exception:
+                        pass
+
                 coordinator_output = await coordinator_merge(
                     llm=llm,
                     specialist_outputs=specialist_outputs,
@@ -529,6 +537,7 @@ async def orchestrator(
                     user_input=user_input,
                     fighters=fighters,
                     router_output=router_output,
+                    analytics_summary=_coord_analytics,
                 )
 
                 # Enforce SpecialistOutput type
@@ -543,22 +552,7 @@ async def orchestrator(
                         metadata={},
                     )
 
-                # Append analytics summary to coordinator output for downstream consumers
-                if analytics_bundle and format_analytics_summary:
-                    try:
-                        coord_analytics = format_analytics_summary(analytics_bundle)
-                        if coord_analytics and isinstance(coordinator_output, SpecialistOutput):
-                            coordinator_output = SpecialistOutput.create(
-                                specialist=coordinator_output.specialist,
-                                content=coordinator_output.content + "\n\n" + coord_analytics,
-                                reasoning=coordinator_output.reasoning,
-                                evidence=coordinator_output.evidence,
-                                confidence=coordinator_output.confidence,
-                                lineage=coordinator_output.lineage,
-                                metadata={**(coordinator_output.metadata or {}), "analytics_injected": True},
-                            )
-                    except Exception:
-                        pass  # Non-fatal: coordinator works without analytics
+                # Analytics summary is now passed to coordinator LLM via analytics_summary param
 
                 # DEBUG MODE DETECTION
                 debug_mode_active = any(
