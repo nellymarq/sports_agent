@@ -361,6 +361,246 @@ def _rating_diff_to_confidence(diff: float) -> str:
         return "toss_up"
 
 
+# ============================================================
+# GLICKO-2 INSPIRED RATING DEVIATION
+# ============================================================
+
+DEFAULT_RD = 200  # Starting rating deviation (high uncertainty)
+MIN_RD = 30       # Minimum RD after many fights
+RD_GROWTH_PER_DAY = 0.5  # RD increases when fighter is inactive
+
+
+class GlickoELORatingSystem(ELORatingSystem):
+    """
+    Extended ELO system with Glicko-2 inspired rating deviation (uncertainty),
+    division-specific ratings, peak tracking, and rating velocity.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.rating_deviations: Dict[str, float] = {}
+        self.division_ratings: Dict[str, Dict[str, float]] = {}  # fighter_id -> {wc: rating}
+        self.peak_ratings: Dict[str, Dict[str, Any]] = {}  # fighter_id -> {rating, date}
+        self.quality_wins: Dict[str, int] = {}
+
+    def get_rd(self, fighter_id: str) -> float:
+        return self.rating_deviations.get(fighter_id, DEFAULT_RD)
+
+    def _update_rd(self, fighter_id: str, fight_date: str = "") -> None:
+        """Update RD: decreases after fights, increases with inactivity."""
+        current_rd = self.get_rd(fighter_id)
+        # After a fight, RD decreases
+        new_rd = max(MIN_RD, current_rd * 0.85)
+        self.rating_deviations[fighter_id] = round(new_rd, 1)
+
+    def _grow_rd_for_inactivity(self, fighter_id: str, days_inactive: int) -> None:
+        """RD grows when fighter doesn't compete."""
+        current_rd = self.get_rd(fighter_id)
+        growth = RD_GROWTH_PER_DAY * days_inactive
+        new_rd = min(DEFAULT_RD, current_rd + growth)
+        self.rating_deviations[fighter_id] = round(new_rd, 1)
+
+    def process_fight(
+        self,
+        winner_id: str,
+        loser_id: str,
+        method: str = "",
+        fight_date: str = "",
+        is_title_fight: bool = False,
+        event_name: str = "",
+        weight_class: str = "",
+    ) -> Tuple[float, float]:
+        """
+        Enhanced fight processing with RD, division ratings, and peak tracking.
+        """
+        # Get current ratings
+        old_winner = self.get_rating(winner_id)
+        old_loser = self.get_rating(loser_id)
+
+        # RD-adjusted K-factor: higher RD = larger swing
+        rd_winner = self.get_rd(winner_id)
+        rd_loser = self.get_rd(loser_id)
+        rd_multiplier_w = 1.0 + (rd_winner / DEFAULT_RD - 0.5) * 0.5
+        rd_multiplier_l = 1.0 + (rd_loser / DEFAULT_RD - 0.5) * 0.5
+
+        method_mult = get_method_multiplier(method)
+        k_winner = compute_k_factor(self.get_fight_count(winner_id), method, is_title_fight)
+        k_loser = compute_k_factor(self.get_fight_count(loser_id), method, is_title_fight)
+
+        k_winner *= rd_multiplier_w
+        k_loser *= rd_multiplier_l
+
+        expected_w = expected_score(old_winner, old_loser)
+        new_winner = old_winner + k_winner * method_mult * (1 - expected_w)
+        new_loser = old_loser + k_loser * method_mult * (0 - (1 - expected_w))
+
+        new_winner = round(new_winner, 1)
+        new_loser = round(new_loser, 1)
+
+        self.ratings[winner_id] = new_winner
+        self.ratings[loser_id] = new_loser
+
+        self.fight_counts[winner_id] = self.get_fight_count(winner_id) + 1
+        self.fight_counts[loser_id] = self.get_fight_count(loser_id) + 1
+
+        if fight_date:
+            self.last_fight_dates[winner_id] = fight_date
+            self.last_fight_dates[loser_id] = fight_date
+
+        # Update RD (decreases after fight)
+        self._update_rd(winner_id, fight_date)
+        self._update_rd(loser_id, fight_date)
+
+        # Track division-specific ratings
+        if weight_class:
+            for fid, rating in [(winner_id, new_winner), (loser_id, new_loser)]:
+                if fid not in self.division_ratings:
+                    self.division_ratings[fid] = {}
+                self.division_ratings[fid][weight_class] = rating
+
+        # Track peak ratings
+        for fid, new_r in [(winner_id, new_winner), (loser_id, new_loser)]:
+            peak = self.peak_ratings.get(fid, {})
+            if not peak or new_r > peak.get("rating", 0):
+                self.peak_ratings[fid] = {"rating": new_r, "date": fight_date}
+
+        # Track quality wins (beating fighters rated 1600+)
+        if old_loser >= 1600:
+            self.quality_wins[winner_id] = self.quality_wins.get(winner_id, 0) + 1
+
+        # Record history
+        entry = {"date": fight_date, "event": event_name, "method": method}
+        for fid, old_r, new_r, result in [
+            (winner_id, old_winner, new_winner, "W"),
+            (loser_id, old_loser, new_loser, "L"),
+        ]:
+            if fid not in self.rating_history:
+                self.rating_history[fid] = []
+            self.rating_history[fid].append({
+                **entry,
+                "old_rating": old_r,
+                "new_rating": new_r,
+                "result": result,
+                "change": round(new_r - old_r, 1),
+            })
+
+        return new_winner, new_loser
+
+    def get_matchup_prediction(
+        self, fighter_a_id: str, fighter_b_id: str
+    ) -> Dict[str, Any]:
+        """Enhanced prediction with uncertainty bands from RD."""
+        rating_a = self.get_rating(fighter_a_id)
+        rating_b = self.get_rating(fighter_b_id)
+        rd_a = self.get_rd(fighter_a_id)
+        rd_b = self.get_rd(fighter_b_id)
+
+        prob_a = expected_score(rating_a, rating_b)
+        prob_b = 1.0 - prob_a
+        diff = abs(rating_a - rating_b)
+
+        # Uncertainty band: wider RD = wider band
+        combined_rd = math.sqrt(rd_a ** 2 + rd_b ** 2)
+        uncertainty = combined_rd / 400 * 0.15  # maps to ~0-15% uncertainty
+
+        return {
+            "fighter_a_rating": rating_a,
+            "fighter_b_rating": rating_b,
+            "rating_diff": round(rating_a - rating_b, 1),
+            "fighter_a_win_prob": round(prob_a, 4),
+            "fighter_b_win_prob": round(prob_b, 4),
+            "confidence": _rating_diff_to_confidence(diff),
+            "uncertainty_band": round(uncertainty, 3),
+            "prob_range_a": {
+                "low": round(max(0, prob_a - uncertainty), 3),
+                "high": round(min(1, prob_a + uncertainty), 3),
+            },
+            "rd_a": round(rd_a, 1),
+            "rd_b": round(rd_b, 1),
+            "reliability": "high" if max(rd_a, rd_b) < 80 else "moderate" if max(rd_a, rd_b) < 150 else "low",
+        }
+
+    def get_peak_rating(self, fighter_id: str) -> Optional[Dict[str, Any]]:
+        """Get fighter's all-time peak rating and when it occurred."""
+        return self.peak_ratings.get(fighter_id)
+
+    def distance_from_peak(self, fighter_id: str) -> Optional[float]:
+        """How far current rating is from peak (regression indicator)."""
+        peak = self.peak_ratings.get(fighter_id)
+        if not peak:
+            return None
+        return round(peak["rating"] - self.get_rating(fighter_id), 1)
+
+    def get_rating_velocity(self, fighter_id: str, window: int = 5) -> Optional[float]:
+        """Average rating change per fight over last N fights."""
+        history = self.rating_history.get(fighter_id, [])
+        if len(history) < 2:
+            return None
+        recent = history[-window:]
+        total_change = sum(h["change"] for h in recent)
+        return round(total_change / len(recent), 1)
+
+    def strength_of_schedule(self, fighter_id: str) -> Optional[float]:
+        """Average opponent rating. Approximated from fight count and rating history."""
+        history = self.rating_history.get(fighter_id, [])
+        if not history:
+            return None
+        # Approximate: use the average of all fighters this fighter has faced
+        # Since we track opponent ratings at fight time in the history entries,
+        # we can estimate SOS from the rating changes and expected scores
+        avg_change = sum(abs(h.get("change", 0)) for h in history) / len(history)
+        # Larger average changes = weaker opponents beaten or stronger opponents lost to
+        # This is a rough proxy; proper SOS would require opponent ID tracking
+        return round(self.get_rating(fighter_id) - avg_change * 0.5, 1)
+
+    def get_quality_wins(self, fighter_id: str) -> int:
+        """Number of wins over fighters rated 1600+."""
+        return self.quality_wins.get(fighter_id, 0)
+
+    def get_division_rating(self, fighter_id: str, weight_class: str) -> float:
+        """Get fighter's rating in a specific division."""
+        div_ratings = self.division_ratings.get(fighter_id, {})
+        return div_ratings.get(weight_class, self.get_rating(fighter_id))
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize full Glicko state including RD, divisions, peaks."""
+        base = super().to_dict()
+        base["rating_deviations"] = self.rating_deviations
+        base["division_ratings"] = self.division_ratings
+        base["peak_ratings"] = self.peak_ratings
+        base["quality_wins"] = self.quality_wins
+        base["rating_history"] = self.rating_history
+        return base
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "GlickoELORatingSystem":
+        """Restore full Glicko state."""
+        system = cls()
+        system.ratings = data.get("ratings", {})
+        system.fight_counts = data.get("fight_counts", {})
+        system.last_fight_dates = data.get("last_fight_dates", {})
+        system.rating_deviations = data.get("rating_deviations", {})
+        system.division_ratings = data.get("division_ratings", {})
+        system.peak_ratings = data.get("peak_ratings", {})
+        system.quality_wins = data.get("quality_wins", {})
+        system.rating_history = data.get("rating_history", {})
+        return system
+
+    def transfer_division(
+        self, fighter_id: str, from_wc: str, to_wc: str, direction: str = "up"
+    ) -> float:
+        """Transfer rating to new division with penalty."""
+        current = self.get_division_rating(fighter_id, from_wc)
+        if direction == "up":
+            new_rating = current - 50  # size disadvantage
+        else:
+            new_rating = current + 20  # size advantage, but weight cut risk
+        if fighter_id not in self.division_ratings:
+            self.division_ratings[fighter_id] = {}
+        self.division_ratings[fighter_id][to_wc] = round(new_rating, 1)
+        return round(new_rating, 1)
+
+
 def elo_probability_to_american_odds(prob: float) -> str:
     """Convert ELO win probability to American odds format."""
     if prob <= 0 or prob >= 1:

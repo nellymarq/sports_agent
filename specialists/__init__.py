@@ -15,6 +15,7 @@ from .damage_specialist import run_damage_specialist
 from .gameplan_specialist import run_gameplan_specialist
 from .judging_specialist import run_judging_specialist
 from .knowledge_specialist import run_knowledge_specialist
+from .clinch_specialist import run_clinch_specialist
 
 # === NEW DEBUG SPECIALISTS ===
 from .routing_debug_specialist import run_routing_debug_specialist
@@ -37,6 +38,7 @@ __all__ = [
     "run_gameplan_specialist",
     "run_judging_specialist",
     "run_knowledge_specialist",
+    "run_clinch_specialist",
 
     # Debug specialists
     "run_routing_debug_specialist",

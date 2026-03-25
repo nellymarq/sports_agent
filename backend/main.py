@@ -49,6 +49,11 @@ from data.fighter_profile import build_fighter_profile
 from data.prop_analysis import analyze_method_props, analyze_round_props, generate_prop_card
 from data.fight_simulation import simulate_fight
 from data.shared_opponents import get_shared_opponent_analysis, format_shared_opponent_report
+from data.parlay_engine import build_optimal_parlays, build_sgp, get_parlay_stats
+from data.calibration import generate_calibration_report, accuracy_by_dimension, analyze_upset_patterns
+from data.cage_control import analyze_clinch_matchup, predict_fight_location
+from data.judge_model import predict_decision, get_judge_adjustment
+from data.aging_curve import full_age_analysis
 
 _logger = logging.getLogger("backend")
 
@@ -940,6 +945,128 @@ def event_preview(event_id: str) -> Dict[str, Any]:
 
 
 # -------------------------------------------------
+# Full Card Simulation Endpoint
+# -------------------------------------------------
+@app.get("/events/{event_id}/simulate")
+def simulate_event_card(event_id: str, n_simulations: int = 5000) -> Dict[str, Any]:
+    """
+    Run Monte Carlo simulations for every bout on an event card.
+    Returns per-bout win probabilities, method distributions, and card-level summary.
+    """
+    n_simulations = min(n_simulations, 20000)
+
+    cache_params = {"event_id": event_id, "n": n_simulations}
+    cached = response_cache.get("/events/simulate", cache_params)
+    if cached:
+        return cached
+
+    try:
+        events_path = ROOT / "data" / "events.json"
+        if not events_path.exists():
+            raise HTTPException(status_code=404, detail="Events data not found")
+
+        with open(events_path) as f:
+            events = json.load(f)
+
+        target = next((e for e in events if e.get("id") == event_id), None)
+        if not target:
+            raise HTTPException(status_code=404, detail=f"Event not found: {event_id}")
+
+        all_bouts = []
+        for bout_source in ["main_event", "co_main_event"]:
+            bout = target.get(bout_source, {})
+            if bout and bout.get("fighters"):
+                all_bouts.append({
+                    "type": bout_source.replace("_", " ").title(),
+                    "weight_class": bout.get("weight_class", ""),
+                    "fighters": bout.get("fighters", []),
+                    "is_title_fight": bout.get("is_title_fight", False),
+                })
+
+        for i, bout in enumerate(target.get("card", [])):
+            if bout.get("fighters"):
+                all_bouts.append({
+                    "type": f"Card #{i+1}",
+                    "weight_class": bout.get("weight_class", ""),
+                    "fighters": bout.get("fighters", []),
+                    "is_title_fight": bout.get("is_title_fight", False),
+                })
+
+        bout_simulations = []
+        for bout in all_bouts:
+            fighters_raw = bout["fighters"]
+            names = []
+            for f in fighters_raw:
+                if isinstance(f, str):
+                    names.append(f)
+                elif isinstance(f, dict):
+                    names.append(f.get("name", "Unknown"))
+
+            if len(names) < 2:
+                continue
+
+            stats_a = {}
+            stats_b = {}
+            try:
+                data_a = _ufc_stats_tool.invoke({"fighter_name": names[0]})
+                stats_a = data_a.get("best_match", {})
+            except Exception:
+                pass
+            try:
+                data_b = _ufc_stats_tool.invoke({"fighter_name": names[1]})
+                stats_b = data_b.get("best_match", {})
+            except Exception:
+                pass
+
+            # Determine matchup type for simulation
+            matchup_type = "balanced"
+            try:
+                mtype = classify_matchup(stats_a, stats_b)
+                matchup_type = mtype.get("matchup_type", "balanced")
+            except Exception:
+                pass
+
+            is_five_round = bout["type"] in ("Main Event", "Co Main Event") or bout.get("is_title_fight")
+
+            try:
+                sim = simulate_fight(
+                    stats_a, stats_b,
+                    n_simulations=n_simulations,
+                    is_five_round=bool(is_five_round),
+                    matchup_type=matchup_type,
+                )
+            except Exception:
+                sim = {"error": "Simulation failed"}
+
+            bout_simulations.append({
+                "type": bout["type"],
+                "weight_class": bout["weight_class"],
+                "fighter_a": names[0],
+                "fighter_b": names[1],
+                "is_five_round": bool(is_five_round),
+                "simulation": sim,
+            })
+
+        result = {
+            "status": "ok",
+            "event_id": event_id,
+            "event_name": target.get("name", ""),
+            "date": target.get("date", ""),
+            "bout_count": len(bout_simulations),
+            "simulations_per_bout": n_simulations,
+            "bouts": bout_simulations,
+        }
+        response_cache.set("/events/simulate", cache_params, result, ttl=300)
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        _logger.exception("Event card simulation failed")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------
 # Cache Management Endpoints
 # -------------------------------------------------
 @app.get("/cache/stats")
@@ -1180,3 +1307,227 @@ def _compute_risk_profile(
             risk["layoff_risk"] = "low"
 
     return risk
+
+
+# -------------------------------------------------
+# Parlay Engine Endpoints
+# -------------------------------------------------
+@app.get("/parlays/optimal")
+def optimal_parlays(
+    max_legs: int = 4,
+    bankroll: float = 1000,
+    min_edge: float = 0.0,
+) -> Dict[str, Any]:
+    """Return optimal parlay suggestions from current value bets."""
+    try:
+        # Get current value bets (requires odds data)
+        odds_data = fetch_all_ufc_odds()
+        preds = _load_predictions()
+        active = [p for p in preds if p.get("actual_winner") is None]
+
+        # Build value bet inputs
+        pred_inputs = [
+            {
+                "fighter_a": p["fighter_a"],
+                "fighter_b": p["fighter_b"],
+                "predicted_winner": p["predicted_winner"],
+                "win_probability": p["win_probability"],
+            }
+            for p in active
+        ]
+
+        vbets = identify_value_bets(pred_inputs, odds_data, min_edge=0.01, bankroll=bankroll)
+        parlays = build_optimal_parlays(vbets, max_legs=max_legs, min_ev=min_edge, bankroll=bankroll)
+
+        return {"parlays": parlays, "value_bets_found": len(vbets)}
+    except Exception as e:
+        _logger.exception("Parlay generation failed")
+        return {"parlays": [], "error": str(e)}
+
+
+@app.get("/parlays/sgp/{fighter_a}/{fighter_b}")
+def sgp_options(fighter_a: str, fighter_b: str) -> Dict[str, Any]:
+    """Return same-game parlay options for a matchup."""
+    try:
+        preds = _load_predictions()
+        match = None
+        for p in preds:
+            fa = p["fighter_a"].lower()
+            fb = p["fighter_b"].lower()
+            a_match = fighter_a.lower() in fa or fighter_a.lower() in fb
+            b_match = fighter_b.lower() in fa or fighter_b.lower() in fb
+            if a_match and b_match:
+                match = p
+                break
+
+        if not match:
+            return {"sgps": [], "message": "No prediction found for this matchup"}
+
+        sgps = build_sgp(
+            fighter_prediction=match,
+            method_probs=match.get("method_probabilities", {}),
+            round_probs=match.get("round_probabilities", {}),
+        )
+        return {"sgps": sgps, "matchup": f"{match['fighter_a']} vs {match['fighter_b']}"}
+    except Exception as e:
+        return {"sgps": [], "error": str(e)}
+
+
+@app.get("/parlays/stats")
+def parlay_stats() -> Dict[str, Any]:
+    """Return parlay tracking stats."""
+    return get_parlay_stats()
+
+
+# -------------------------------------------------
+# Advanced Calibration Endpoints
+# -------------------------------------------------
+@app.get("/calibration/advanced")
+def advanced_calibration() -> Dict[str, Any]:
+    """Return comprehensive calibration report."""
+    preds = _load_predictions()
+    resolved = [p for p in preds if p.get("correct") is not None]
+
+    report = generate_calibration_report(resolved)
+    dimensions = accuracy_by_dimension(resolved)
+    upsets = analyze_upset_patterns(resolved)
+
+    return {
+        "report_markdown": report,
+        "by_dimension": dimensions,
+        "upset_analysis": upsets,
+    }
+
+
+# -------------------------------------------------
+# Clinch & Cage Control Endpoints
+# -------------------------------------------------
+@app.get("/clinch-matchup")
+def clinch_matchup(fighter_a: str, fighter_b: str) -> Dict[str, Any]:
+    """Analyze clinch dynamics between two fighters."""
+    try:
+        ufc = UFCStatsTool()
+        stats_a = ufc.search_fighter(fighter_a)
+        stats_b = ufc.search_fighter(fighter_b)
+
+        if not stats_a or not stats_b:
+            raise HTTPException(status_code=404, detail="Fighter not found")
+
+        stats_a["name"] = fighter_a
+        stats_b["name"] = fighter_b
+
+        clinch = analyze_clinch_matchup(stats_a, stats_b)
+        location = predict_fight_location(stats_a, stats_b)
+
+        return {"clinch_analysis": clinch, "fight_location": location}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------
+# Judge & Decision Endpoints
+# -------------------------------------------------
+@app.get("/judge-analysis")
+def judge_analysis(
+    fighter_a: str,
+    fighter_b: str,
+    is_five_round: bool = False,
+) -> Dict[str, Any]:
+    """Predict decision outcome with judge tendency analysis."""
+    try:
+        ufc = UFCStatsTool()
+        stats_a = ufc.search_fighter(fighter_a)
+        stats_b = ufc.search_fighter(fighter_b)
+
+        if not stats_a or not stats_b:
+            raise HTTPException(status_code=404, detail="Fighter not found")
+
+        decision = predict_decision(stats_a, stats_b, is_five_round=is_five_round)
+        adjustment = get_judge_adjustment(decision)
+
+        return {"decision_prediction": decision, "adjustments": adjustment}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------
+# Aging Curve Endpoints
+# -------------------------------------------------
+@app.get("/aging-analysis/{fighter_name}")
+def aging_analysis(fighter_name: str) -> Dict[str, Any]:
+    """Run aging curve analysis for a fighter."""
+    try:
+        ufc = UFCStatsTool()
+        stats = ufc.search_fighter(fighter_name)
+        if not stats:
+            raise HTTPException(status_code=404, detail="Fighter not found")
+
+        # Extract age from stats if available
+        age = None
+        try:
+            age_str = stats.get("age", "")
+            if age_str:
+                age = int(str(age_str).strip())
+        except (ValueError, TypeError):
+            pass
+
+        if not age:
+            return {"error": "Age not available for this fighter"}
+
+        record = stats.get("record", "")
+        analysis = full_age_analysis(
+            age=age,
+            weight_class=stats.get("weight_class", ""),
+            record=record,
+            fighter_stats=stats,
+        )
+        return {"fighter": fighter_name, "analysis": analysis}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------
+# Advanced Simulation Endpoint
+# -------------------------------------------------
+@app.get("/simulate/advanced")
+def simulate_advanced(
+    fighter_a: str,
+    fighter_b: str,
+    simulations: int = 10000,
+    five_round: bool = False,
+) -> Dict[str, Any]:
+    """Run advanced round-by-round fight simulation."""
+    try:
+        from data.fight_simulation import simulate_fight_advanced
+
+        ufc = UFCStatsTool()
+        stats_a = ufc.search_fighter(fighter_a)
+        stats_b = ufc.search_fighter(fighter_b)
+
+        if not stats_a or not stats_b:
+            raise HTTPException(status_code=404, detail="Fighter not found")
+
+        stats_a["name"] = fighter_a
+        stats_b["name"] = fighter_b
+
+        matchup = classify_matchup(stats_a, stats_b)
+        matchup_type = matchup.get("matchup_type", "mixed")
+
+        result = simulate_fight_advanced(
+            stats_a, stats_b,
+            n_simulations=min(simulations, 50000),
+            matchup_type=matchup_type,
+            is_five_round=five_round,
+        )
+
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -17,6 +17,7 @@ DYNAMIC_SPECIALISTS = [
     "gameplan",
     "judging",
     "knowledge",
+    "clinch",
 ]
 
 DEBUG_SPECIALISTS = [
@@ -105,6 +106,9 @@ def _base_keyword_routing(text: str) -> List[str]:
 
     if any(w in t for w in ["knowledge", "archetype", "long-term", "evolution", "career arc"]):
         specialists.append("knowledge")
+
+    if any(w in t for w in ["clinch", "dirty boxing", "cage control", "cage wrestling", "fence", "underhook"]):
+        specialists.append("clinch")
 
     return list(dict.fromkeys(specialists))
 

@@ -445,6 +445,42 @@ Provide long-term contextual analysis and career arc assessment:
 - Historical matchup parallels: Compare current matchup to similar historical style
   clashes in the same division for pattern-based prediction support
 """,
+
+    "clinch": """
+### Domain: Clinch & Cage Control Analysis
+
+Analyze close-range clinch dynamics, dirty boxing, and octagon positioning:
+
+**Clinch Framework:**
+- Clinch initiation: Who forces clinch exchanges? (higher SApM often correlates with clinch seeking)
+- Clinch style classification: dirty boxer, cage wrestler, trip artist, range fighter
+- Position dominance: underhook battles, bodylock control, Thai clinch
+- Cage control: pressing opponents against fence for control time or takedowns
+
+**Key Analysis Points:**
+- Dirty boxing weapons: short elbows, uppercuts, knees in the clinch
+- Cage wrestling: ability to pin opponents and work from the fence
+- Trip and sweep threats from clinch position
+- Bodywork accumulation: knees and short punches to the body
+- Separation ability: who can disengage and create space?
+- Clinch-to-takedown transitions vs clinch-to-strike transitions
+
+**Advanced Clinch Analysis:**
+- Clinch time estimation: What percentage of the fight will be in clinch?
+  (based on both fighters' tendencies — if both are clinch-heavy, expect 30%+ clinch time)
+- Position hierarchy in clinch:
+  * Double underhooks > single underhook > overhook
+  * Thai clinch (double collar tie) > single collar tie
+  * Bodylock > loose clinch
+- Clinch finish probability: Dirty boxers with high KO power can finish in the clinch
+  (knees, elbows, uppercuts from Thai clinch)
+- Cage wrestling efficiency: What percentage of cage pins lead to takedowns?
+  (high TD acc fighters convert at 40%+, while clinch strikers may not attempt)
+- Separation dynamics: Counter-strikers who separate cleanly after clinch exchanges
+  gain significant scoring advantages in rounds where clinch time is high
+- Cardio drain: Extended clinch fighting is extremely energy-intensive —
+  the fighter who loses position repeatedly will fade in late rounds
+""",
 }
 
 

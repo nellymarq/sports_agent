@@ -294,3 +294,337 @@ def simulate_fight(
         "matchup_type": matchup_type,
         "is_five_round": is_five_round,
     }
+
+
+# ============================================================
+# ADVANCED ROUND-BY-ROUND SIMULATION
+# ============================================================
+
+# Cardio decay per round (cumulative fatigue)
+CARDIO_DECAY_RATES = {
+    "fast_starter": [1.0, 0.88, 0.76, 0.65, 0.55],
+    "steady":       [0.95, 0.93, 0.88, 0.82, 0.76],
+    "grinder":      [0.90, 0.90, 0.88, 0.86, 0.84],
+}
+
+# Championship rounds bonus for experienced fighters
+CHAMP_ROUNDS_BONUS = 0.08  # 8% boost in R4/R5 if experienced
+
+
+def _classify_cardio_type(stats: Dict[str, Any]) -> str:
+    """Classify fighter's energy output pattern."""
+    slpm = _parse_float(stats.get("slpm"))
+    sapm = _parse_float(stats.get("sapm"))
+    if slpm and sapm:
+        output_ratio = slpm / max(sapm, 0.1)
+        if slpm > 5.5 and output_ratio > 1.2:
+            return "fast_starter"
+        elif slpm < 3.0:
+            return "grinder"
+    return "steady"
+
+
+def compute_physical_edge(
+    stats_a: Dict[str, Any],
+    stats_b: Dict[str, Any],
+) -> Dict[str, Any]:
+    """
+    Quantify physical attribute advantages.
+    Reach, height, and size differentials.
+    """
+    reach_a = _parse_float(stats_a.get("reach"))
+    reach_b = _parse_float(stats_b.get("reach"))
+    height_a = _parse_float(stats_a.get("height"))
+    height_b = _parse_float(stats_b.get("height"))
+
+    edges = {}
+
+    # Reach differential: every inch adds striking accuracy and defensive bonus
+    if reach_a is not None and reach_b is not None:
+        reach_diff = reach_a - reach_b
+        edges["reach_diff_inches"] = round(reach_diff, 1)
+        # +0.5% striking accuracy per inch of reach advantage
+        edges["reach_accuracy_modifier"] = round(reach_diff * 0.005, 4)
+        # +0.3% defensive bonus per inch (harder to hit from outside)
+        edges["reach_defense_modifier"] = round(reach_diff * 0.003, 4)
+        edges["reach_significant"] = abs(reach_diff) >= 3
+    else:
+        edges["reach_diff_inches"] = 0
+        edges["reach_accuracy_modifier"] = 0
+        edges["reach_defense_modifier"] = 0
+        edges["reach_significant"] = False
+
+    # Height differential: advantage in striking, disadvantage in clinch/grappling
+    if height_a is not None and height_b is not None:
+        height_diff = height_a - height_b
+        edges["height_diff_inches"] = round(height_diff, 1)
+        edges["height_striking_modifier"] = round(height_diff * 0.003, 4)
+        edges["height_clinch_modifier"] = round(-height_diff * 0.002, 4)  # taller = worse in clinch
+    else:
+        edges["height_diff_inches"] = 0
+        edges["height_striking_modifier"] = 0
+        edges["height_clinch_modifier"] = 0
+
+    return edges
+
+
+def _round_finish_probability(
+    base_ko_prob: float,
+    base_sub_prob: float,
+    round_num: int,
+    cardio_a: List[float],
+    cardio_b: List[float],
+    damage_accumulated_a: float,
+    damage_accumulated_b: float,
+    physical_edge: Dict[str, Any],
+) -> Dict[str, float]:
+    """
+    Compute per-round finish probabilities accounting for fatigue and damage.
+    """
+    rd = min(round_num, len(cardio_a)) - 1
+
+    fatigue_a = cardio_a[rd] if rd < len(cardio_a) else 0.6
+    fatigue_b = cardio_b[rd] if rd < len(cardio_b) else 0.6
+
+    # Damage accumulation makes fighters more vulnerable to KO
+    ko_vulnerability_a = 1.0 + damage_accumulated_a * 0.15
+    ko_vulnerability_b = 1.0 + damage_accumulated_b * 0.15
+
+    # Fatigue makes fighters more vulnerable to submissions
+    sub_vulnerability_a = 1.0 + (1 - fatigue_a) * 0.3
+    sub_vulnerability_b = 1.0 + (1 - fatigue_b) * 0.3
+
+    # Round-specific base rates (R1 has more finishes)
+    round_modifier = 1.0 / (1 + 0.15 * rd)
+
+    # Physical edge modifiers
+    reach_mod = physical_edge.get("reach_accuracy_modifier", 0)
+
+    # A's probability of finishing B this round
+    ko_prob_a = base_ko_prob * fatigue_a * ko_vulnerability_b * round_modifier * (1 + reach_mod)
+    sub_prob_a = base_sub_prob * fatigue_a * sub_vulnerability_b * round_modifier
+
+    # B's probability of finishing A this round
+    ko_prob_b = base_ko_prob * fatigue_b * ko_vulnerability_a * round_modifier * (1 - reach_mod)
+    sub_prob_b = base_sub_prob * fatigue_b * sub_vulnerability_a * round_modifier
+
+    return {
+        "ko_prob_a": min(0.3, ko_prob_a),
+        "sub_prob_a": min(0.15, sub_prob_a),
+        "ko_prob_b": min(0.3, ko_prob_b),
+        "sub_prob_b": min(0.15, sub_prob_b),
+    }
+
+
+def simulate_fight_advanced(
+    stats_a: Dict[str, Any],
+    stats_b: Dict[str, Any],
+    n_simulations: int = 10000,
+    matchup_type: str = "mixed",
+    is_five_round: bool = False,
+) -> Dict[str, Any]:
+    """
+    Advanced round-by-round Monte Carlo fight simulation.
+
+    Features:
+    - Per-round finish probability with fatigue decay
+    - Damage accumulation across rounds
+    - Championship rounds modeling
+    - Physical advantage integration
+    - Confidence intervals on win probability
+    """
+    vector_a = extract_fighter_vector(stats_a)
+    vector_b = extract_fighter_vector(stats_b)
+    base_prob_a = compute_win_probability(vector_a, vector_b)
+
+    method_mod = METHOD_MODIFIERS.get(matchup_type, METHOD_MODIFIERS["mixed"])
+    max_rounds = 5 if is_five_round else 3
+
+    # Cardio profiles
+    cardio_type_a = _classify_cardio_type(stats_a)
+    cardio_type_b = _classify_cardio_type(stats_b)
+    cardio_a = CARDIO_DECAY_RATES[cardio_type_a][:max_rounds]
+    cardio_b = CARDIO_DECAY_RATES[cardio_type_b][:max_rounds]
+
+    # Physical edge
+    physical_edge = compute_physical_edge(stats_a, stats_b)
+
+    # Base method rates
+    base_ko = 0.06 * method_mod.get("ko_tko", 1.0)
+    base_sub = 0.025 * method_mod.get("submission", 1.0)
+
+    # Adjust for fighter-specific power/grappling
+    slpm_a = _parse_float(stats_a.get("slpm")) or 3.5
+    str_def_b = _parse_float(stats_b.get("str_def")) or 55
+    sub_a = _parse_float(stats_a.get("sub_avg")) or 0.5
+
+    if slpm_a > 5.0:
+        base_ko *= 1.2
+    if str_def_b < 50:
+        base_ko *= 1.15
+    if sub_a > 1.0:
+        base_sub *= 1.3
+
+    # Run simulations
+    rng = random.Random(42)
+    results = {
+        "a_wins": 0, "b_wins": 0,
+        "methods": {"ko_tko": 0, "submission": 0, "decision": 0},
+        "rounds": {f"r{i+1}": 0 for i in range(max_rounds)},
+        "a_methods": {"ko_tko": 0, "submission": 0, "decision": 0},
+        "b_methods": {"ko_tko": 0, "submission": 0, "decision": 0},
+    }
+    results["rounds"]["decision"] = 0
+
+    # Track individual outcomes for confidence interval
+    win_outcomes = []
+
+    for _ in range(n_simulations):
+        fight_over = False
+        damage_a = 0.0
+        damage_b = 0.0
+
+        for rd in range(1, max_rounds + 1):
+            probs = _round_finish_probability(
+                base_ko, base_sub, rd, cardio_a, cardio_b,
+                damage_a, damage_b, physical_edge,
+            )
+
+            # Check if A finishes B
+            roll = rng.random()
+            if roll < probs["ko_prob_a"] * base_prob_a * 2:
+                results["a_wins"] += 1
+                results["a_methods"]["ko_tko"] += 1
+                results["methods"]["ko_tko"] += 1
+                results["rounds"][f"r{rd}"] += 1
+                win_outcomes.append(1)
+                fight_over = True
+                break
+            elif roll < (probs["ko_prob_a"] + probs["sub_prob_a"]) * base_prob_a * 2:
+                results["a_wins"] += 1
+                results["a_methods"]["submission"] += 1
+                results["methods"]["submission"] += 1
+                results["rounds"][f"r{rd}"] += 1
+                win_outcomes.append(1)
+                fight_over = True
+                break
+
+            # Check if B finishes A
+            roll2 = rng.random()
+            if roll2 < probs["ko_prob_b"] * (1 - base_prob_a) * 2:
+                results["b_wins"] += 1
+                results["b_methods"]["ko_tko"] += 1
+                results["methods"]["ko_tko"] += 1
+                results["rounds"][f"r{rd}"] += 1
+                win_outcomes.append(0)
+                fight_over = True
+                break
+            elif roll2 < (probs["ko_prob_b"] + probs["sub_prob_b"]) * (1 - base_prob_a) * 2:
+                results["b_wins"] += 1
+                results["b_methods"]["submission"] += 1
+                results["methods"]["submission"] += 1
+                results["rounds"][f"r{rd}"] += 1
+                win_outcomes.append(0)
+                fight_over = True
+                break
+
+            # Accumulate damage this round (more damage taken as fatigue increases)
+            fatigue_a = 1 - cardio_a[min(rd-1, len(cardio_a)-1)]
+            fatigue_b = 1 - cardio_b[min(rd-1, len(cardio_b)-1)]
+            damage_a += rng.uniform(0.05, 0.15) * (0.5 + fatigue_a)
+            damage_b += rng.uniform(0.05, 0.15) * (0.5 + fatigue_b)
+
+        if not fight_over:
+            # Decision: use base probability with fatigue adjustment
+            late_fatigue_a = cardio_a[-1] if cardio_a else 0.7
+            late_fatigue_b = cardio_b[-1] if cardio_b else 0.7
+            fatigue_edge = (late_fatigue_a - late_fatigue_b) * 0.1
+            dec_prob_a = base_prob_a + fatigue_edge
+
+            if rng.random() < dec_prob_a:
+                results["a_wins"] += 1
+                results["a_methods"]["decision"] += 1
+                win_outcomes.append(1)
+            else:
+                results["b_wins"] += 1
+                results["b_methods"]["decision"] += 1
+                win_outcomes.append(0)
+            results["methods"]["decision"] += 1
+            results["rounds"]["decision"] += 1
+
+    # Confidence interval
+    ci = compute_confidence_interval(win_outcomes)
+
+    name_a = stats_a.get("name", "Fighter A")
+    name_b = stats_b.get("name", "Fighter B")
+
+    return {
+        "fighter_a": name_a,
+        "fighter_b": name_b,
+        "simulations": n_simulations,
+        "win_probability": {
+            name_a: round(results["a_wins"] / n_simulations * 100, 1),
+            name_b: round(results["b_wins"] / n_simulations * 100, 1),
+        },
+        "method_distribution": {
+            k: round(v / n_simulations * 100, 1)
+            for k, v in results["methods"].items()
+        },
+        "round_distribution": {
+            k: round(v / n_simulations * 100, 1)
+            for k, v in results["rounds"].items()
+        },
+        "winner_method_breakdown": {
+            name_a: {
+                k: round(v / max(results["a_wins"], 1) * 100, 1)
+                for k, v in results["a_methods"].items()
+            },
+            name_b: {
+                k: round(v / max(results["b_wins"], 1) * 100, 1)
+                for k, v in results["b_methods"].items()
+            },
+        },
+        "statistical_edge": {
+            dim: round(vector_a.get(dim, 0.5) - vector_b.get(dim, 0.5), 3)
+            for dim in DIMENSION_WEIGHTS
+        },
+        "matchup_type": matchup_type,
+        "is_five_round": is_five_round,
+        "confidence_interval_90": ci,
+        "cardio_profiles": {
+            name_a: cardio_type_a,
+            name_b: cardio_type_b,
+        },
+        "physical_edge": physical_edge,
+        "simulation_type": "advanced_round_by_round",
+    }
+
+
+def compute_confidence_interval(
+    outcomes: List[int],
+    confidence: float = 0.90,
+) -> Dict[str, float]:
+    """
+    Compute confidence interval for win probability from simulation outcomes.
+    Uses normal approximation (valid for large N).
+    """
+    if not outcomes:
+        return {"lower": 0.0, "upper": 100.0, "mean": 50.0}
+
+    n = len(outcomes)
+    mean = sum(outcomes) / n
+    variance = sum((x - mean) ** 2 for x in outcomes) / max(n - 1, 1)
+    std_err = math.sqrt(variance / n) if n > 1 else 0
+
+    # Z-score for 90% CI = 1.645
+    z = 1.645 if confidence == 0.90 else 1.96
+
+    lower = max(0, mean - z * std_err) * 100
+    upper = min(1, mean + z * std_err) * 100
+
+    return {
+        "lower": round(lower, 1),
+        "upper": round(upper, 1),
+        "mean": round(mean * 100, 1),
+        "std_error": round(std_err * 100, 2),
+    }

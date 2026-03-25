@@ -36,6 +36,10 @@ ARCHETYPES = {
         "description": "Technical fighter who wins decisions through volume",
         "relevant_specialists": ["judging", "pace", "fight_iq", "style"],
     },
+    "clinch_fighter": {
+        "description": "Clinch-heavy fighter who excels in close-range exchanges",
+        "relevant_specialists": ["clinch", "grappling", "pace", "damage"],
+    },
 }
 
 
@@ -114,6 +118,19 @@ def classify_style(stats: Dict[str, Any]) -> Dict[str, Any]:
             point_score += 20
         scores["point_fighter"] = round(min(100, point_score), 1)
 
+    # Clinch fighter: high SApM, moderate TD avg, moderate SLpM
+    if sapm is not None and td_avg is not None and slpm is not None:
+        clinch_score = 0.0
+        if sapm > 4.0:
+            clinch_score += 40
+        if td_avg > 1.5 and td_avg < 3.5:
+            clinch_score += 25
+        if slpm > 2.5 and slpm < 5.0:
+            clinch_score += 20
+        if str_def and str_def < 55:
+            clinch_score += 15  # absorbs in clinch
+        scores["clinch_fighter"] = round(min(100, clinch_score), 1)
+
     # Well-rounded: balanced stats across all areas
     if all(v is not None for v in [slpm, str_acc, td_avg, sub_avg]):
         balance = 100 - (
@@ -178,6 +195,7 @@ def classify_matchup(
     # Determine matchup type
     striker_types = {"pressure_striker", "counter_striker", "knockout_artist", "point_fighter"}
     grappler_types = {"wrestler", "grappler"}
+    clinch_types = {"clinch_fighter"}
 
     if primary_a in striker_types and primary_b in grappler_types:
         matchup_type = "striker_vs_grappler"
@@ -195,6 +213,10 @@ def classify_matchup(
         matchup_type = "grappler_vs_grappler"
         description = "Ground battle — scramble ability and mat wrestling decisive"
         extra_specialists = ["scramble", "fight_iq"]
+    elif primary_a in clinch_types or primary_b in clinch_types:
+        matchup_type = "clinch_heavy"
+        description = "Clinch-heavy matchup — dirty boxing, cage wrestling, and inside fighting key"
+        extra_specialists = ["clinch", "grappling", "pace"]
     else:
         matchup_type = "mixed"
         description = "Diverse skillsets — multiple paths to victory"
