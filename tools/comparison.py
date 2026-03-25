@@ -10,6 +10,9 @@ from data.fighter_profile import (
     compute_streak,
     compute_method_distribution,
 )
+from data.style_classifier import classify_matchup
+from data.cage_control import analyze_clinch_matchup, predict_fight_location
+from data.aging_curve import age_adjustment
 
 
 def _parse_record(record: str) -> Dict[str, int]:
@@ -218,10 +221,44 @@ def build_enhanced_comparison(
             "edge": edge_name,
         })
 
+    # Style matchup classification
+    try:
+        matchup = classify_matchup(fighter_a, fighter_b)
+    except Exception:
+        matchup = None
+
+    # Clinch matchup analysis
+    try:
+        clinch = analyze_clinch_matchup(fighter_a, fighter_b)
+    except Exception:
+        clinch = None
+
+    # Fight location prediction
+    try:
+        location = predict_fight_location(fighter_a, fighter_b)
+    except Exception:
+        location = None
+
+    # Age adjustment
+    age_adj = None
+    try:
+        age_a_str = fighter_a.get("age", "")
+        age_b_str = fighter_b.get("age", "")
+        if age_a_str and age_b_str:
+            age_a = int(str(age_a_str).strip())
+            age_b = int(str(age_b_str).strip())
+            age_adj = age_adjustment(age_a, age_b)
+    except (ValueError, TypeError):
+        pass
+
     return {
         "fighter_a_profile": profile_a,
         "fighter_b_profile": profile_b,
         "tale_of_the_tape": tale,
         "comparison_text": comparison_text,
         "stat_edges": stat_edges,
+        "style_matchup": matchup,
+        "clinch_analysis": clinch,
+        "fight_location": location,
+        "age_adjustment": age_adj,
     }

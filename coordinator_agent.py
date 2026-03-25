@@ -11,10 +11,12 @@ SECTION_ORDER = [
     "Overview",
     "Style & Form",
     "Pace & Pressure",
+    "Clinch & Cage Control",
     "Grappling & Scramble Dynamics",
     "Fight IQ & Gameplan",
     "Damage & Durability",
     "Judging Tendencies",
+    "Aging & Career Phase",
     "Metadata Snapshot",
     "Summary Takeaways",
 ]

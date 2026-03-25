@@ -6,6 +6,10 @@ from __future__ import annotations
 from typing import Dict, Any, List, Optional
 from datetime import datetime, date
 
+from data.style_classifier import classify_style
+from data.aging_curve import full_age_analysis, estimate_chin_health
+from data.cage_control import analyze_clinch_profile, compute_octagon_control_score
+
 
 def compute_streak(fights: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
@@ -225,6 +229,62 @@ def build_fighter_profile(
         profile["method_distribution"] = compute_method_distribution(fights)
         profile["round_distribution"] = compute_round_distribution(fights)
         profile["activity"] = compute_activity(fights)
+
+    # Style classification
+    if ufc_stats:
+        try:
+            profile["style"] = classify_style(ufc_stats)
+        except Exception:
+            pass
+
+        # Clinch profile
+        try:
+            profile["clinch_profile"] = analyze_clinch_profile(ufc_stats)
+        except Exception:
+            pass
+
+        # Octagon control
+        try:
+            profile["octagon_control"] = compute_octagon_control_score(ufc_stats)
+        except Exception:
+            pass
+
+    # Aging curve analysis (requires age)
+    age = None
+    try:
+        age_val = (ufc_stats or {}).get("age", "")
+        if age_val:
+            age = int(str(age_val).strip())
+    except (ValueError, TypeError):
+        pass
+
+    if age:
+        # Count KO losses from method distribution
+        ko_losses = 0
+        total_fights_count = 0
+        if "method_distribution" in profile:
+            md = profile["method_distribution"]
+            ko_losses = md.get("losses", {}).get("ko_tko", 0)
+            total_fights_count = md.get("total_wins", 0) + md.get("total_losses", 0)
+
+        streak_data = profile.get("streak", {})
+        record_str = profile.get("record", "")
+
+        try:
+            profile["aging"] = full_age_analysis(
+                age=age,
+                weight_class=(ufc_stats or {}).get("weight_class", ""),
+                record=record_str,
+                fight_history=fights or None,
+                fighter_stats=ufc_stats or {},
+                ko_losses=ko_losses,
+                total_fights=total_fights_count,
+                streak_type=streak_data.get("streak_type", ""),
+                streak_count=streak_data.get("current_streak", 0),
+                ufc_fight_count=len(fights) if fights else 0,
+            )
+        except Exception:
+            pass
 
     return profile
 
