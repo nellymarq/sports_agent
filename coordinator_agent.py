@@ -61,6 +61,14 @@ Conflict Resolution Protocol:
 - Give extra weight to specialists whose analysis is grounded in specific statistics
   vs those making general assessments.
 
+Evidence Quality Tiering:
+- Tag each analytical claim with its evidence tier:
+  [STATS] — backed by specific fighter statistics (SLpM, accuracy, record)
+  [SIMULATION] — backed by Monte Carlo simulation results
+  [ANALYSIS] — analyst inference from patterns and expertise
+- Prioritize [STATS] and [SIMULATION] evidence over [ANALYSIS] in conflict resolution.
+- When building the EDGE SUMMARY, note the evidence tier for each edge.
+
 Prediction Optimization:
 - Your merged analysis will be fed to a prediction specialist.
 - Ensure you clearly surface: stylistic advantages/disadvantages, recent form trajectory, durability concerns, pace dynamics, and any significant edges.
@@ -167,6 +175,77 @@ def _detect_fighter_leans(specialist_outputs: List[SpecialistOutput], fighters: 
     }
 
 
+def _validate_consensus(specialist_outputs: List[SpecialistOutput], fighters: List[str]) -> List[str]:
+    """
+    Check for internal contradictions across specialists.
+    Returns list of contradiction warnings.
+    """
+    contradictions = []
+
+    if not fighters or len(fighters) < 2:
+        return contradictions
+
+    f_a = fighters[0].lower()
+    f_b = fighters[1].lower()
+
+    edge_keywords = ["advantage", "edge", "superior", "better", "stronger", "favors"]
+    concern_keywords = ["concern", "weakness", "vulnerable", "struggles", "poor", "limited"]
+
+    # Domain keywords to detect which area a specialist is discussing
+    domains = {
+        "striking": ["striking", "standup", "boxing", "kicks", "punch", "slpm"],
+        "grappling": ["grappling", "wrestling", "takedown", "ground", "submission"],
+        "cardio": ["cardio", "pace", "endurance", "gas", "fatigue", "stamina"],
+        "durability": ["durability", "chin", "damage", "absorb", "knockout"],
+    }
+
+    # Check 1: Internal contradictions — same specialist says a fighter has an edge
+    # AND flags concerns for that fighter in the same domain
+    for s in specialist_outputs:
+        content_lower = s.content.lower()
+        for domain_name, domain_kws in domains.items():
+            # Check if this specialist discusses this domain
+            if not any(kw in content_lower for kw in domain_kws):
+                continue
+
+            for fighter_name, fighter_label in [(f_a, fighters[0]), (f_b, fighters[1])]:
+                has_edge = False
+                has_concern = False
+
+                # Scan sentences for edge/concern signals near fighter name
+                sentences = content_lower.replace("\n", " ").split(".")
+                for sentence in sentences:
+                    if fighter_name not in sentence:
+                        continue
+                    if not any(kw in sentence for kw in domain_kws):
+                        continue
+                    if any(kw in sentence for kw in edge_keywords):
+                        has_edge = True
+                    if any(kw in sentence for kw in concern_keywords):
+                        has_concern = True
+
+                if has_edge and has_concern:
+                    contradictions.append(
+                        f"{s.specialist} gives {fighter_label} both an edge and flags concerns "
+                        f"in {domain_name} — internal inconsistency"
+                    )
+
+    # Check 2: Cross-specialist disagreement on who is favored
+    leans = _detect_fighter_leans(specialist_outputs, fighters)
+    lean_details = leans.get("lean_details", {})
+    a_supporters = [spec for spec, d in lean_details.items() if d["lean"] == fighters[0]]
+    b_supporters = [spec for spec, d in lean_details.items() if d["lean"] == fighters[1]]
+
+    if a_supporters and b_supporters:
+        contradictions.append(
+            f"Specialists disagree on favored fighter: "
+            f"{', '.join(a_supporters)} favor {fighters[0]} while "
+            f"{', '.join(b_supporters)} favor {fighters[1]}"
+        )
+
+    return contradictions
+
+
 def _build_structured_block(specialist_outputs: List[SpecialistOutput], fighters: List[str] = None) -> str:
     # Sort by confidence descending so higher-confidence analyses appear first
     sorted_outputs = sorted(specialist_outputs, key=lambda s: s.confidence, reverse=True)
@@ -197,6 +276,14 @@ def _build_structured_block(specialist_outputs: List[SpecialistOutput], fighters
             lines.append(f"  - {spec}: {details['lean']} "
                          f"(conf={details['confidence']:.2f}, "
                          f"signals: A={details['a_signals']}, B={details['b_signals']})")
+        lines.append("")
+
+    # Consensus validation: detect and surface contradictions
+    contradictions = _validate_consensus(sorted_outputs, fighters or [])
+    if contradictions:
+        lines.append("=== SPECIALIST CONTRADICTIONS (must address) ===")
+        for c in contradictions:
+            lines.append(f"  - {c}")
         lines.append("")
 
     for idx, s in enumerate(sorted_outputs, start=1):
@@ -261,6 +348,7 @@ async def coordinator_merge(
     user_input: str,
     fighters,
     router_output: Dict[str, Any] = None,   # NEW: router output injected for diagnostics
+    analytics_summary: str = None,           # NEW: pre-computed analytics data
 ) -> SpecialistOutput:
 
     info("Coordinator: merging specialist outputs")
@@ -301,6 +389,9 @@ async def coordinator_merge(
         + "\n\n"
         + structured_block
     )
+
+    if analytics_summary:
+        system_prompt += "\n\n=== PRE-COMPUTED ANALYTICS (use as ground truth) ===\n" + analytics_summary
 
     messages = [
         {"role": "system", "content": system_prompt},

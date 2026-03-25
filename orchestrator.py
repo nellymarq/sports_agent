@@ -61,6 +61,14 @@ from tools.prefetch import prefetch_fighter_stats, format_prefetched_stats, buil
 # === DOMAIN PROMPTS ===
 from specialists.domain_prompts import get_domain_guidance
 
+# === ANALYTICS PAYLOADS ===
+try:
+    from data.specialist_payloads import compute_analytics_bundle, format_specialist_payload, format_analytics_summary
+except ImportError:
+    compute_analytics_bundle = None
+    format_specialist_payload = None
+    format_analytics_summary = None
+
 # === PREDICTION TRACKING ===
 from prediction_tracker import record_prediction
 
@@ -163,6 +171,16 @@ async def _run_single_specialist(
     enriched_context = retrieved_context
     if domain_guidance:
         enriched_context = domain_guidance + "\n\n" + (retrieved_context or "")
+
+    # Inject domain-specific analytics payload
+    analytics_bundle = context.get("analytics_bundle", {})
+    if analytics_bundle and format_specialist_payload:
+        try:
+            specialist_payload = format_specialist_payload(analytics_bundle, specialist_key)
+            if specialist_payload:
+                enriched_context = specialist_payload + "\n\n" + enriched_context
+        except Exception:
+            pass  # Non-fatal: specialist runs without analytics
 
     try:
         output = await asyncio.wait_for(
@@ -371,6 +389,18 @@ async def orchestrator(
         except Exception as e:
             error(f"Fighter stats prefetch failed (non-fatal): {e}")
 
+    # === PRE-COMPUTE ANALYTICS BUNDLE ===
+    analytics_bundle = {}
+    if prefetched_stats and len(fighters) >= 2:
+        try:
+            if compute_analytics_bundle and format_analytics_summary:
+                analytics_bundle = compute_analytics_bundle(prefetched_stats, fighters)
+                analytics_summary = format_analytics_summary(analytics_bundle)
+                if analytics_summary:
+                    prefetched_context = analytics_summary + "\n\n" + prefetched_context
+        except Exception as e:
+            error(f"Analytics bundle computation failed (non-fatal): {e}")
+
     # === STRUCTURED MEMORY ===
     semantic_memory = get_semantic(primary_fighter) or ""
     episodic_memory = get_recent_episodic(5) or []
@@ -398,6 +428,7 @@ async def orchestrator(
         "unified_metadata": unified_metadata_payload,
         "unified_prediction": unified_prediction_payload,
         "prefetched_stats": prefetched_stats,
+        "analytics_bundle": analytics_bundle,
     }
 
     # === DAG EXECUTION STATE ===
@@ -512,6 +543,23 @@ async def orchestrator(
                         metadata={},
                     )
 
+                # Append analytics summary to coordinator output for downstream consumers
+                if analytics_bundle and format_analytics_summary:
+                    try:
+                        coord_analytics = format_analytics_summary(analytics_bundle)
+                        if coord_analytics and isinstance(coordinator_output, SpecialistOutput):
+                            coordinator_output = SpecialistOutput.create(
+                                specialist=coordinator_output.specialist,
+                                content=coordinator_output.content + "\n\n" + coord_analytics,
+                                reasoning=coordinator_output.reasoning,
+                                evidence=coordinator_output.evidence,
+                                confidence=coordinator_output.confidence,
+                                lineage=coordinator_output.lineage,
+                                metadata={**(coordinator_output.metadata or {}), "analytics_injected": True},
+                            )
+                    except Exception:
+                        pass  # Non-fatal: coordinator works without analytics
+
                 # DEBUG MODE DETECTION
                 debug_mode_active = any(
                     s.specialist
@@ -526,6 +574,17 @@ async def orchestrator(
 
                 # PREDICTION (only once coordinator is ready)
                 if not test_mode and not debug_mode_active:
+                    # Build prediction features, merging unified prediction with analytics bundle
+                    prediction_features = context.get("unified_prediction")
+                    if analytics_bundle:
+                        try:
+                            if prediction_features and isinstance(prediction_features, dict):
+                                prediction_features = {**prediction_features, "analytics_bundle": analytics_bundle}
+                            elif analytics_bundle:
+                                prediction_features = {"analytics_bundle": analytics_bundle}
+                        except Exception:
+                            pass  # Non-fatal: prediction runs without analytics
+
                     prediction_output = await run_prediction_specialist(
                         llm=prediction_llm,
                         tool_registry=tool_registry,
@@ -535,7 +594,7 @@ async def orchestrator(
                         semantic_memory=semantic_memory,
                         episodic_memory=episodic_memory,
                         retrieved_context=retrieved_context,
-                        prediction_features=context.get("unified_prediction"),
+                        prediction_features=prediction_features,
                         event_metadata=context.get("unified_metadata"),
                     )
 

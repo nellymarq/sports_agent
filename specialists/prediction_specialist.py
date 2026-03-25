@@ -79,6 +79,17 @@ Apply these frameworks IN ORDER to build your prediction:
    - Moving up in weight: fighters moving up historically win ~45% (size disadvantage)
    - Moving down in weight: fighters moving down win ~60% but watch for cut-related issues
 
+### Enhanced Data Sources (when available in prediction_features):
+8. **Style matchup classification**: Use archetype analysis (pressure_striker vs counter_striker etc.)
+   to ground your style analysis in data, not inference.
+9. **Aging curve data**: If career_phase, chin_health, or regression flags are present,
+   use them to adjust win probability. Declining fighters get -5-10% adjustment.
+10. **Fight simulation results**: If Monte Carlo simulation data is present, use it as
+    a statistical anchor. Your prediction should not deviate more than 15% from simulation baseline.
+11. **Clinch dynamics**: If clinch_matchup or fight_location data is present, factor in
+    where the fight will take place (range/clinch/ground distribution).
+12. **ELO ratings**: If ELO data is present, use it as a baseline power ranking indicator.
+
 ---
 
 ### Sample Size & Uncertainty Bands
@@ -206,6 +217,146 @@ PROFILE = """You are a prediction specialist in a modular UFC analytics engine.
 """
 
 
+def _extract_structured_analytics(prediction_features: Dict[str, Any]) -> List[str]:
+    """
+    Extract enhanced analytics fields from prediction_features into
+    human-readable summary lines for injection into the specialist context.
+    Handles both bout-level and fighter-level analytics gracefully.
+    """
+    lines: List[str] = []
+
+    def _format_bout(bout: Dict[str, Any], label: str) -> None:
+        fighters = bout.get("fighters", [])
+
+        # --- Fighter-level analytics ---
+        for f in fighters:
+            name = f.get("name", "Unknown")
+
+            # Style classification
+            style = f.get("style")
+            if style:
+                primary = style.get("primary_style", "unknown")
+                secondary = style.get("secondary_style")
+                primary_score = style.get("primary_score", "")
+                style_str = f"  [{name}] Style: {primary} ({primary_score})"
+                if secondary:
+                    style_str += f" / secondary: {secondary} ({style.get('secondary_score', '')})"
+                lines.append(style_str)
+
+            # Aging curve
+            aging = f.get("aging")
+            if aging:
+                phase_info = aging.get("career_phase", {})
+                phase = phase_info.get("phase", "unknown")
+                composite = aging.get("composite_age_score", "N/A")
+                chin = aging.get("chin_health", {})
+                chin_val = chin.get("chin_health", "N/A") if chin else "N/A"
+                vulnerability = chin.get("vulnerability", "N/A") if chin else "N/A"
+                regression = aging.get("regression", {})
+                reg_flags = regression.get("flags", []) if regression else []
+                is_regressing = regression.get("is_regressing", False) if regression else False
+
+                lines.append(
+                    f"  [{name}] Age analysis: phase={phase}, composite_score={composite}, "
+                    f"chin_health={chin_val} ({vulnerability})"
+                )
+                if is_regressing:
+                    lines.append(
+                        f"  [{name}] REGRESSION WARNING: score={regression.get('regression_score')}, "
+                        f"type={regression.get('regression_type')}, flags={reg_flags}"
+                    )
+
+            # Clinch profile
+            clinch_prof = f.get("clinch_profile")
+            if clinch_prof:
+                lines.append(
+                    f"  [{name}] Clinch: style={clinch_prof.get('clinch_style')}, "
+                    f"tendency={clinch_prof.get('clinch_tendency')}, "
+                    f"prefers_clinch={clinch_prof.get('prefers_clinch')}"
+                )
+
+            # Octagon control
+            oct_ctrl = f.get("octagon_control")
+            if oct_ctrl:
+                lines.append(
+                    f"  [{name}] Octagon control: score={oct_ctrl.get('control_score')}, "
+                    f"style={oct_ctrl.get('control_style')}, "
+                    f"pressure={oct_ctrl.get('pressure_rating')}, "
+                    f"footwork={oct_ctrl.get('footwork_rating')}"
+                )
+
+        # --- Bout-level analytics ---
+        style_mu = bout.get("style_matchup")
+        if style_mu:
+            lines.append(
+                f"  [Matchup] Type: {style_mu.get('matchup_type')} — "
+                f"{style_mu.get('matchup_description', '')}"
+            )
+
+        clinch_mu = bout.get("clinch_matchup")
+        if clinch_mu:
+            lines.append(
+                f"  [Clinch matchup] Initiator: {clinch_mu.get('clinch_initiator')}, "
+                f"Dominant: {clinch_mu.get('clinch_dominant')}, "
+                f"Est. clinch time: {clinch_mu.get('clinch_time_estimate_pct')}%, "
+                f"Finish prob: {clinch_mu.get('clinch_finish_probability')}"
+            )
+
+        fight_loc = bout.get("fight_location")
+        if fight_loc:
+            dist = fight_loc.get("location_distribution", {})
+            lines.append(
+                f"  [Fight location] Primary: {fight_loc.get('primary_location')} — "
+                f"Range: {dist.get('range', '?')}%, "
+                f"Clinch: {dist.get('clinch', '?')}%, "
+                f"Ground: {dist.get('ground', '?')}%"
+            )
+
+        age_adj = bout.get("age_adjustment")
+        if age_adj:
+            lines.append(
+                f"  [Age adjustment] Modifier: {age_adj.get('modifier_pct')}, "
+                f"A ({age_adj.get('phase_a')}, age {age_adj.get('age_a')}) vs "
+                f"B ({age_adj.get('phase_b')}, age {age_adj.get('age_b')}), "
+                f"gap={age_adj.get('age_gap')} yrs"
+            )
+            reasons = age_adj.get("reasons", [])
+            if reasons:
+                lines.append(f"    Reasons: {'; '.join(reasons)}")
+
+    # Process main_event, co_main_event, and card bouts
+    main = prediction_features.get("main_event")
+    if main:
+        lines.append("[Main Event Analytics]")
+        _format_bout(main, "Main Event")
+
+    co_main = prediction_features.get("co_main_event")
+    if co_main:
+        lines.append("[Co-Main Event Analytics]")
+        _format_bout(co_main, "Co-Main Event")
+
+    card = prediction_features.get("card", [])
+    for i, bout in enumerate(card):
+        # Check if this bout has any enhanced analytics
+        fighters = bout.get("fighters", [])
+        has_analytics = any(
+            f.get("style") or f.get("aging") or f.get("clinch_profile") or f.get("octagon_control")
+            for f in fighters
+        ) or bout.get("style_matchup") or bout.get("clinch_matchup") or bout.get("fight_location") or bout.get("age_adjustment")
+
+        if has_analytics:
+            lines.append(f"[Card Bout {i + 1} Analytics]")
+            _format_bout(bout, f"Card Bout {i + 1}")
+
+    # Handle case where prediction_features is a single bout (not event-level)
+    if not main and not co_main and not card:
+        fighters = prediction_features.get("fighters", [])
+        if fighters:
+            _format_bout(prediction_features, "Bout")
+
+    return lines
+
+
 def _build_context_block(
     coordinator_output: SpecialistOutput,
     fighters: List[str],
@@ -228,6 +379,11 @@ def _build_context_block(
 
     if prediction_features:
         sections.append("=== Prediction Features (Structured) ===\n" + str(prediction_features))
+
+        # Extract enhanced analytics into a readable section
+        analytics_lines = _extract_structured_analytics(prediction_features)
+        if analytics_lines:
+            sections.append("=== Enhanced Analytics Summary ===\n" + "\n".join(analytics_lines))
 
     if retrieved_context:
         sections.append("=== Retrieved Context ===\n" + str(retrieved_context))

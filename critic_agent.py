@@ -112,6 +112,149 @@ async def _critic_pass(
     return str(content).strip()
 
 
+def validate_edge_conclusion_consistency(text: str) -> List[Dict[str, Any]]:
+    """Check that the predicted winner aligns with edge analysis."""
+    warnings: List[Dict[str, Any]] = []
+
+    # Extract edge claims like "Fighter A has the striking edge" or "Edge: Fighter B"
+    edge_pattern = re.findall(
+        r"(\b[\w\.\'\-]+(?:\s[\w\.\'\-]+)?)\s+has\s+the\s+\w+\s+edge"
+        r"|edge[:\s]+(\b[\w\.\'\-]+(?:\s[\w\.\'\-]+)?)",
+        text, re.IGNORECASE,
+    )
+
+    # Count edges per fighter name (normalize to lowercase)
+    edge_counts: Dict[str, int] = {}
+    for groups in edge_pattern:
+        name = (groups[0] or groups[1]).strip().lower()
+        if name:
+            edge_counts[name] = edge_counts.get(name, 0) + 1
+
+    if not edge_counts:
+        return warnings
+
+    # Extract predicted winner from common prediction patterns
+    winner_match = re.search(
+        r"\*\*(?:PREDICTED\s+)?WINNER:\*\*\s*(.+?)(?:\n|$)"
+        r"|(?:PICK|PREDICTION)[:\s]+(\b[\w\.\'\-]+(?:\s[\w\.\'\-]+)?)\b",
+        text, re.IGNORECASE,
+    )
+    if not winner_match:
+        return warnings
+
+    predicted_winner = (winner_match.group(1) or winner_match.group(2)).strip().lower()
+
+    # Find the fighter with the most edges
+    max_edge_fighter = max(edge_counts, key=edge_counts.get)
+    max_edges = edge_counts[max_edge_fighter]
+
+    # Check if predicted winner is in edge_counts
+    winner_edges = 0
+    winner_key = None
+    for name, count in edge_counts.items():
+        if name in predicted_winner or predicted_winner in name:
+            winner_edges = count
+            winner_key = name
+            break
+
+    if winner_key is None:
+        # Could not match predicted winner to edge analysis names
+        return warnings
+
+    # Compare: does the predicted winner have fewer edges?
+    other_edges = max_edges if winner_key != max_edge_fighter else 0
+    if winner_key != max_edge_fighter:
+        other_edges = max_edges
+
+    if winner_edges < other_edges:
+        # Determine severity based on lopsidedness
+        if other_edges - winner_edges >= 3 and other_edges >= 4:
+            severity = "high"
+            label = "Strong edge-conclusion mismatch"
+        else:
+            severity = "medium"
+            label = "Edge-conclusion inconsistency"
+
+        warnings.append({
+            "type": "edge_conclusion_mismatch",
+            "severity": severity,
+            "message": (
+                f"{label}: predicted winner has {winner_edges} edge(s) "
+                f"but {max_edge_fighter} has {max_edges} edge(s)"
+            ),
+            "winner_edges": winner_edges,
+            "max_edge_fighter": max_edge_fighter,
+            "max_edges": max_edges,
+        })
+
+    return warnings
+
+
+def validate_against_base_rates(text: str) -> List[Dict[str, Any]]:
+    """
+    Check prediction against known UFC base rates.
+    - Title fights: favorites win ~65% (not 80%+)
+    - Top-5 vs Top-5: closer to 55-60%, not 75%+
+    - Underdog win rate: ~35% in UFC (don't go below 20% lightly)
+    """
+    warnings: List[Dict[str, Any]] = []
+
+    # Extract win probability
+    m_prob = re.search(r"\*\*WIN PROBABILITY:\*\*\s*(\d+)%\s*vs\s*(\d+)%", text)
+    if not m_prob:
+        return warnings
+
+    prob_a = int(m_prob.group(1))
+    prob_b = int(m_prob.group(2))
+    higher_prob = max(prob_a, prob_b)
+    lower_prob = min(prob_a, prob_b)
+
+    # Detect title fight context
+    is_title_fight = bool(re.search(
+        r"title\s+fight|championship\s+bout|title\s+bout|for\s+the\s+(?:\w+\s+)?title",
+        text, re.IGNORECASE,
+    ))
+
+    # Detect top-5 vs top-5 context
+    is_top5_matchup = bool(re.search(
+        r"top[\s-]?5\s+vs\s+top[\s-]?5|ranked\s+#?[1-5]\s+vs\s+#?[1-5]"
+        r"|both\s+(?:are\s+)?top[\s-]?5",
+        text, re.IGNORECASE,
+    ))
+
+    if is_title_fight and higher_prob > 80:
+        warnings.append({
+            "type": "base_rate_title_fight",
+            "severity": "medium",
+            "message": (
+                f"Title fight favorite at {higher_prob}% exceeds historical "
+                f"base rate (~65% favorites win in title fights)"
+            ),
+        })
+
+    if is_top5_matchup and higher_prob > 75:
+        warnings.append({
+            "type": "base_rate_top5",
+            "severity": "medium",
+            "message": (
+                f"Top-5 vs Top-5 matchup at {higher_prob}% exceeds historical "
+                f"base rate (~55-60% for elite matchups)"
+            ),
+        })
+
+    if lower_prob < 20:
+        warnings.append({
+            "type": "base_rate_underdog_floor",
+            "severity": "medium",
+            "message": (
+                f"Underdog probability at {lower_prob}% is below UFC historical "
+                f"upset rate (~35%). Probabilities below 20% should be rare."
+            ),
+        })
+
+    return warnings
+
+
 def validate_prediction_consistency(text: str) -> List[Dict[str, Any]]:
     """
     Post-hoc quantitative validation of the prediction output.
@@ -198,6 +341,44 @@ def validate_prediction_consistency(text: str) -> List[Dict[str, Any]]:
                 "type": "probability_floor_violation",
                 "severity": "medium",
                 "message": f"Underdog probability at {lower_prob}% is below UFC floor (~15%)",
+            })
+
+    # Archetype-method consistency checks
+    ko_pct = method_probs.get("ko_tko")
+    sub_pct = method_probs.get("submission")
+    dec_pct = method_probs.get("decision")
+
+    if ko_pct is not None and ko_pct < 20:
+        if re.search(r"heavy[- ]handed\s+striker|knockout\s+artist", text, re.IGNORECASE):
+            warnings.append({
+                "type": "archetype_method_mismatch",
+                "severity": "medium",
+                "message": (
+                    f"Fighter described as heavy-handed striker/knockout artist "
+                    f"but KO/TKO probability is only {ko_pct}%"
+                ),
+            })
+
+    if sub_pct is not None and sub_pct < 5:
+        if re.search(r"elite\s+grappler|submission\s+specialist", text, re.IGNORECASE):
+            warnings.append({
+                "type": "archetype_method_mismatch",
+                "severity": "medium",
+                "message": (
+                    f"Fighter described as elite grappler/submission specialist "
+                    f"but Submission probability is only {sub_pct}%"
+                ),
+            })
+
+    if dec_pct is not None and dec_pct < 40:
+        if re.search(r"point\s+fighter|decision\s+machine", text, re.IGNORECASE):
+            warnings.append({
+                "type": "archetype_method_mismatch",
+                "severity": "medium",
+                "message": (
+                    f"Fighter described as point fighter/decision machine "
+                    f"but Decision probability is only {dec_pct}%"
+                ),
             })
 
     return warnings
@@ -300,6 +481,13 @@ async def critic_review(
 
     # Run quantitative validation on the final output
     validation_warnings = validate_prediction_consistency(final_text)
+
+    # Run edge-to-conclusion and base-rate validations
+    edge_warnings = validate_edge_conclusion_consistency(final_text)
+    base_rate_warnings = validate_against_base_rates(final_text)
+    validation_warnings.extend(edge_warnings)
+    validation_warnings.extend(base_rate_warnings)
+
     if validation_warnings:
         info(f"Critic: found {len(validation_warnings)} validation warnings")
         # Append warnings to the output if there are high-severity ones
@@ -309,6 +497,13 @@ async def critic_review(
             for w in high_severity:
                 warning_text += f"- {w['message']}\n"
             final_text += warning_text
+
+    # Apply confidence penalty for validation issues
+    if validation_warnings:
+        high_count = sum(1 for w in validation_warnings if w["severity"] == "high")
+        med_count = sum(1 for w in validation_warnings if w["severity"] == "medium")
+        penalty = high_count * 0.08 + med_count * 0.03
+        final_conf = max(0.1, final_conf - penalty)
 
     metadata = {
         "source": "critic",
