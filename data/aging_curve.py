@@ -234,8 +234,6 @@ def detect_regression(
                 flags.append("finish_rate_decline")
 
     # Stat-level regression indicators
-    slpm = _parse_float(fighter_stats.get("slpm"))
-    str_acc = _parse_float(fighter_stats.get("str_acc"))
     str_def = _parse_float(fighter_stats.get("str_def"))
 
     # Fighters past peak with poor defense are concerning

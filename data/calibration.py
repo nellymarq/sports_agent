@@ -192,7 +192,7 @@ def analyze_upset_patterns(
     correct = [p for p in resolved_predictions if p.get("correct") is True]
 
     if not incorrect:
-        return {"upsets": 0, "message": "No upsets to analyze"}
+        return {"total_upsets": 0, "upsets": 0, "message": "No upsets to analyze"}
 
     # By weight class
     wc_upsets: Dict[str, int] = defaultdict(int)
