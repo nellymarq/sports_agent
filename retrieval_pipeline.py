@@ -2,6 +2,7 @@
 # Vector-store retrieval for UFC agent, with multi-fighter search.
 
 from typing import Optional, List
+from logger import debug
 from embeddings.embedding_engine import get_embedding
 from embeddings.vector_store import VectorStore
 
@@ -25,7 +26,8 @@ def get_retrieved_context(
 
     try:
         store = VectorStore()
-    except Exception:
+    except Exception as _e:
+        debug(f"Vector store init failed: {_e}")
         return ""
 
     all_fighters = list(fighters or [])
@@ -44,8 +46,8 @@ def get_retrieved_context(
             if text and text not in seen_texts:
                 seen_texts.add(text)
                 scored_lines.append((score, f"[score={score:.3f}] {text}"))
-    except Exception:
-        pass
+    except Exception as _e:
+        debug(f"Vector search failed: {_e}")
 
     # Query 2+: individual fighter name searches
     for f in all_fighters:
@@ -67,7 +69,8 @@ def get_retrieved_context(
                         continue
                     seen_texts.add(text)
                     scored_lines.append((score, f"[score={score:.3f}] {text}"))
-        except Exception:
+        except Exception as _e:
+            debug(f"Fighter search failed for {f}: {_e}")
             continue
 
     # Sort by score (lower = more similar for cosine distance)

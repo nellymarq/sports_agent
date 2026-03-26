@@ -19,7 +19,9 @@ try:
 
     _embedding_engine = EmbeddingEngine()
     _vector_store = VectorStore()
-except Exception:
+except Exception as _init_err:
+    import logging as _log
+    _log.getLogger("memory_agent").debug(f"Embedding init failed: {_init_err}")
     _embedding_engine = None
     _vector_store = None
 
@@ -59,7 +61,9 @@ def _load_json() -> Dict[str, Any]:
             data.setdefault("episodic", [])
             data.setdefault("semantic", {})
             return data
-    except Exception:
+    except Exception as _e:
+        from logger import debug
+        debug(f"Memory JSON load failed, using defaults: {_e}")
         return DEFAULT_MEMORY.copy()
 
 
@@ -107,9 +111,9 @@ async def add_episodic(summary: str) -> None:
                 embedding=emb,
                 metadata={"type": "episodic"},
             )
-        except Exception:
-            # Embedding failures should never crash the agent
-            pass
+        except Exception as _e:
+            from logger import debug
+            debug(f"Episodic embedding failed (non-fatal): {_e}")
 
 
 def get_recent_episodic(n: int = 5) -> List[str]:
@@ -140,8 +144,9 @@ async def add_semantic(fighter: str, knowledge: str) -> None:
                     "fighter": fighter,
                 },
             )
-        except Exception:
-            pass
+        except Exception as _e:
+            from logger import debug
+            debug(f"Semantic embedding failed (non-fatal): {_e}")
 
 
 def get_semantic(fighter: str) -> str:
@@ -174,8 +179,9 @@ def store_vectorized_memory(
             embedding=emb,
             metadata=metadata,
         )
-    except Exception:
-        # Vector store is best-effort; never crash the pipeline
+    except Exception as _e:
+        from logger import debug
+        debug(f"Vector store write failed (non-fatal): {_e}")
         return
 
 

@@ -355,7 +355,8 @@ async def orchestrator(
     if unified_event and not fighters:
         try:
             ev_dict = unified_event.to_dict()
-        except Exception:
+        except Exception as _exc:
+            debug(f"Event dict conversion failed: {_exc}")
             ev_dict = None
 
         if isinstance(ev_dict, dict):
@@ -419,8 +420,8 @@ async def orchestrator(
             fighter_mem = get_semantic(fighter)
             if fighter_mem:
                 semantic_parts.append(f"=== {fighter} ===\n{fighter_mem}")
-        except Exception:
-            pass
+        except Exception as _exc:
+            debug(f"Non-fatal: {_exc}")
     semantic_memory = "\n\n".join(semantic_parts) if semantic_parts else ""
 
     episodic_memory = get_recent_episodic(5) or []
@@ -434,8 +435,8 @@ async def orchestrator(
                 recent = notes[-1] if notes else None
                 if recent and isinstance(recent, dict):
                     specialist_notes[spec_key] = recent.get("content", "")[:500]
-        except Exception:
-            pass
+        except Exception as _exc:
+            debug(f"Non-fatal: {_exc}")
 
     # === RETRIEVAL ===
     if not retrieved_context:
@@ -559,8 +560,8 @@ async def orchestrator(
                 if analytics_bundle and format_analytics_summary:
                     try:
                         _coord_analytics = format_analytics_summary(analytics_bundle)
-                    except Exception:
-                        pass
+                    except Exception as _exc:
+                        debug(f"Non-fatal: {_exc}")
 
                 coordinator_output = await coordinator_merge(
                     llm=llm,
@@ -609,8 +610,8 @@ async def orchestrator(
                                 prediction_features = {**prediction_features, "analytics_bundle": analytics_bundle}
                             elif analytics_bundle:
                                 prediction_features = {"analytics_bundle": analytics_bundle}
-                        except Exception:
-                            pass  # Non-fatal: prediction runs without analytics
+                        except Exception as _exc:
+                            debug(f"Analytics merge into prediction failed: {_exc}")
 
                     prediction_output = await run_prediction_specialist(
                         llm=prediction_llm,
@@ -690,7 +691,7 @@ async def orchestrator(
                                 fighter_a=fighters[0],
                                 fighter_b=fighters[1] if len(fighters) > 1 else "unknown",
                                 predicted_winner=pred_meta["predicted_winner"],
-                                win_probability=pred_meta.get("prob_fighter_a", 50) / 100.0,
+                                win_probability=pred_meta.get("prob_fighter_a", 50) / 100.0 if pred_meta.get("prob_fighter_a", 50) > 1 else pred_meta.get("prob_fighter_a", 0.5),
                                 confidence_tier=pred_meta.get("confidence_tier", ""),
                                 method_lean=pred_meta.get("method_lean", ""),
                             )
@@ -839,8 +840,8 @@ async def orchestrator(
                 "simulation_winner": sim_winner,
                 "confidence": final_output_meta.confidence,
             })
-        except Exception:
-            pass
+        except Exception as _exc:
+            debug(f"Non-fatal: {_exc}")
 
     # =====================================================================
 
@@ -851,13 +852,13 @@ async def orchestrator(
         if fighter and fighter != "unknown":
             try:
                 await add_semantic(fighter, final_output_str)
-            except Exception:
-                pass
+            except Exception as _exc:
+                debug(f"Non-fatal: {_exc}")
     if not fighters and primary_fighter != "unknown":
         try:
             await add_semantic(primary_fighter, final_output_str)
-        except Exception:
-            pass
+        except Exception as _exc:
+            debug(f"Non-fatal: {_exc}")
 
     try:
         store_vectorized_memory(

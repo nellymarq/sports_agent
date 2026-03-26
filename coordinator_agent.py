@@ -113,25 +113,23 @@ def _detect_fighter_leans(specialist_outputs: List[SpecialistOutput], fighters: 
         edge_keywords = ["advantage", "edge", "superior", "better", "stronger", "favors", "wins"]
         concern_keywords = ["concern", "weakness", "vulnerable", "struggles", "poor", "limited"]
 
-        # Positive edge signals (fighter mentioned near edge keywords)
-        a_pos = sum(
-            1 for kw in edge_keywords
-            if f_a in content and kw in content[max(0, content.find(f_a) - 100):content.find(f_a) + 100]
-        )
-        b_pos = sum(
-            1 for kw in edge_keywords
-            if f_b in content and kw in content[max(0, content.find(f_b) - 100):content.find(f_b) + 100]
-        )
+        # Find ALL occurrences of each fighter name and scan windows around them
+        def _count_near(name: str, keywords: List[str]) -> int:
+            count = 0
+            start = 0
+            while True:
+                idx = content.find(name, start)
+                if idx == -1:
+                    break
+                window = content[max(0, idx - 100):idx + len(name) + 100]
+                count += sum(1 for kw in keywords if kw in window)
+                start = idx + 1
+            return count
 
-        # Negative concern signals (fighter mentioned near concern keywords)
-        a_neg = sum(
-            1 for kw in concern_keywords
-            if f_a in content and kw in content[max(0, content.find(f_a) - 100):content.find(f_a) + 100]
-        )
-        b_neg = sum(
-            1 for kw in concern_keywords
-            if f_b in content and kw in content[max(0, content.find(f_b) - 100):content.find(f_b) + 100]
-        )
+        a_pos = _count_near(f_a, edge_keywords)
+        b_pos = _count_near(f_b, edge_keywords)
+        a_neg = _count_near(f_a, concern_keywords)
+        b_neg = _count_near(f_b, concern_keywords)
 
         # Net score: positive mentions minus negative mentions for opponent
         a_score = a_pos + b_neg
