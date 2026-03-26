@@ -159,6 +159,17 @@ async def _run_full_pipeline_impl(
         _logger.error(f"Retrieval failed: {e}")
         retrieved_summary = ""  # Continue without retrieval
 
+    # 1b. Extract fighter names from retrieval context and enrich user input
+    #     This handles "who wins the next UFC main event?" by appending the
+    #     actual fighter names from event data so the orchestrator can find them.
+    if retrieved_summary and "Fighters identified:" in retrieved_summary:
+        import re
+        fighter_lines = re.findall(r"^- (.+)$", retrieved_summary, re.MULTILINE)
+        if fighter_lines and "vs" not in user_input.lower():
+            fighters_str = " vs ".join(fighter_lines[:2])
+            user_input = f"{user_input}\n\n[Resolved matchup: {fighters_str}]"
+            _logger.info(f"Enriched user input with fighters: {fighters_str}")
+
     # 2. Router
     _stage("routing")
     try:

@@ -117,6 +117,15 @@ async def get_next_scheduled_event() -> Optional[Dict[str, Any]]:
             upcoming.append(ev)
 
     if not upcoming:
+        # No future events — fall back to the most recent event
+        all_dated = [
+            (ev, _parse_date(ev.get("date", "")))
+            for ev in events
+            if _parse_date(ev.get("date", ""))
+        ]
+        if all_dated:
+            all_dated.sort(key=lambda x: x[1], reverse=True)
+            return all_dated[0][0]  # Return cached data directly
         return None
 
     upcoming.sort(key=lambda e: _parse_date(e.get("date", "")) or datetime.max)
