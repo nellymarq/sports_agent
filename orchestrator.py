@@ -426,16 +426,15 @@ async def orchestrator(
 
     # Also load any specialist notes from previous analyses
     specialist_notes = {}
-    try:
-        for spec_key in ["style", "form", "damage", "grappling", "pace"]:
+    for spec_key in ["style", "form", "damage", "grappling", "pace"]:
+        try:
             notes = MEMORY_STORE.get_specialist_history(spec_key)
             if notes:
-                # Get most recent note for relevance
                 recent = notes[-1] if notes else None
                 if recent and isinstance(recent, dict):
-                    specialist_notes[spec_key] = recent.get("content", "")[:500]  # Cap size
-    except Exception:
-        pass
+                    specialist_notes[spec_key] = recent.get("content", "")[:500]
+        except Exception:
+            pass
 
     # === RETRIEVAL ===
     if not retrieved_context:

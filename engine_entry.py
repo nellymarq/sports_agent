@@ -78,10 +78,17 @@ def _build_minimal_task_plan(original_plan: Dict[str, Any]) -> Dict[str, Any]:
             if t.get("task_type") != "specialist" or t.get("specialist") in core_four
             or t.get("task_type") in ("coordinator_merge", "critic_review")
         ]
-        # Re-index task IDs
+        # Re-index task IDs preserving specialist → coordinator → critic order
+        specialist_ids = []
         for i, t in enumerate(minimal["tasks"]):
             t["id"] = i
-            t["depends_on"] = []
+            if t.get("task_type") == "specialist":
+                t["depends_on"] = []
+                specialist_ids.append(i)
+            elif t.get("task_type") in ("coordinator_merge", "critic_review"):
+                t["depends_on"] = list(specialist_ids)
+            else:
+                t["depends_on"] = []
     return minimal
 
 

@@ -19,7 +19,7 @@ _MAX_FIGHTER_NAME_LENGTH = 50
 
 _HTML_TAG_RE = re.compile(r"<[^>]+>")
 _CONTROL_CHAR_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
-_SPECIAL_CHARS_RE = re.compile(r"[<>&\"';{}()\[\]\\|`~]")
+_SPECIAL_CHARS_RE = re.compile(r"[<>&\";{}()\[\]\\|`~]")  # apostrophes allowed (O'Malley, etc.)
 _RECORD_RE = re.compile(r"^(\d{1,3})-(\d{1,3})-(\d{1,3})(?:\s*\(\d+\s*NC\))?$")
 _PERCENT_RE = re.compile(r"^(\d+(?:\.\d+)?)\s*%?$")
 _NUMERIC_RE = re.compile(r"^-?\d+(?:\.\d+)?$")

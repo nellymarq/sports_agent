@@ -200,9 +200,9 @@ class TestValidateFighterName(unittest.TestCase):
         self.assertTrue(r["valid"])
 
     def test_name_with_apostrophe(self):
-        # Apostrophes (single quotes) ARE blocked as special chars
-        r = validate_fighter_name("Israel O'Malley")
-        self.assertFalse(r["valid"])
+        # Apostrophes are allowed (O'Malley, O'Connell, etc.)
+        r = validate_fighter_name("Sean O'Malley")
+        self.assertTrue(r["valid"])
 
     def test_name_stripped(self):
         r = validate_fighter_name("  Khabib Nurmagomedov  ")
