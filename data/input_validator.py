@@ -226,8 +226,11 @@ def validate_stats_response(
             "data_quality_score": 0.0,
         }
 
-    # --- required keys ---
-    missing = _STATS_REQUIRED_KEYS - set(stats.keys())
+    # --- required keys (must exist AND have non-empty value) ---
+    missing = set()
+    for key in _STATS_REQUIRED_KEYS:
+        if key not in stats or not stats[key]:
+            missing.add(key)
     if missing:
         return {
             "valid": False,

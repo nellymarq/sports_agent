@@ -292,8 +292,8 @@ class TestValidateStatsResponse(unittest.TestCase):
 
     def test_empty_record(self):
         r = validate_stats_response(self._complete_stats(record=""), "Test")
-        # Missing required key effectively
-        self.assertTrue(any("empty" in w.lower() for w in r["warnings"]))
+        # Empty record now treated as missing required field
+        self.assertFalse(r["valid"])
 
     def test_unusually_high_fights(self):
         r = validate_stats_response(self._complete_stats(record="50-35-0"), "Test")

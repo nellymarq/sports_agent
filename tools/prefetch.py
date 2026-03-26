@@ -7,7 +7,7 @@ from typing import Dict, Any, List, Optional
 import logging
 import time
 
-from tools import TOOL_REGISTRY, _cache_get
+from tools import TOOL_REGISTRY
 from data.input_validator import validate_fighter_name, validate_stats_response
 
 _logger = logging.getLogger("tools.prefetch")
@@ -98,10 +98,13 @@ def prefetch_fighter_stats(fighters: List[str]) -> Dict[str, Any]:
         # Data freshness and quality tracking
         fighter_data["prefetch_timestamp"] = time.time()
 
-        # Data quality: count how many key fields are present and valid
-        quality_fields = ["record", "slpm", "str_acc", "str_def", "td_avg", "td_def", "sub_avg", "reach", "age"]
-        present = sum(1 for f in quality_fields if fighter_data.get(f))
-        fighter_data["data_quality_score"] = round(present / len(quality_fields), 2)
+        # Use validated quality score if available, otherwise compute simple one
+        if "validated_quality_score" not in fighter_data:
+            quality_fields = ["record", "slpm", "str_acc", "str_def", "td_avg", "td_def", "sub_avg", "reach", "age"]
+            present = sum(1 for f in quality_fields if fighter_data.get(f))
+            fighter_data["data_quality_score"] = round(present / len(quality_fields), 2)
+        else:
+            fighter_data["data_quality_score"] = fighter_data["validated_quality_score"]
 
         results[fighter] = fighter_data
 
@@ -137,7 +140,7 @@ def format_prefetched_stats(stats: Dict[str, Any]) -> str:
                 lines.append(f"  {label}: {val}")
 
         # Recent fights
-        detail = data.get("detail_stats", {})
+        detail = data.get("detail_stats") or {}
         if detail.get("recent_fights"):
             lines.append("  Recent Fights:")
             for f in detail["recent_fights"][:5]:
