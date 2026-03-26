@@ -5,11 +5,22 @@ export function Skeleton({ className, ...rest }: HTMLAttributes<HTMLDivElement>)
   return (
     <div
       className={clsx(
-        "animate-pulse rounded-md bg-slate-800/70",
+        "relative rounded-md bg-slate-800/70 overflow-hidden",
         className
       )}
       {...rest}
-    />
+    >
+      {/* Shimmer overlay */}
+      <div
+        className="absolute inset-0 shimmer"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent 0%, rgba(0,224,255,0.04) 50%, transparent 100%)",
+          backgroundSize: "200% 100%",
+          animation: "shimmer 2s ease-in-out infinite",
+        }}
+      />
+    </div>
   );
 }
 

@@ -6,12 +6,75 @@
   color-scheme: dark;
 }
 
-body {
-  @apply bg-background text-slate-100;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-    "Segoe UI", sans-serif;
+html {
+  scroll-behavior: smooth;
 }
 
-main {
-  @apply min-h-screen bg-background text-slate-100;
+body {
+  @apply bg-background text-slate-100;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+/* Gradient text utility */
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500;
+}
+
+/* Glow effects */
+.glow-accent {
+  box-shadow: 0 0 20px rgba(0, 224, 255, 0.15), 0 0 60px rgba(0, 224, 255, 0.05);
+}
+
+.glow-subtle {
+  box-shadow: 0 0 40px rgba(0, 224, 255, 0.08);
+}
+
+/* Smooth transitions */
+* {
+  @apply transition-colors duration-150;
+}
+
+/* Shimmer skeleton effect */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(30, 41, 59, 0) 0%,
+    rgba(30, 41, 59, 0.4) 50%,
+    rgba(30, 41, 59, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* Accent ring pulse for active indicators */
+.ring-pulse-accent {
+  box-shadow: 0 0 0 0 rgba(0, 224, 255, 0.4);
+  animation: ringPulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes ringPulse {
+  0% { box-shadow: 0 0 0 0 rgba(0, 224, 255, 0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(0, 224, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 224, 255, 0); }
+}
+
+/* Method donut segment colors */
+.segment-ko { color: #f97316; }
+.segment-sub { color: #a78bfa; }
+.segment-dec { color: #38bdf8; }
+
+/* Prose overrides for analysis content */
+.prose-analysis {
+  @apply prose prose-invert prose-sm max-w-none;
+  @apply prose-headings:text-slate-100 prose-headings:font-semibold;
+  @apply prose-p:text-slate-300 prose-p:leading-relaxed;
+  @apply prose-strong:text-white prose-strong:font-semibold;
+  @apply prose-li:text-slate-300;
+  @apply prose-a:text-accent prose-a:no-underline hover:prose-a:underline;
 }
