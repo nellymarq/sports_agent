@@ -4,10 +4,11 @@
 
 # runtime state
 state/
-cache/runtime_cache.json
-cache/runtime_cache.json.tmp
+cache/
+backend/cache/
 tests/cache/
 *.tmp
+*.db
 
 # python artifacts
 __pycache__/
