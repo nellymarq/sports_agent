@@ -529,11 +529,11 @@ class TestEventCardSimulation:
         }
         with patch("backend.main._ufc_stats_tool") as mock_tool:
             mock_tool.invoke.return_value = mock_stats
-            resp = client.get("/events/ufc_327/simulate?n_simulations=100")
+            resp = client.get("/events/ufc_327_prochazka_vs_ulberg/simulate?n_simulations=100")
             assert resp.status_code == 200
             data = resp.json()
             assert data["status"] == "ok"
-            assert data["event_id"] == "ufc_327"
+            assert data["event_id"] == "ufc_327_prochazka_vs_ulberg"
             assert data["bout_count"] > 0
             assert data["simulations_per_bout"] == 100
             for bout in data["bouts"]:
@@ -554,7 +554,7 @@ class TestEventCardSimulation:
         }
         with patch("backend.main._ufc_stats_tool") as mock_tool:
             mock_tool.invoke.return_value = mock_stats
-            resp = client.get("/events/ufc_327/simulate?n_simulations=100000")
+            resp = client.get("/events/ufc_327_prochazka_vs_ulberg/simulate?n_simulations=100000")
             assert resp.status_code == 200
             data = resp.json()
             assert data["simulations_per_bout"] == 20000

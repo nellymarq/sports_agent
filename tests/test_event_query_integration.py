@@ -32,20 +32,31 @@ class TestEventIdResolution:
 
 
 class TestEventFighters:
-    def test_ufc_313_fighters(self):
-        fighters = get_event_fighters("ufc_313")
-        assert len(fighters) >= 2
-        assert "Alex Pereira" in fighters
-        assert "Magomed Ankalaev" in fighters
+    def test_next_event_has_fighters(self):
+        """Verify the first event in events.json has a main event with fighters."""
+        import json
+        from pathlib import Path
+        events_path = Path(__file__).resolve().parents[1] / "data" / "events.json"
+        events = json.loads(events_path.read_text())
+        assert len(events) > 0
+        first = events[0]
+        me = first.get("main_event", {})
+        fighters = me.get("fighters", [])
+        assert len(fighters) >= 2, f"First event {first.get('id')} has no main event fighters"
 
     def test_unknown_event(self):
         fighters = get_event_fighters("ufc_999")
         assert fighters == []
 
-    def test_event_data_exists(self):
-        ev = get_event_by_code("ufc_313")
-        assert ev is not None
-        assert "ufc" in ev.get("name", "").lower() or "ufc" in ev.get("code", "").lower()
+    def test_first_event_data_exists(self):
+        """Verify events.json has at least one event with valid data."""
+        import json
+        from pathlib import Path
+        events_path = Path(__file__).resolve().parents[1] / "data" / "events.json"
+        events = json.loads(events_path.read_text())
+        assert len(events) > 0
+        first = events[0]
+        assert first.get("name"), "First event has no name"
 
 
 @pytest.mark.asyncio

@@ -1,175 +1,9 @@
 [
   {
-    "id": "ufc_326",
-    "code": "UFC 326",
-    "name": "UFC 326: Holloway vs Oliveira 2",
-    "date": "2026-03-07",
-    "location": "T-Mobile Arena, Las Vegas, NV",
-    "status": "completed",
-    "main_event": {
-      "fighters": [
-        "Max Holloway",
-        "Charles Oliveira"
-      ],
-      "weight_class": "BMF Title",
-      "is_title_fight": true
-    },
-    "co_main_event": {
-      "fighters": [
-        "Caio Borralho",
-        "Reinier de Ridder"
-      ],
-      "weight_class": "Middleweight"
-    },
-    "card": [
-      {
-        "fighters": [
-          "Raul Rosas Jr.",
-          "Rob Font"
-        ],
-        "weight_class": "Bantamweight"
-      },
-      {
-        "fighters": [
-          "Drew Dober",
-          "Michael Johnson"
-        ],
-        "weight_class": "Lightweight"
-      },
-      {
-        "fighters": [
-          "Gregory Rodrigues",
-          "Brunno Ferreira"
-        ],
-        "weight_class": "Middleweight"
-      },
-      {
-        "fighters": [
-          "Cody Garbrandt",
-          "Xiao Long"
-        ],
-        "weight_class": "Bantamweight"
-      },
-      {
-        "fighters": [
-          "Donte Johnson",
-          "Cody Brundage"
-        ],
-        "weight_class": "Middleweight"
-      }
-    ]
-  },
-  {
-    "id": "ufc_fn_269",
-    "code": "UFC Fight Night 269",
-    "name": "UFC Fight Night: Emmett vs Vallejos",
-    "location": "Meta Apex, Enterprise, NV",
-    "main_event": {
-      "fighters": [
-        "Josh Emmett",
-        "Kevin Vallejos"
-      ]
-    },
-    "co_main_event": {
-      "fighters": [
-        "Amanda Lemos",
-        "Gillian Robertson"
-      ]
-    },
-    "card": [
-      {
-        "fighters": [
-          "Ion Cutelaba",
-          "Oumar Sy"
-        ]
-      },
-      {
-        "fighters": [
-          "Marwan Rahiki",
-          "Harry Hardwick"
-        ]
-      },
-      {
-        "fighters": [
-          "Vitor Petrino",
-          "Steven Asplund"
-        ]
-      },
-      {
-        "fighters": [
-          "Charles Johnson",
-          "Bruno Silva"
-        ]
-      },
-      {
-        "fighters": [
-          "Eryk Anders",
-          "Brad Tavares"
-        ]
-      },
-      {
-        "fighters": [
-          "Chris Curtis",
-          "Myktybek Orolbai"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "ufc_fn_270",
-    "code": "UFC Fight Night 270",
-    "name": "UFC Fight Night: Evloev vs Murphy",
-    "location": "O2 Arena, London, England",
-    "main_event": {
-      "fighters": [
-        "Movsar Evloev",
-        "Lerone Murphy"
-      ]
-    },
-    "co_main_event": {
-      "fighters": [
-        "Michael Page",
-        "Sam Patterson"
-      ]
-    },
-    "card": [
-      {
-        "fighters": [
-          "Roman Dolidze",
-          "Christian Leroy Duncan"
-        ]
-      },
-      {
-        "fighters": [
-          "Iwo Baraniewski",
-          "Austen Lane"
-        ]
-      },
-      {
-        "fighters": [
-          "Luke Riley",
-          "Michael Aswell"
-        ]
-      },
-      {
-        "fighters": [
-          "Nathaniel Wood",
-          "Losene Keita"
-        ]
-      },
-      {
-        "fighters": [
-          "Mason Jones",
-          "Axel Sola"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "ufc_fn_271",
-    "code": "UFC Fight Night 271",
-    "name": "UFC Fight Night: Adesanya vs Pyfer",
-    "location": "Climate Pledge Arena, Seattle, WA",
+    "id": "ufc_fight_night_adesanya_vs_pyfer",
+    "code": "ufc_fight_night_adesanya_vs_pyfer",
+    "name": "UFC Fight Night: Adesanya vs. Pyfer",
+    "location": "Seattle, Washington, USA",
     "main_event": {
       "fighters": [
         "Israel Adesanya",
@@ -185,14 +19,32 @@
     "card": [
       {
         "fighters": [
-          "Michael Chiesa",
-          "Carlston Harris"
+          "Israel Adesanya",
+          "Joe Pyfer"
         ]
       },
       {
         "fighters": [
-          "Chase Hooper",
-          "Lance Gibson Jr."
+          "Alexa Grasso",
+          "Maycee Barber"
+        ]
+      },
+      {
+        "fighters": [
+          "Michael Chiesa",
+          "Niko Price"
+        ]
+      },
+      {
+        "fighters": [
+          "Julian Erosa",
+          "Lerryan Douglas"
+        ]
+      },
+      {
+        "fighters": [
+          "Mansur Abdul-Malik",
+          "Yousri Belgaroui"
         ]
       },
       {
@@ -203,185 +55,738 @@
       },
       {
         "fighters": [
+          "Ignacio Bahamondes",
+          "Tofiq Musayev"
+        ]
+      },
+      {
+        "fighters": [
+          "Chase Hooper",
+          "Lance Gibson Jr."
+        ]
+      },
+      {
+        "fighters": [
+          "Marcin Tybura",
+          "Tyrell Fortune"
+        ]
+      },
+      {
+        "fighters": [
           "Casey O'Neill",
           "Gabriella Fernandes"
         ]
       },
       {
         "fighters": [
-          "Mansur Abdul-Malik",
-          "Yousri Belgaroui"
+          "Navajo Stirling",
+          "Bruno Lopes"
         ]
+      },
+      {
+        "fighters": [
+          "Ricky Simon",
+          "Adrian Yanez"
+        ]
+      },
+      {
+        "fighters": [
+          "Alexia Thainara",
+          "Bruna Brasil"
+        ]
+      }
+    ],
+    "date": "2026-03-28"
+  },
+  {
+    "id": "ufc_fight_night_moicano_vs_duncan",
+    "name": "UFC Fight Night: Moicano vs. Duncan",
+    "date": "2026-04-04",
+    "location": "Las Vegas, Nevada, USA",
+    "main_event": {
+      "fighters": [
+        "Renato Moicano",
+        "Chris Duncan"
+      ],
+      "weight_class": "Lightweight"
+    },
+    "co_main_event": {
+      "fighters": [
+        "Virna Jandiroba",
+        "Tabatha Ricci"
+      ],
+      "weight_class": "Women's Strawweight"
+    },
+    "card": [
+      {
+        "fighters": [
+          "Renato Moicano",
+          "Chris Duncan"
+        ],
+        "weight_class": "Lightweight"
+      },
+      {
+        "fighters": [
+          "Virna Jandiroba",
+          "Tabatha Ricci"
+        ],
+        "weight_class": "Women's Strawweight"
+      },
+      {
+        "fighters": [
+          "Abdul Rakhman Yakhyaev",
+          "Brendson Ribeiro"
+        ],
+        "weight_class": "Light Heavyweight"
+      },
+      {
+        "fighters": [
+          "Ethyn Ewing",
+          "Rafael Estevam"
+        ],
+        "weight_class": "Bantamweight"
+      },
+      {
+        "fighters": [
+          "Tommy McMillen",
+          "Manolo Zecchini"
+        ],
+        "weight_class": "Featherweight"
+      },
+      {
+        "fighters": [
+          "Charles Radtke",
+          "Jose Henrique"
+        ],
+        "weight_class": "Welterweight"
+      },
+      {
+        "fighters": [
+          "Guilherme Pat",
+          "Thomas Petersen"
+        ],
+        "weight_class": "Heavyweight"
+      },
+      {
+        "fighters": [
+          "Jose Delano",
+          "Robert Ruchala"
+        ],
+        "weight_class": "Featherweight"
+      },
+      {
+        "fighters": [
+          "Alessandro Costa",
+          "Stewart Nicoll"
+        ],
+        "weight_class": "Flyweight"
+      },
+      {
+        "fighters": [
+          "Lando Vannata",
+          "Darrius Flowers"
+        ],
+        "weight_class": "Lightweight"
+      },
+      {
+        "fighters": [
+          "Alice Pereira",
+          "Hailey Cowan"
+        ],
+        "weight_class": "Women's Bantamweight"
+      },
+      {
+        "fighters": [
+          "Azamat Bekoev",
+          "Tresean Gore"
+        ],
+        "weight_class": "Middleweight"
+      },
+      {
+        "fighters": [
+          "Dione Barbosa",
+          "Melissa Gatto"
+        ],
+        "weight_class": "Women's Flyweight"
       }
     ]
   },
   {
-    "id": "ufc_327",
-    "code": "UFC 327",
-    "name": "UFC 327: Procházka vs Ulberg",
-    "location": "Kaseya Center, Miami, FL",
+    "id": "ufc_327_prochazka_vs_ulberg",
+    "name": "UFC 327: Prochazka vs. Ulberg",
+    "date": "2026-04-11",
+    "location": "Miami, Florida, USA",
     "main_event": {
       "fighters": [
-        "Jiří Procházka",
+        "Jiri Prochazka",
         "Carlos Ulberg"
-      ]
+      ],
+      "weight_class": "Light Heavyweight"
     },
     "co_main_event": {
       "fighters": [
         "Joshua Van",
         "Tatsuro Taira"
-      ]
+      ],
+      "weight_class": "Flyweight"
     },
     "card": [
       {
         "fighters": [
-          "Dominick Reyes",
-          "Johnny Walker"
-        ]
+          "Jiri Prochazka",
+          "Carlos Ulberg"
+        ],
+        "weight_class": "Light Heavyweight"
+      },
+      {
+        "fighters": [
+          "Joshua Van",
+          "Tatsuro Taira"
+        ],
+        "weight_class": "Flyweight"
       },
       {
         "fighters": [
           "Curtis Blaydes",
           "Josh Hokit"
-        ]
+        ],
+        "weight_class": "Heavyweight"
       },
       {
         "fighters": [
-          "Beneil Dariush",
-          "Manuel Torres"
-        ]
-      },
-      {
-        "fighters": [
-          "Tatiana Suarez",
-          "Loopy Godinez"
-        ]
+          "Dominick Reyes",
+          "Johnny Walker"
+        ],
+        "weight_class": "Light Heavyweight"
       },
       {
         "fighters": [
           "Azamat Murzakanov",
           "Paulo Costa"
-        ]
+        ],
+        "weight_class": "Light Heavyweight"
       },
       {
         "fighters": [
-          "Nate Landwehr",
-          "Cub Swanson"
-        ]
+          "Patricio Freire",
+          "Aaron Pico"
+        ],
+        "weight_class": "Featherweight"
       },
       {
         "fighters": [
-          "Randy Brown",
-          "Kevin Holland"
-        ]
-      },
-      {
-        "fighters": [
-          "Aaron Pico",
-          "Patricio Pitbull"
-        ]
+          "Cub Swanson",
+          "Nate Landwehr"
+        ],
+        "weight_class": "Featherweight"
       },
       {
         "fighters": [
           "Mateusz Gamrot",
           "Esteban Ribovics"
-        ]
+        ],
+        "weight_class": "Lightweight"
+      },
+      {
+        "fighters": [
+          "Kevin Holland",
+          "Randy Brown"
+        ],
+        "weight_class": "Welterweight"
+      },
+      {
+        "fighters": [
+          "Tatiana Suarez",
+          "Loopy Godinez"
+        ],
+        "weight_class": "Women's Strawweight"
       },
       {
         "fighters": [
           "Kelvin Gastelum",
           "Vicente Luque"
-        ]
+        ],
+        "weight_class": "Middleweight"
       }
     ]
   },
   {
-    "id": "ufc_313",
-    "code": "UFC 313",
-    "name": "UFC 313: Pereira vs Ankalaev",
-    "location": "T-Mobile Arena, Las Vegas, NV",
+    "id": "ufc_fight_night_burns_vs_malott",
+    "name": "UFC Fight Night: Burns vs. Malott",
+    "date": "2026-04-18",
+    "location": "Winnipeg, Manitoba, Canada",
     "main_event": {
       "fighters": [
-        "Alex Pereira",
-        "Magomed Ankalaev"
-      ]
+        "Gilbert Burns",
+        "Mike Malott"
+      ],
+      "weight_class": "Welterweight"
     },
     "co_main_event": {
       "fighters": [
-        "Shavkat Rakhmonov",
-        "Ian Machado Garry"
-      ]
+        "Jasmine Jasudavicius",
+        "Karine Silva"
+      ],
+      "weight_class": "Women's Flyweight"
     },
     "card": [
       {
         "fighters": [
-          "Bo Nickal",
-          "Paul Craig"
-        ]
+          "Gilbert Burns",
+          "Mike Malott"
+        ],
+        "weight_class": "Welterweight"
+      },
+      {
+        "fighters": [
+          "Jasmine Jasudavicius",
+          "Karine Silva"
+        ],
+        "weight_class": "Women's Flyweight"
+      },
+      {
+        "fighters": [
+          "Melissa Croden",
+          "Daria Zhelezniakova"
+        ],
+        "weight_class": "Women's Bantamweight"
+      },
+      {
+        "fighters": [
+          "Julien Leblanc",
+          "Robert Valentin"
+        ],
+        "weight_class": "Middleweight"
+      },
+      {
+        "fighters": [
+          "Tanner Boser",
+          "Gokhan Saricam"
+        ],
+        "weight_class": "Heavyweight"
+      },
+      {
+        "fighters": [
+          "DongHun Choi",
+          "Andre Lima"
+        ],
+        "weight_class": "Flyweight"
+      },
+      {
+        "fighters": [
+          "Mitch Raposo",
+          "Allan Nascimento"
+        ],
+        "weight_class": "Flyweight"
+      },
+      {
+        "fighters": [
+          "John Castaneda",
+          "Mark Vologdin"
+        ],
+        "weight_class": "Bantamweight"
+      },
+      {
+        "fighters": [
+          "JJ Aldrich",
+          "Jamey-Lyn Horth"
+        ],
+        "weight_class": "Women's Flyweight"
+      },
+      {
+        "fighters": [
+          "Kyler Phillips",
+          "Charles Jourdain"
+        ],
+        "weight_class": "Bantamweight"
+      }
+    ]
+  },
+  {
+    "id": "ufc_fight_night_sterling_vs_zalal",
+    "name": "UFC Fight Night: Sterling vs. Zalal",
+    "date": "2026-04-25",
+    "location": "Las Vegas, Nevada, USA",
+    "main_event": {
+      "fighters": [
+        "Aljamain Sterling",
+        "Youssef Zalal"
+      ],
+      "weight_class": "Featherweight"
+    },
+    "co_main_event": {
+      "fighters": [
+        "Davey Grant",
+        "Juan Adrian Martinetti"
+      ],
+      "weight_class": "Bantamweight"
+    },
+    "card": [
+      {
+        "fighters": [
+          "Aljamain Sterling",
+          "Youssef Zalal"
+        ],
+        "weight_class": "Featherweight"
+      },
+      {
+        "fighters": [
+          "Davey Grant",
+          "Juan Adrian Martinetti"
+        ],
+        "weight_class": "Bantamweight"
+      },
+      {
+        "fighters": [
+          "Norma Dumont",
+          "Joselyne Edwards"
+        ],
+        "weight_class": "Women's Bantamweight"
+      },
+      {
+        "fighters": [
+          "Montel Jackson",
+          "Raoni Barcelos"
+        ],
+        "weight_class": "Bantamweight"
+      },
+      {
+        "fighters": [
+          "Talita Alencar",
+          "Julia Polastri"
+        ],
+        "weight_class": "Women's Strawweight"
+      },
+      {
+        "fighters": [
+          "Rodolfo Vieira",
+          "Eric McConico"
+        ],
+        "weight_class": "Middleweight"
+      },
+      {
+        "fighters": [
+          "Jafel Filho",
+          "Lucas Rocha"
+        ],
+        "weight_class": "Flyweight"
+      },
+      {
+        "fighters": [
+          "Mayra Bueno Silva",
+          "Michelle Montague"
+        ],
+        "weight_class": "Women's Bantamweight"
+      },
+      {
+        "fighters": [
+          "Jackson McVey",
+          "Sedriques Dumas"
+        ],
+        "weight_class": "Middleweight"
+      }
+    ]
+  },
+  {
+    "id": "ufc_fight_night_della_maddalena_vs_prates",
+    "name": "UFC Fight Night: Della Maddalena vs. Prates",
+    "date": "2026-05-02",
+    "location": "Perth, Western Australia, Australia",
+    "main_event": {
+      "fighters": [
+        "Jack Della Maddalena",
+        "Carlos Prates"
+      ],
+      "weight_class": "Welterweight"
+    },
+    "co_main_event": {
+      "fighters": [
+        "Beneil Dariush",
+        "Quillan Salkilld"
+      ],
+      "weight_class": "Lightweight"
+    },
+    "card": [
+      {
+        "fighters": [
+          "Jack Della Maddalena",
+          "Carlos Prates"
+        ],
+        "weight_class": "Welterweight"
+      },
+      {
+        "fighters": [
+          "Beneil Dariush",
+          "Quillan Salkilld"
+        ],
+        "weight_class": "Lightweight"
+      },
+      {
+        "fighters": [
+          "Tai Tuivasa",
+          "Sean Sharaf"
+        ],
+        "weight_class": "Heavyweight"
+      },
+      {
+        "fighters": [
+          "Junior Tafa",
+          "Kevin Christian"
+        ],
+        "weight_class": "Light Heavyweight"
+      },
+      {
+        "fighters": [
+          "Cam Rowston",
+          "Robert Bryczek"
+        ],
+        "weight_class": "Middleweight"
+      },
+      {
+        "fighters": [
+          "Jacob Malkoun",
+          "Gerald Meerschaert"
+        ],
+        "weight_class": "Middleweight"
+      },
+      {
+        "fighters": [
+          "Steve Erceg",
+          "Tim Elliott"
+        ],
+        "weight_class": "Flyweight"
+      }
+    ]
+  },
+  {
+    "id": "ufc_328_chimaev_vs_strickland",
+    "name": "UFC 328: Chimaev vs. Strickland",
+    "date": "2026-05-09",
+    "location": "Newark, New Jersey, USA",
+    "main_event": {
+      "fighters": [
+        "Khamzat Chimaev",
+        "Sean Strickland"
+      ],
+      "weight_class": "Middleweight"
+    },
+    "co_main_event": {
+      "fighters": [
+        "Alexander Volkov",
+        "Waldo Cortes Acosta"
+      ],
+      "weight_class": "Heavyweight"
+    },
+    "card": [
+      {
+        "fighters": [
+          "Khamzat Chimaev",
+          "Sean Strickland"
+        ],
+        "weight_class": "Middleweight"
+      },
+      {
+        "fighters": [
+          "Alexander Volkov",
+          "Waldo Cortes Acosta"
+        ],
+        "weight_class": "Heavyweight"
+      },
+      {
+        "fighters": [
+          "Jan Blachowicz",
+          "Bogdan Guskov"
+        ],
+        "weight_class": "Light Heavyweight"
+      },
+      {
+        "fighters": [
+          "Ateba Gautier",
+          "Ozzy Diaz"
+        ],
+        "weight_class": "Middleweight"
+      },
+      {
+        "fighters": [
+          "Sean Brady",
+          "Joaquin Buckley"
+        ],
+        "weight_class": "Welterweight"
+      },
+      {
+        "fighters": [
+          "King Green",
+          "Jeremy Stephens"
+        ],
+        "weight_class": "Lightweight"
+      },
+      {
+        "fighters": [
+          "Clayton Carpenter",
+          "Jose Ochoa"
+        ],
+        "weight_class": "Flyweight"
+      }
+    ]
+  },
+  {
+    "id": "ufc_fight_night_allen_vs_costa",
+    "name": "UFC Fight Night: Allen vs. Costa",
+    "date": "2026-05-16",
+    "location": "Las Vegas, Nevada, USA",
+    "main_event": {
+      "fighters": [
+        "Arnold Allen",
+        "Melquizael Costa"
+      ],
+      "weight_class": "Featherweight"
+    },
+    "co_main_event": {},
+    "card": [
+      {
+        "fighters": [
+          "Arnold Allen",
+          "Melquizael Costa"
+        ],
+        "weight_class": "Featherweight"
+      }
+    ]
+  },
+  {
+    "id": "ufc_fight_night_song_vs_figueiredo",
+    "name": "UFC Fight Night: Song vs. Figueiredo",
+    "date": "2026-05-30",
+    "location": "Macau, China",
+    "main_event": {
+      "fighters": [
+        "Song Yadong",
+        "Deiveson Figueiredo"
+      ],
+      "weight_class": "Bantamweight"
+    },
+    "co_main_event": {
+      "fighters": [
+        "Sergei Pavlovich",
+        "Tallison Teixeira"
+      ],
+      "weight_class": "Heavyweight"
+    },
+    "card": [
+      {
+        "fighters": [
+          "Song Yadong",
+          "Deiveson Figueiredo"
+        ],
+        "weight_class": "Bantamweight"
+      },
+      {
+        "fighters": [
+          "Sergei Pavlovich",
+          "Tallison Teixeira"
+        ],
+        "weight_class": "Heavyweight"
+      },
+      {
+        "fighters": [
+          "Zhang Mingyang",
+          "Alonzo Menifield"
+        ],
+        "weight_class": "Light Heavyweight"
       },
       {
         "fighters": [
           "Alex Perez",
-          "Tagir Ulanbekov"
-        ]
-      },
-      {
-        "fighters": [
-          "Amanda Lemos",
-          "Virna Jandiroba"
-        ]
+          "Sumudaerji"
+        ],
+        "weight_class": "Flyweight"
       }
     ]
   },
   {
-    "id": "ufc_328",
-    "code": "UFC 328",
-    "name": "UFC 328: Makhachev vs Tsarukyan 2",
-    "location": "T-Mobile Arena, Las Vegas, NV",
+    "id": "ufc_fight_night_muhammad_vs_bonfim",
+    "name": "UFC Fight Night: Muhammad vs. Bonfim",
+    "date": "2026-06-06",
+    "location": "Las Vegas, Nevada, USA",
     "main_event": {
       "fighters": [
-        "Islam Makhachev",
-        "Arman Tsarukyan"
-      ]
+        "Belal Muhammad",
+        "Gabriel Bonfim"
+      ],
+      "weight_class": "Welterweight"
+    },
+    "co_main_event": {},
+    "card": [
+      {
+        "fighters": [
+          "Belal Muhammad",
+          "Gabriel Bonfim"
+        ],
+        "weight_class": "Welterweight"
+      }
+    ]
+  },
+  {
+    "id": "ufc_freedom_250",
+    "name": "UFC Freedom 250",
+    "date": "2026-06-14",
+    "location": "Washington, DC, USA",
+    "main_event": {
+      "fighters": [
+        "Ilia Topuria",
+        "Justin Gaethje"
+      ],
+      "weight_class": "Lightweight"
     },
     "co_main_event": {
       "fighters": [
-        "Sean O'Malley",
-        "Merab Dvalishvili"
-      ]
+        "Alex Pereira",
+        "Ciryl Gane"
+      ],
+      "weight_class": "Heavyweight"
     },
     "card": [
       {
         "fighters": [
-          "Dustin Poirier",
-          "Dan Hooker"
-        ]
+          "Ilia Topuria",
+          "Justin Gaethje"
+        ],
+        "weight_class": "Lightweight"
       },
       {
         "fighters": [
-          "Gilbert Burns",
-          "Michael Page"
-        ]
+          "Alex Pereira",
+          "Ciryl Gane"
+        ],
+        "weight_class": "Heavyweight"
+      },
+      {
+        "fighters": [
+          "Sean O'Malley",
+          "Aiemann Zahabi"
+        ],
+        "weight_class": "Bantamweight"
+      },
+      {
+        "fighters": [
+          "Mauricio Ruffy",
+          "Michael Chandler"
+        ],
+        "weight_class": "Lightweight"
+      },
+      {
+        "fighters": [
+          "Bo Nickal",
+          "Kyle Daukaus"
+        ],
+        "weight_class": "Middleweight"
+      },
+      {
+        "fighters": [
+          "Diego Lopes",
+          "Steve Garcia"
+        ],
+        "weight_class": "Featherweight"
       }
     ]
-  },
-  {
-    "id": "fn_253",
-    "code": "FN 253",
-    "name": "UFC Fight Night 253",
-    "date": "2025-02-22",
-    "location": "UFC APEX, Las Vegas, NV",
-    "status": "completed",
-    "main_event": {
-      "fighters": [
-        "Jailton Almeida",
-        "Alexandr Romanov"
-      ],
-      "weight_class": "Heavyweight"
-    },
-    "co_main_event": {
-      "fighters": []
-    },
-    "card": []
   }
 ]
