@@ -412,29 +412,49 @@ async def orchestrator(
         except Exception as e:
             error(f"Analytics bundle computation failed (non-fatal): {e}")
 
+    # === MEMORY MAINTENANCE (run BEFORE loading, not after) ===
+    MEMORY_STORE.decay_long_term(threshold_seconds=30 * 24 * 3600)
+    MEMORY_STORE.dedupe_long_term()
+    MEMORY_STORE.cap_long_term(max_entries=500)
+    MEMORY_STORE.decay_short_term(threshold_seconds=86400)
+
     # === STRUCTURED MEMORY ===
-    # Load semantic memory for ALL identified fighters (not just primary)
+    # Load semantic memory for identified fighters (concise, fighter-specific only)
     semantic_parts = []
     for fighter in fighters:
         try:
             fighter_mem = get_semantic(fighter)
-            if fighter_mem:
+            # Only include if it's concise (< 500 chars) — skip stale full-analysis dumps
+            if fighter_mem and len(fighter_mem) < 500:
                 semantic_parts.append(f"=== {fighter} ===\n{fighter_mem}")
         except Exception as _exc:
             debug(f"Non-fatal: {_exc}")
     semantic_memory = "\n\n".join(semantic_parts) if semantic_parts else ""
 
-    episodic_memory = get_recent_episodic(5) or []
+    # Filter episodic memory: only include entries that mention current fighters
+    raw_episodic = get_recent_episodic(10) or []
+    fighter_lower = {f.lower() for f in fighters if f}
+    episodic_memory = []
+    for ep in raw_episodic:
+        ep_lower = ep.lower() if isinstance(ep, str) else ""
+        if any(f in ep_lower for f in fighter_lower):
+            episodic_memory.append(ep)
+    episodic_memory = episodic_memory[-3:]  # max 3 relevant entries
 
-    # Also load any specialist notes from previous analyses
+    # Load specialist notes only if they match current fighters
     specialist_notes = {}
     for spec_key in ["style", "form", "damage", "grappling", "pace"]:
         try:
             notes = MEMORY_STORE.get_specialist_history(spec_key)
             if notes:
-                recent = notes[-1] if notes else None
-                if recent and isinstance(recent, dict):
-                    specialist_notes[spec_key] = recent.get("content", "")[:500]
+                # Find most recent note that mentions current fighters
+                for note in reversed(notes):
+                    if not isinstance(note, dict):
+                        continue
+                    note_query = (note.get("query") or "").lower()
+                    if any(f in note_query for f in fighter_lower):
+                        specialist_notes[spec_key] = note.get("content", "")[:500]
+                        break
         except Exception as _exc:
             debug(f"Non-fatal: {_exc}")
 
@@ -776,11 +796,7 @@ async def orchestrator(
     #                           MEMORY MAINTENANCE
     # =====================================================================
 
-    # Decay stale long-term memories (older than 30 days)
-    MEMORY_STORE.decay_long_term(threshold_seconds=30 * 24 * 3600)
-    MEMORY_STORE.dedupe_long_term()
-    MEMORY_STORE.cap_long_term(max_entries=500)
-    MEMORY_STORE.decay_short_term(threshold_seconds=86400)
+    # (Memory decay now runs at pipeline start, not here)
 
     # =====================================================================
     #                           INLINE MEMORY WRITES
@@ -847,18 +863,15 @@ async def orchestrator(
 
     await summarize_and_store(llm, "Summarize this UFC analysis session:", [final_output_str])
 
-    # Store semantic memory for all fighters (not just primary)
+    # Store concise semantic memory per fighter (not the entire analysis)
     for fighter in fighters:
         if fighter and fighter != "unknown":
             try:
-                await add_semantic(fighter, final_output_str)
+                # Store only the first 400 chars as a brief summary, not the full output
+                brief = final_output_str[:400].rsplit(" ", 1)[0] + "..."
+                await add_semantic(fighter, brief)
             except Exception as _exc:
                 debug(f"Non-fatal: {_exc}")
-    if not fighters and primary_fighter != "unknown":
-        try:
-            await add_semantic(primary_fighter, final_output_str)
-        except Exception as _exc:
-            debug(f"Non-fatal: {_exc}")
 
     try:
         store_vectorized_memory(

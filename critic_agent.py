@@ -8,56 +8,27 @@ from logger import info, debug, error
 from data.metadata import SpecialistOutput, FinalOutput
 
 CRITIC_SYSTEM_PROMPT_BASE = """
-You are the final-stage critic for a multi-specialist UFC analytics engine.
-Your job is to refine clarity, cohesion, and flow without changing meaning.
-Do not add new facts. Do not remove meaningful analysis.
+You are the final-stage editor for a UFC analytics engine. Your job: refine clarity and flow.
 
-CRITICAL: Subject Consistency
-- The analysis must stay focused on the fighters specified in the user question.
-- If the text appears to analyze a different fighter or matchup than requested,
-  you must correct the narrative to match the requested fighters if possible,
-  or clearly state that the content appears mismatched and cannot be trusted.
+RULES:
+1. Do NOT add new analysis, facts, disclaimers, or meta-commentary.
+2. Do NOT add warnings like "mismatched", "unreliable", "insufficient data", or "wait for more information".
+3. Do NOT reference other fights, other matchups, or previous analyses. Only the current fighters matter.
+4. Do NOT repeat the same point in different words. Merge duplicates.
+5. Keep the EDGE SUMMARY and CONVERGENCE sections intact — do not alter their format or data.
 
-Logical Consistency Check:
-- If the analysis states a fighter has an advantage in a domain but then concludes they
-  lose that matchup, flag this as an internal inconsistency.
-- If the prediction winner contradicts the edge breakdown (e.g., Fighter B predicted to win
-  but Fighter A has 4 of 5 edges), add a note flagging this tension.
-- If specific statistics are cited that don't match the conclusion drawn from them,
-  note the discrepancy.
-- Ensure the confidence tier matches the probability: Low should be near 50-55%,
-  High should be 65-80%, Very High should be 80%+.
+YOUR TASK:
+- Improve sentence flow and readability.
+- Remove repetition and filler.
+- Ensure the analysis stays focused on the two named fighters only.
+- If the win probability seems close (50-55%), make sure the narrative reflects a competitive fight.
+- If the win probability is decisive (65%+), make sure the narrative explains why.
+- Remove any content about fighters NOT in this matchup.
 
-Evidence Quality Check:
-- If claims are made without citing specific statistics or fight results, mark them
-  as "analytical assessment" rather than "data-backed" by adding [analyst assessment]
-  to unsourced claims that sound factual.
-- Do NOT add these markers to general analysis — only to specific factual claims
-  (records, stats, fight outcomes) that lack source data.
-
-Prediction Calibration Check:
-- If **WIN PROBABILITY** is present, verify it matches the analysis:
-  - 50-55%: Analysis should describe a very close, uncertain matchup
-  - 55-65%: Analysis should show a slight edge but acknowledge risks
-  - 65-75%: Analysis should show clear advantages in multiple domains
-  - 75-85%: Analysis should show dominant advantages across most domains
-  - 85%+: Reserved for extreme mismatches only — flag if edge analysis doesn't support this
-- If METHOD LEAN says "KO/TKO" but analysis describes mostly grappling advantages, flag
-- If METHOD PROBABILITIES don't roughly match the analysis narrative, flag
-- If ROUND LEAN contradicts pace/cardio analysis (e.g., "late stoppage" but cardio issues), flag
-
-Method Distribution Sanity:
-- KO/TKO + Submission + Decision should sum to ~100% (allow 5% margin for rounding)
-- If a fighter is described as a "heavy-handed striker" but KO/TKO probability is <20%, flag
-- If a fighter is described as "elite grappler/BJJ" but Submission probability is <5%, flag
-
-MEMORY CONTEXT
-- You may be given long-term (semantic) and recent (episodic) memory.
-- Use these only to correct obvious factual drift (e.g., wrong stance, wrong weight class),
-  not to invent new analysis.
+OUTPUT: Return only the refined analysis text. No preamble, no meta-commentary.
 """
 
-CHUNK_SIZE = 3500
+CHUNK_SIZE = 6000
 
 
 def chunk_text(text: str, size: int = CHUNK_SIZE) -> List[str]:
@@ -94,11 +65,9 @@ async def _critic_pass(
         {
             "role": "user",
             "content": (
-                "Refine the following analysis. Improve clarity, flow, and transitions "
-                "without changing meaning. Ensure the subject matches the user question "
-                "and extracted fighters where possible. If parts of the text clearly "
-                "refer to different fighters or matchups, explicitly flag them as "
-                "mismatched and unreliable:\n\n" + text
+                "Refine the following analysis. Improve clarity, flow, and remove "
+                "repetition. Remove any content about fighters not in this matchup. "
+                "Do not add disclaimers or meta-commentary. Return only the refined text:\n\n" + text
             ),
         },
     ]
@@ -492,13 +461,7 @@ async def critic_review(
 
     if validation_warnings:
         info(f"Critic: found {len(validation_warnings)} validation warnings")
-        # Append warnings to the output if there are high-severity ones
-        high_severity = [w for w in validation_warnings if w.get("severity") == "high"]
-        if high_severity:
-            warning_text = "\n\n**VALIDATION NOTES:**\n"
-            for w in high_severity:
-                warning_text += f"- {w['message']}\n"
-            final_text += warning_text
+        # Warnings stored in metadata for debugging — not appended to user-facing output
 
     # Apply confidence penalty for validation issues
     if validation_warnings:
