@@ -76,12 +76,21 @@ Prediction Optimization:
 - Include any pre-fetched fighter stats (record, SLpM, accuracy, recent fights) from context.
 - If odds/implied probabilities are available, include them.
 
-CRITICAL: End your analysis with a brief "EDGE SUMMARY" section that lists:
-- Which fighter has the edge in each domain (striking, grappling, cardio, fight IQ, durability, experience)
-- An overall lean (which fighter has more edges)
-- A convergence score: "[X] of [Y] specialists lean toward [Fighter Name]"
-- Any major disagreements worth noting
-This summary is essential for the prediction specialist.
+CRITICAL: End your analysis with an "EDGE SUMMARY" section in this exact format:
+
+EDGE SUMMARY:
+- Striking: [Fighter Name or Even] — [brief reason]
+- Grappling: [Fighter Name or Even] — [brief reason]
+- Cardio/Pace: [Fighter Name or Even] — [brief reason]
+- Fight IQ: [Fighter Name or Even] — [brief reason]
+- Durability: [Fighter Name or Even] — [brief reason]
+- Experience: [Fighter Name or Even] — [brief reason]
+
+OVERALL LEAN: [Fighter Name] ([X] of [Y] edges)
+CONVERGENCE: [X] of [Y] specialists lean toward [Fighter Name] ([Z]% confidence-weighted)
+UPSET FLAGS: [List any upset conditions detected, or "None"]
+
+This structured format is essential for the prediction specialist. Use exact fighter names, not pronouns.
 """
 
 

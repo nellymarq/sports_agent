@@ -3,6 +3,7 @@
 
 import asyncio
 import time
+import traceback
 from typing import Dict, Any, List, Set, Optional
 import re
 
@@ -268,7 +269,7 @@ async def _run_single_specialist(
             evidence=[],
             confidence=0.0,
             lineage={"specialist": specialist_key, "error": True},
-            metadata={"error_message": str(e), "execution_time_s": _elapsed},
+            metadata={"error_message": str(e), "error_type": type(e).__name__, "error_traceback": traceback.format_exc(), "execution_time_s": _elapsed},
         )
 
 # =====================================================================

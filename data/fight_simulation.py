@@ -63,31 +63,31 @@ def extract_fighter_vector(stats: Dict[str, Any]) -> Dict[str, float]:
 
     # Striking volume (SLpM) - UFC avg ~3.5
     slpm = _parse_float(stats.get("slpm"))
-    vector["striking_volume"] = min(slpm / 7.0, 1.0) if slpm is not None else 0.5
+    vector["striking_volume"] = min(slpm / 7.0, 1.0) if slpm else 0.5
 
     # Striking accuracy - UFC avg ~43%
     str_acc = _parse_float(stats.get("str_acc"))
-    vector["striking_accuracy"] = min(str_acc / 70.0, 1.0) if str_acc is not None else 0.5
+    vector["striking_accuracy"] = min(str_acc / 70.0, 1.0) if str_acc else 0.5
 
     # Striking defense - UFC avg ~55%
     str_def = _parse_float(stats.get("str_def"))
-    vector["striking_defense"] = min(str_def / 80.0, 1.0) if str_def is not None else 0.5
+    vector["striking_defense"] = min(str_def / 80.0, 1.0) if str_def else 0.5
 
     # Takedown offense (TD avg per 15 min) - UFC avg ~1.5
     td_avg = _parse_float(stats.get("td_avg"))
-    vector["takedown_offense"] = min(td_avg / 5.0, 1.0) if td_avg is not None else 0.5
+    vector["takedown_offense"] = min(td_avg / 5.0, 1.0) if td_avg else 0.5
 
     # Takedown defense - UFC avg ~62%
     td_def = _parse_float(stats.get("td_def"))
-    vector["takedown_defense"] = min(td_def / 90.0, 1.0) if td_def is not None else 0.5
+    vector["takedown_defense"] = min(td_def / 90.0, 1.0) if td_def else 0.5
 
     # Submission threat (sub avg per 15 min) - UFC avg ~0.5
     sub_avg = _parse_float(stats.get("sub_avg"))
-    vector["submission_threat"] = min(sub_avg / 3.0, 1.0) if sub_avg is not None else 0.5
+    vector["submission_threat"] = min(sub_avg / 3.0, 1.0) if sub_avg else 0.5
 
     # Absorbed per minute (lower is better) - inverted scale
     sapm = _parse_float(stats.get("sapm"))
-    vector["cardio_pace"] = max(0, 1.0 - (sapm / 8.0)) if sapm is not None else 0.5
+    vector["cardio_pace"] = max(0, 1.0 - (sapm / 8.0)) if sapm else 0.5
 
     # Experience from record
     record = stats.get("record", "")
@@ -122,6 +122,8 @@ def compute_win_probability(
     # Convert edge score to probability using logistic function
     # Scale factor controls spread (higher = more extreme probabilities)
     scale = 4.0
+    # Clamp edge_score to prevent math.exp overflow for extreme values
+    edge_score = max(-5, min(5, edge_score))
     prob_a = 1.0 / (1.0 + math.exp(-edge_score * scale))
 
     # Compress toward 50% (UFC fighters always have upset potential)
@@ -443,8 +445,8 @@ def simulate_fight_advanced(
     # Cardio profiles
     cardio_type_a = _classify_cardio_type(stats_a)
     cardio_type_b = _classify_cardio_type(stats_b)
-    cardio_a = CARDIO_DECAY_RATES[cardio_type_a][:max_rounds]
-    cardio_b = CARDIO_DECAY_RATES[cardio_type_b][:max_rounds]
+    cardio_a = CARDIO_DECAY_RATES[cardio_type_a][:max_rounds] or [0.85]
+    cardio_b = CARDIO_DECAY_RATES[cardio_type_b][:max_rounds] or [0.85]
 
     # Physical edge
     physical_edge = compute_physical_edge(stats_a, stats_b)

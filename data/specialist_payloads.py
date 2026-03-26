@@ -83,25 +83,29 @@ def compute_analytics_bundle(
 
     bundle["fighter_a"] = name_a
     bundle["fighter_b"] = name_b
+    bundle["_errors"] = []
 
     # --- Style classification ---
     try:
         from data.style_classifier import classify_style
         bundle["style_a"] = classify_style(stats_a)
-    except Exception:
+    except Exception as e:
         bundle["style_a"] = None
+        bundle["_errors"].append(f"style_a: {type(e).__name__}: {e}")
 
     try:
         from data.style_classifier import classify_style
         bundle["style_b"] = classify_style(stats_b)
-    except Exception:
+    except Exception as e:
         bundle["style_b"] = None
+        bundle["_errors"].append(f"style_b: {type(e).__name__}: {e}")
 
     try:
         from data.style_classifier import classify_matchup
         bundle["matchup"] = classify_matchup(stats_a, stats_b)
-    except Exception:
+    except Exception as e:
         bundle["matchup"] = None
+        bundle["_errors"].append(f"matchup: {type(e).__name__}: {e}")
 
     # --- Aging analysis ---
     age_a = _parse_int(stats_a.get("age"))
@@ -117,8 +121,9 @@ def compute_analytics_bundle(
                 record=stats_a.get("record", ""),
                 fighter_stats=stats_a,
             )
-        except Exception:
+        except Exception as e:
             bundle["aging_a"] = None
+            bundle["_errors"].append(f"aging_a: {type(e).__name__}: {e}")
     else:
         bundle["aging_a"] = None
 
@@ -131,8 +136,9 @@ def compute_analytics_bundle(
                 record=stats_b.get("record", ""),
                 fighter_stats=stats_b,
             )
-        except Exception:
+        except Exception as e:
             bundle["aging_b"] = None
+            bundle["_errors"].append(f"aging_b: {type(e).__name__}: {e}")
     else:
         bundle["aging_b"] = None
 
@@ -147,8 +153,9 @@ def compute_analytics_bundle(
                 phase_a=phase_a,
                 phase_b=phase_b,
             )
-        except Exception:
+        except Exception as e:
             bundle["age_adj"] = None
+            bundle["_errors"].append(f"age_adj: {type(e).__name__}: {e}")
     else:
         bundle["age_adj"] = None
 
@@ -156,38 +163,44 @@ def compute_analytics_bundle(
     try:
         from data.cage_control import analyze_clinch_profile
         bundle["clinch_profile_a"] = analyze_clinch_profile(stats_a)
-    except Exception:
+    except Exception as e:
         bundle["clinch_profile_a"] = None
+        bundle["_errors"].append(f"clinch_profile_a: {type(e).__name__}: {e}")
 
     try:
         from data.cage_control import analyze_clinch_profile
         bundle["clinch_profile_b"] = analyze_clinch_profile(stats_b)
-    except Exception:
+    except Exception as e:
         bundle["clinch_profile_b"] = None
+        bundle["_errors"].append(f"clinch_profile_b: {type(e).__name__}: {e}")
 
     try:
         from data.cage_control import analyze_clinch_matchup
         bundle["clinch_matchup"] = analyze_clinch_matchup(stats_a_with_name, stats_b_with_name)
-    except Exception:
+    except Exception as e:
         bundle["clinch_matchup"] = None
+        bundle["_errors"].append(f"clinch_matchup: {type(e).__name__}: {e}")
 
     try:
         from data.cage_control import predict_fight_location
         bundle["fight_location"] = predict_fight_location(stats_a, stats_b)
-    except Exception:
+    except Exception as e:
         bundle["fight_location"] = None
+        bundle["_errors"].append(f"fight_location: {type(e).__name__}: {e}")
 
     try:
         from data.cage_control import compute_octagon_control_score
         bundle["octagon_control_a"] = compute_octagon_control_score(stats_a)
-    except Exception:
+    except Exception as e:
         bundle["octagon_control_a"] = None
+        bundle["_errors"].append(f"octagon_control_a: {type(e).__name__}: {e}")
 
     try:
         from data.cage_control import compute_octagon_control_score
         bundle["octagon_control_b"] = compute_octagon_control_score(stats_b)
-    except Exception:
+    except Exception as e:
         bundle["octagon_control_b"] = None
+        bundle["_errors"].append(f"octagon_control_b: {type(e).__name__}: {e}")
 
     # --- Fight simulation ---
     matchup_type = _safe_get(bundle, "matchup", "matchup_type") or "mixed"
@@ -198,8 +211,9 @@ def compute_analytics_bundle(
             stats_a_with_name, stats_b_with_name,
             matchup_type=matchup_type,
         )
-    except Exception:
+    except Exception as e:
         bundle["simulation"] = None
+        bundle["_errors"].append(f"simulation: {type(e).__name__}: {e}")
 
     try:
         from data.fight_simulation import simulate_fight_advanced
@@ -207,22 +221,25 @@ def compute_analytics_bundle(
             stats_a_with_name, stats_b_with_name,
             matchup_type=matchup_type,
         )
-    except Exception:
+    except Exception as e:
         bundle["advanced_sim"] = None
+        bundle["_errors"].append(f"advanced_sim: {type(e).__name__}: {e}")
 
     # --- Decision prediction ---
     try:
         from data.judge_model import predict_decision
         bundle["decision_pred"] = predict_decision(stats_a, stats_b)
-    except Exception:
+    except Exception as e:
         bundle["decision_pred"] = None
+        bundle["_errors"].append(f"decision_pred: {type(e).__name__}: {e}")
 
     # --- Physical edge (computed inside advanced sim, surface it) ---
     try:
         from data.fight_simulation import compute_physical_edge
         bundle["physical_edge"] = compute_physical_edge(stats_a, stats_b)
-    except Exception:
+    except Exception as e:
         bundle["physical_edge"] = None
+        bundle["_errors"].append(f"physical_edge: {type(e).__name__}: {e}")
 
     # Attach raw stats for reference
     bundle["stats_a"] = stats_a

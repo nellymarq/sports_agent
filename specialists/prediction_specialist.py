@@ -92,6 +92,16 @@ Apply these frameworks IN ORDER to build your prediction:
 
 ---
 
+### Convergence Validation (MANDATORY)
+Before finalizing your prediction:
+1. Check the CONVERGENCE score from the coordinator's EDGE SUMMARY
+2. If your predicted winner has <50% of specialist votes, you MUST reduce confidence by 10-15%
+3. If convergence is >80%, your prediction should align with consensus unless you have SPECIFIC statistical evidence to diverge
+4. If you diverge from consensus, explicitly state WHY in your KEY FACTORS
+5. Your win probability should not exceed convergence% + 15% (e.g., if 60% converge on Fighter A, don't predict >75%)
+
+---
+
 ### Sample Size & Uncertainty Bands
 
 Adjust your confidence based on data available:
@@ -384,6 +394,22 @@ def _build_context_block(
         analytics_lines = _extract_structured_analytics(prediction_features)
         if analytics_lines:
             sections.append("=== Enhanced Analytics Summary ===\n" + "\n".join(analytics_lines))
+
+    # Inject market odds if available
+    if prediction_features:
+        odds = None
+        if isinstance(prediction_features, dict):
+            # Check main_event or bout-level odds
+            main = prediction_features.get("main_event", {})
+            if isinstance(main, dict):
+                odds = main.get("odds", {})
+            ab = prediction_features.get("analytics_bundle", {})
+            if isinstance(ab, dict) and not odds:
+                sim = ab.get("simulation", {})
+                if sim:
+                    sections.append("=== Simulation Baseline ===\n" + str(sim.get("win_probability", {})))
+        if odds:
+            sections.append("=== Market Odds (use as baseline) ===\n" + str(odds))
 
     if retrieved_context:
         sections.append("=== Retrieved Context ===\n" + str(retrieved_context))
