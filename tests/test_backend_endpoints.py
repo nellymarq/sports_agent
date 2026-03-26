@@ -502,3 +502,59 @@ class TestCompareEndpointEnhanced:
             )
             elo = data["elo_matchup"]
             assert abs(elo["fighter_a_win_prob"] + elo["fighter_b_win_prob"] - 1.0) < 0.001
+            # Shared opponents should be present (may be empty)
+            assert "shared_opponents" in data
+
+
+class TestEventCardSimulation:
+    def test_event_not_found(self, client):
+        resp = client.get("/events/nonexistent_999/simulate")
+        assert resp.status_code == 404
+
+    def test_event_simulation_success(self, client):
+        mock_stats = {
+            "best_match": {
+                "name": "Fighter",
+                "record": "15-3-0",
+                "slpm": "4.0",
+                "str_acc": "50%",
+                "sapm": "3.0",
+                "str_def": "55%",
+                "td_avg": "1.5",
+                "td_acc": "40%",
+                "td_def": "60%",
+                "sub_avg": "0.5",
+                "detail_stats": {},
+            }
+        }
+        with patch("backend.main._ufc_stats_tool") as mock_tool:
+            mock_tool.invoke.return_value = mock_stats
+            resp = client.get("/events/ufc_327/simulate?n_simulations=100")
+            assert resp.status_code == 200
+            data = resp.json()
+            assert data["status"] == "ok"
+            assert data["event_id"] == "ufc_327"
+            assert data["bout_count"] > 0
+            assert data["simulations_per_bout"] == 100
+            for bout in data["bouts"]:
+                assert "fighter_a" in bout
+                assert "fighter_b" in bout
+                assert "simulation" in bout
+
+    def test_simulation_cap(self, client):
+        """n_simulations should be capped at 20000."""
+        mock_stats = {
+            "best_match": {
+                "name": "Fighter",
+                "slpm": "4.0", "str_acc": "50%",
+                "sapm": "3.0", "str_def": "55%",
+                "td_avg": "1.5", "td_acc": "40%",
+                "td_def": "60%", "sub_avg": "0.5",
+            }
+        }
+        with patch("backend.main._ufc_stats_tool") as mock_tool:
+            mock_tool.invoke.return_value = mock_stats
+            resp = client.get("/events/ufc_327/simulate?n_simulations=100000")
+            assert resp.status_code == 200
+            data = resp.json()
+            assert data["simulations_per_bout"] == 20000

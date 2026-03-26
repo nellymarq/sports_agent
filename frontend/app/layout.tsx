@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: "/events", label: "Events" },
   { href: "/predictions", label: "Predictions" },
   { href: "/value-bets", label: "Value Bets" },
+  { href: "/bet-calculator", label: "Bet Calc" },
   { href: "/calibration", label: "Calibration" },
 ];
 
@@ -46,7 +47,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 </nav>
               </div>
               <span className="text-xs text-slate-400 hidden md:block">
-                14 Specialists · Memory-Aware · Prediction Tracking
+                16 Specialists · Memory-Aware · Prediction Tracking
               </span>
               <MobileNav links={NAV_LINKS} />
             </div>

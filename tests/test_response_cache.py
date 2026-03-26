@@ -61,3 +61,87 @@ class TestResponseCache:
         stats = cache.stats()
         assert stats["entries"] == 0
         assert stats["hit_rate"] == 0
+
+    def test_ttl_actual_expiry(self):
+        """Verify entries actually expire after TTL elapses."""
+        cache = ResponseCache(default_ttl=60)
+        # Manually set an entry that's already expired
+        key = cache._make_key("/expire_test", None)
+        cache._cache[key] = {"value": "old", "expires_at": time.time() - 1}
+        assert cache.get("/expire_test", None) is None
+
+    def test_custom_ttl_overrides_default(self):
+        cache = ResponseCache(default_ttl=1)
+        # Set with a longer TTL
+        cache.set("/long", None, "value", ttl=3600)
+        key = cache._make_key("/long", None)
+        # Verify the expiry is well in the future
+        assert cache._cache[key]["expires_at"] > time.time() + 3500
+
+    def test_overwrite_existing_key(self):
+        cache = ResponseCache(default_ttl=60)
+        cache.set("/test", {"k": 1}, "first")
+        cache.set("/test", {"k": 1}, "second")
+        assert cache.get("/test", {"k": 1}) == "second"
+
+    def test_clear_resets_stats(self):
+        cache = ResponseCache(default_ttl=60)
+        cache.set("/a", None, 1)
+        cache.get("/a", None)  # hit
+        cache.get("/b", None)  # miss
+        cache.clear()
+        stats = cache.stats()
+        assert stats["hits"] == 0
+        assert stats["misses"] == 0
+
+    def test_invalidate_nonexistent_is_noop(self):
+        cache = ResponseCache(default_ttl=60)
+        cache.invalidate("/nonexistent", {"x": 1})  # should not raise
+        assert cache.get("/nonexistent", {"x": 1}) is None
+
+    def test_param_order_independence(self):
+        """Same params in different order should produce same cache key."""
+        cache = ResponseCache(default_ttl=60)
+        cache.set("/test", {"a": 1, "b": 2}, "value")
+        # json.dumps with sort_keys=True ensures order-independence
+        assert cache.get("/test", {"b": 2, "a": 1}) == "value"
+
+    def test_different_endpoints_same_params(self):
+        cache = ResponseCache(default_ttl=60)
+        cache.set("/ep1", {"x": 1}, "result_1")
+        cache.set("/ep2", {"x": 1}, "result_2")
+        assert cache.get("/ep1", {"x": 1}) == "result_1"
+        assert cache.get("/ep2", {"x": 1}) == "result_2"
+
+    def test_concurrent_access(self):
+        """Verify thread safety with concurrent reads/writes."""
+        import threading
+
+        cache = ResponseCache(default_ttl=60)
+        errors = []
+
+        def writer(i):
+            try:
+                for j in range(50):
+                    cache.set(f"/ep_{i}", {"j": j}, f"val_{i}_{j}")
+            except Exception as e:
+                errors.append(e)
+
+        def reader(i):
+            try:
+                for j in range(50):
+                    cache.get(f"/ep_{i}", {"j": j})
+            except Exception as e:
+                errors.append(e)
+
+        threads = []
+        for i in range(4):
+            threads.append(threading.Thread(target=writer, args=(i,)))
+            threads.append(threading.Thread(target=reader, args=(i,)))
+
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+
+        assert len(errors) == 0
