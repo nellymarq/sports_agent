@@ -591,6 +591,21 @@ def search_fighters(req: FighterSearchRequest) -> Dict[str, Any]:
     try:
         data = _ufc_stats_tool.invoke({"fighter_name": req.query})
         if data.get("error"):
+            # Fallback to Wikipedia
+            try:
+                from data.providers.wikipedia_fighter import search_fighter_wikipedia
+                wiki_data = search_fighter_wikipedia(req.query)
+                if wiki_data and "best_match" in wiki_data:
+                    fighter = wiki_data["best_match"]
+                    return {
+                        "status": "ok",
+                        "results": [fighter] if fighter else [],
+                        "query": req.query,
+                        "source": "wikipedia",
+                    }
+            except Exception:
+                pass
+
             return {
                 "status": "ok",
                 "results": [],
@@ -1205,7 +1220,17 @@ def fighter_profile(name: str) -> Dict[str, Any]:
     try:
         data = _ufc_stats_tool.invoke({"fighter_name": name})
         if data.get("error"):
-            raise HTTPException(status_code=404, detail=f"Fighter not found: {name}")
+            # Fallback to Wikipedia
+            try:
+                from data.providers.wikipedia_fighter import search_fighter_wikipedia
+                data = search_fighter_wikipedia(name)
+                if not data or "best_match" not in data:
+                    raise HTTPException(status_code=404, detail=f"Fighter not found: {name}")
+                _logger.info(f"Wikipedia fallback used for fighter profile: {name}")
+            except HTTPException:
+                raise
+            except Exception:
+                raise HTTPException(status_code=404, detail=f"Fighter not found: {name}")
 
         fighter_data = data.get("best_match", {})
         fighter_name = fighter_data.get("name", name)

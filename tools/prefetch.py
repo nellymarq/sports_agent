@@ -85,6 +85,23 @@ def prefetch_fighter_stats(fighters: List[str]) -> Dict[str, Any]:
             except Exception as e:
                 _logger.debug(f"UFCStats prefetch failed for {fighter}: {e}")
 
+        # Wikipedia fallback if UFCStats didn't return data
+        if not fighter_data.get("record"):
+            try:
+                from data.providers.wikipedia_fighter import search_fighter_wikipedia
+                wiki_result = search_fighter_wikipedia(fighter)
+                if wiki_result and "best_match" in wiki_result:
+                    best = wiki_result["best_match"]
+                    for key in ["record", "height", "weight", "reach", "stance",
+                                "nickname", "detail_stats"]:
+                        val = best.get(key)
+                        if val and not fighter_data.get(key):
+                            fighter_data[key] = val
+                    fighter_data["stats_source"] = "Wikipedia"
+                    _logger.info(f"Wikipedia fallback used for {fighter}")
+            except Exception as e:
+                _logger.debug(f"Wikipedia fallback failed for {fighter}: {e}")
+
         # DraftKings odds
         if dk_tool:
             try:
