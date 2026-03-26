@@ -84,7 +84,7 @@ async def retrieval_agent(
     # 1b) If no fighters found in text, try to derive from event mention
     if not fighters:
         import re
-        m = re.search(r"ufc\s*([0-9]{2,4})", user_input.lower())
+        m = re.search(r"ufc[\s_\-]*([0-9]{2,4})", user_input.lower())
         if m:
             event_id = f"ufc_{m.group(1)}"
             event_fighters = get_event_fighters(event_id)

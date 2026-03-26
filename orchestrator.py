@@ -130,7 +130,7 @@ def _resolve_event_id_from_text(text: str) -> Optional[str]:
     Best-effort: extract 'UFC 313' -> 'ufc_313' style event_id.
     """
     t = (text or "").lower()
-    m = re.search(r"ufc\s*([0-9]{2,4})", t)
+    m = re.search(r"ufc[\s_\-]*([0-9]{2,4})", t)
     if not m:
         return None
     num = m.group(1)
