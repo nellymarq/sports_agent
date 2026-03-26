@@ -86,7 +86,7 @@ def _parse_infobox(page_title: str) -> Dict[str, str]:
         return {}
 
     fields = {}
-    for m in re.finditer(r'\|\s*([\w\s]+?)\s*=\s*(.+?)(?=\n\||\n\}\})', wikitext):
+    for m in re.finditer(r'\|\s*([\w\s]+?)\s*=\s*(.+?)(?=\n\||\n\}\})', wikitext, re.DOTALL):
         key = m.group(1).strip().lower().replace(" ", "_")
         val = m.group(2).strip()
         # Strip wiki markup

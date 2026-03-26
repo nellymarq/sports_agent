@@ -1,4 +1,4 @@
-# specialists/template/specialist_template_debug.py
+# specialists/critic_debug_specialist.py
 
 from specialists.tool_runtime import (
     build_system_prompt,

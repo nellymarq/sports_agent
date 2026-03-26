@@ -1,23 +1,31 @@
 # specialists/__init__.py
 # Export all specialists so orchestrator + tests can import them cleanly.
+#
+# The 15 standard domain specialists are generated from a shared base class
+# (base_specialist.py) — only the specialist name differs between them.
+# Debug specialists and prediction_specialist have unique logic and remain
+# in their own files.
 
-from .style_specialist import run_style_specialist
-from .form_specialist import run_form_specialist
-from .sentiment_specialist import run_sentiment_specialist
-from .weightcut_specialist import run_weightcut_specialist
-from .general_specialist import run_general_specialist
-from .metadata_specialist import run_metadata_specialist
-from .pace_specialist import run_pace_specialist
-from .grappling_specialist import run_grappling_specialist
-from .fight_iq_specialist import run_fight_iq_specialist
-from .scramble_specialist import run_scramble_specialist
-from .damage_specialist import run_damage_specialist
-from .gameplan_specialist import run_gameplan_specialist
-from .judging_specialist import run_judging_specialist
-from .knowledge_specialist import run_knowledge_specialist
-from .clinch_specialist import run_clinch_specialist
+from .base_specialist import make_specialist
 
-# === NEW DEBUG SPECIALISTS ===
+# --- Standard domain specialists (generated from shared base) ---
+run_style_specialist = make_specialist("Style")
+run_form_specialist = make_specialist("Form")
+run_sentiment_specialist = make_specialist("Sentiment")
+run_weightcut_specialist = make_specialist("Weightcut")
+run_general_specialist = make_specialist("General")
+run_metadata_specialist = make_specialist("Metadata")
+run_pace_specialist = make_specialist("Pace")
+run_grappling_specialist = make_specialist("Grappling")
+run_fight_iq_specialist = make_specialist("Fight IQ")
+run_scramble_specialist = make_specialist("Scramble")
+run_damage_specialist = make_specialist("Damage")
+run_gameplan_specialist = make_specialist("Gameplan")
+run_judging_specialist = make_specialist("Judging")
+run_knowledge_specialist = make_specialist("Knowledge")
+run_clinch_specialist = make_specialist("Clinch")
+
+# --- Debug specialists (unique logic, separate files) ---
 from .routing_debug_specialist import run_routing_debug_specialist
 from .coordinator_debug_specialist import run_coordinator_debug_specialist
 from .critic_debug_specialist import run_critic_debug_specialist

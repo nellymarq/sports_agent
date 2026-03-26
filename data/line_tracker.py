@@ -10,6 +10,11 @@ import time
 import threading
 from typing import Dict, Any, List, Optional
 
+try:
+    from config import STEAM_MOVE_THRESHOLD
+except ImportError:
+    STEAM_MOVE_THRESHOLD = 0.05
+
 
 TRACKER_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "state")
 LINE_HISTORY_PATH = os.path.join(TRACKER_DIR, "line_history.json")
@@ -195,7 +200,7 @@ def _detect_steam_move(snapshots: List[Dict[str, Any]]) -> Dict[str, Any]:
                 continue
 
             shift = abs(imp_j - imp_i)
-            if shift >= 0.05:
+            if shift >= STEAM_MOVE_THRESHOLD:
                 return {
                     "detected": True,
                     "shift": round(imp_j - imp_i, 4),

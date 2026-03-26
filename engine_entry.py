@@ -32,7 +32,7 @@ from state_manager import (
 # CONFIG: LIVE vs TEST
 # ============================================================
 
-USE_TEST_MODE = False
+USE_TEST_MODE = os.getenv("TEST_MODE", "").lower() in ("1", "true", "yes")
 
 # Two-model hybrid setup:
 # - Routing, supervisor, specialists, critic → 8B Instant
@@ -104,7 +104,7 @@ async def _run_full_pipeline(
     try:
         return await asyncio.wait_for(
             _run_full_pipeline_impl(user_input, on_stage),
-            timeout=300.0  # 5 minute max
+            timeout=float(os.getenv("PIPELINE_TIMEOUT", "300"))
         )
     except asyncio.TimeoutError:
         return "[ERROR] Analysis timed out after 5 minutes. Try a simpler query."

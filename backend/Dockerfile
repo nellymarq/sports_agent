@@ -11,6 +11,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install playwright browsers (required by tools/browser_fetch.py)
+RUN playwright install --with-deps chromium || true
+
 COPY . .
 
 EXPOSE 8000

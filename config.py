@@ -68,6 +68,26 @@ EMBEDDING_DIMENSION = int(os.getenv("EMBEDDING_DIMENSION", "384"))
 # ============================================================
 EVENT_PROVIDER_TIMEOUT = float(os.getenv("EVENT_PROVIDER_TIMEOUT", "15"))
 
+# ============================================================
+# PIPELINE EXECUTION
+# ============================================================
+PIPELINE_TIMEOUT = float(os.getenv("PIPELINE_TIMEOUT", "300"))
+
+# ============================================================
+# ANALYTICS TUNING
+# ============================================================
+# Line tracker: minimum odds shift (as probability) to flag as steam move
+STEAM_MOVE_THRESHOLD = float(os.getenv("STEAM_MOVE_THRESHOLD", "0.05"))
+
+# Parlay engine: default weight-class correlation coefficient
+WEIGHT_CLASS_CORRELATION = float(os.getenv("WEIGHT_CLASS_CORRELATION", "0.05"))
+
+# Prediction tracker: rolling accuracy window size
+PREDICTION_ROLLING_WINDOW = int(os.getenv("PREDICTION_ROLLING_WINDOW", "10"))
+
+# Response cache default TTL (seconds)
+RESPONSE_CACHE_TTL = int(os.getenv("RESPONSE_CACHE_TTL", "120"))
+
 
 # ============================================================
 # STARTUP VALIDATION

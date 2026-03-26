@@ -40,7 +40,7 @@ async def build_unified_event(
     Each provider is isolated — failures don't break the pipeline.
     """
     from data.providers.espn_events import fetch_event_from_espn
-    from data.providers.tapology_events import fetch_event_from_tapology
+    from data.providers.fetch_event_from_tapology import fetch_event_from_tapology
     from data.providers.ufc_events import fetch_event_from_ufc
     from data.providers.odds_provider import fetch_odds_for_event
 

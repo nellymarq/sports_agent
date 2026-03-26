@@ -9,6 +9,11 @@ import json
 import time
 from typing import Dict, Any, List, Optional
 
+try:
+    from config import PREDICTION_ROLLING_WINDOW
+except ImportError:
+    PREDICTION_ROLLING_WINDOW = 10
+
 TRACKER_DIR = os.path.join(os.path.dirname(__file__), "state")
 PREDICTIONS_PATH = os.path.join(TRACKER_DIR, "predictions.json")
 
@@ -302,7 +307,7 @@ def get_calibration_stats() -> Dict[str, Any]:
                 dog_stats["correct"] += 1
 
     # Rolling accuracy trend (last N resolved predictions)
-    accuracy_trend = _compute_rolling_accuracy(resolved)
+    accuracy_trend = _compute_rolling_accuracy(resolved, window=PREDICTION_ROLLING_WINDOW)
 
     return {
         "total_predictions": len(preds),

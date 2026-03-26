@@ -13,6 +13,7 @@ from data.providers.odds_provider import (
     fetch_all_ufc_odds,
     fetch_odds_for_event,
 )
+from data.exceptions import DataSourceError
 
 
 class TestOddsConversions:
@@ -106,8 +107,8 @@ class TestFetchDraftKingsOdds:
     @patch("data.providers.odds_provider._safe_get")
     def test_api_failure(self, mock_get):
         mock_get.side_effect = Exception("Network error")
-        result = _fetch_draftkings_odds("")
-        assert result == {"bouts": {}}
+        with pytest.raises(DataSourceError, match="DraftKings"):
+            _fetch_draftkings_odds("")
 
 
 class TestFetchPolymarketOdds:
@@ -136,8 +137,8 @@ class TestFetchPolymarketOdds:
     @patch("data.providers.odds_provider._safe_get")
     def test_api_failure(self, mock_get):
         mock_get.side_effect = Exception("Network error")
-        result = _fetch_polymarket_odds("")
-        assert result == {"bouts": {}}
+        with pytest.raises(DataSourceError, match="Polymarket"):
+            _fetch_polymarket_odds("")
 
 
 class TestFetchAllUfcOdds:

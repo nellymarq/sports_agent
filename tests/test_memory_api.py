@@ -109,10 +109,35 @@ class TestMemoryCap:
 
 
 class TestMemoryFindSimilar:
-    def test_find_similar_returns_empty(self):
+    def test_find_similar_returns_empty_on_empty_store(self):
         store = MemoryStore()
         assert store.find_similar("test") == []
 
-    def test_cluster_topics_returns_empty(self):
+    def test_find_similar_with_data(self):
+        store = MemoryStore()
+        store.write_long_term({"content": "Conor McGregor knockout power analysis"})
+        store.write_long_term({"content": "Weather forecast for tomorrow"})
+        # Substring fallback should match the first item
+        results = store.find_similar("McGregor", threshold=0.8)
+        assert any("McGregor" in str(r.get("content", "")) for r in results)
+
+    def test_cluster_topics_returns_empty_on_empty_store(self):
         store = MemoryStore()
         assert store.cluster_topics() == {}
+
+    def test_cluster_topics_groups_by_type(self):
+        store = MemoryStore()
+        store.long_term.append({"type": "episodic", "content": "a", "timestamp": 1, "hash": "h1"})
+        store.long_term.append({"type": "episodic", "content": "b", "timestamp": 2, "hash": "h2"})
+        store.long_term.append({"type": "semantic", "content": "c", "timestamp": 3, "hash": "h3"})
+        clusters = store.cluster_topics()
+        assert "episodic" in clusters
+        assert "semantic" in clusters
+        assert len(clusters["episodic"]) == 2
+        assert len(clusters["semantic"]) == 1
+
+    def test_cluster_topics_defaults_to_general(self):
+        store = MemoryStore()
+        store.long_term.append({"content": "no type", "timestamp": 1, "hash": "h1"})
+        clusters = store.cluster_topics()
+        assert "general" in clusters

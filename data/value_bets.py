@@ -164,9 +164,12 @@ def identify_value_bets(
     for bout_key, bout_data in bouts.items():
         fighters = bout_data.get("fighters", [])
         for f in fighters:
-            key = f["name"].strip().lower()
+            name = f.get("name", "")
+            if not name:
+                continue
+            key = name.strip().lower()
             odds_by_fighter[key] = {
-                "name": f["name"],
+                "name": name,
                 "odds_american": f.get("odds_american", ""),
                 "odds_decimal": f.get("odds_decimal"),
                 "implied_probability": f.get("implied_probability"),

@@ -3,10 +3,13 @@
 
 from __future__ import annotations
 from typing import Dict, Any, Optional, List
+import asyncio
 import logging
 import time
 
 import requests
+
+from data.exceptions import DataSourceError
 
 _logger = logging.getLogger("odds_provider")
 
@@ -108,7 +111,7 @@ def _fetch_draftkings_odds(event_id: str) -> Dict[str, Any]:
 
     except Exception as e:
         _logger.warning(f"DraftKings odds fetch failed: {e}")
-        return {"bouts": {}}
+        raise DataSourceError("DraftKings", str(e), cause=e) from e
 
 
 def _fetch_polymarket_odds(event_id: str) -> Dict[str, Any]:
@@ -150,7 +153,7 @@ def _fetch_polymarket_odds(event_id: str) -> Dict[str, Any]:
 
     except Exception as e:
         _logger.warning(f"Polymarket odds fetch failed: {e}")
-        return {"bouts": {}}
+        raise DataSourceError("Polymarket", str(e), cause=e) from e
 
 
 def _merge_odds_sources(*sources: Dict[str, Any]) -> Dict[str, Any]:
@@ -172,8 +175,19 @@ def _merge_odds_sources(*sources: Dict[str, Any]) -> Dict[str, Any]:
 
 async def fetch_odds_for_event(event_id: str) -> Optional[Dict[str, Any]]:
     """Fetch and merge odds from all available providers."""
-    dk = _fetch_draftkings_odds(event_id)
-    pm = _fetch_polymarket_odds(event_id)
+    loop = asyncio.get_running_loop()
+
+    # Each provider may raise DataSourceError — catch individually so one
+    # failure doesn't prevent the other provider's data from being used.
+    try:
+        dk = await loop.run_in_executor(None, _fetch_draftkings_odds, event_id)
+    except DataSourceError:
+        dk = {"bouts": {}}
+
+    try:
+        pm = await loop.run_in_executor(None, _fetch_polymarket_odds, event_id)
+    except DataSourceError:
+        pm = {"bouts": {}}
 
     merged = _merge_odds_sources(dk, pm)
     if not merged.get("bouts"):

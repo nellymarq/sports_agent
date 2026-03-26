@@ -68,5 +68,3 @@ def parse_event_detail(html: str, event_metadata: dict):
 
     event_metadata["bouts"] = bouts
     return event_metadata
-
-from data.providers.fetch_event_from_tapology import fetch_event_from_tapology

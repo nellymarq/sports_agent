@@ -2,8 +2,47 @@
 # Legacy fighter extraction + new unified-schema helpers (Option A)
 
 from __future__ import annotations
-from typing import List, Tuple
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Tuple
 import re
+
+
+# ------------------------------------------------------------
+# FighterRecord dataclass — canonical fighter representation
+# ------------------------------------------------------------
+
+@dataclass
+class FighterRecord:
+    canonical_name: str
+    division: str
+    aliases: List[str] = field(default_factory=list)
+    nicknames: List[str] = field(default_factory=list)
+    is_champion: bool = False
+    ufc_id: Optional[str] = None
+    rank: Optional[int] = None
+    reach_in: Optional[int] = None
+    height_in: Optional[int] = None
+    stance: Optional[str] = None
+    dob: Optional[str] = None
+    record: Optional[str] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+# All recognized UFC divisions
+DIVISIONS = [
+    "mens_heavyweight",
+    "mens_light_heavyweight",
+    "mens_middleweight",
+    "mens_welterweight",
+    "mens_lightweight",
+    "mens_featherweight",
+    "mens_bantamweight",
+    "mens_flyweight",
+    "womens_strawweight",
+    "womens_flyweight",
+    "womens_bantamweight",
+    "womens_featherweight",
+]
 
 _STOPWORDS = {
     "ufc", "mma", "fight", "fights", "fighter", "fighters",

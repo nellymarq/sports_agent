@@ -9,6 +9,11 @@ import hashlib
 import json
 from typing import Any, Dict, Optional
 
+try:
+    from config import RESPONSE_CACHE_TTL
+except ImportError:
+    RESPONSE_CACHE_TTL = 120
+
 
 class ResponseCache:
     """
@@ -63,6 +68,15 @@ class ResponseCache:
             self._misses = 0
             return count
 
+    def evict_expired(self) -> int:
+        """Remove all expired entries. Returns count of evicted entries."""
+        now = time.time()
+        with self._lock:
+            expired = [k for k, v in self._cache.items() if now > v["expires_at"]]
+            for k in expired:
+                del self._cache[k]
+            return len(expired)
+
     def stats(self) -> Dict[str, Any]:
         with self._lock:
             total = self._hits + self._misses
@@ -73,6 +87,17 @@ class ResponseCache:
                 "hit_rate": round(self._hits / total * 100, 1) if total > 0 else 0,
             }
 
+    def start_background_eviction(self, interval_seconds: int = 60):
+        """Start a daemon thread that periodically evicts expired entries."""
+        def _evict_loop():
+            while True:
+                time.sleep(interval_seconds)
+                self.evict_expired()
+
+        t = threading.Thread(target=_evict_loop, daemon=True, name="cache-evictor")
+        t.start()
+
 
 # Shared instance for the backend
-response_cache = ResponseCache(default_ttl=120)
+response_cache = ResponseCache(default_ttl=RESPONSE_CACHE_TTL)
+response_cache.start_background_eviction(interval_seconds=60)
