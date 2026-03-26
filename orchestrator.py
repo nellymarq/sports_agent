@@ -182,6 +182,15 @@ async def _run_single_specialist(
         except Exception as _e:
             debug(f"Specialist payload injection failed for {specialist_key}: {_e}")
 
+    # Inject relevant specialist memory notes from previous analyses
+    try:
+        specialist_notes = context.get("specialist_notes", {})
+        spec_note = specialist_notes.get(specialist_key, "")
+        if spec_note:
+            enriched_context = f"=== Previous Analysis Memory ===\n{spec_note}\n\n" + enriched_context
+    except Exception as _e:
+        debug(f"Specialist memory injection failed for {specialist_key}: {_e}")
+
     try:
         output = await asyncio.wait_for(
             specialist_fn(
@@ -402,8 +411,31 @@ async def orchestrator(
             error(f"Analytics bundle computation failed (non-fatal): {e}")
 
     # === STRUCTURED MEMORY ===
-    semantic_memory = get_semantic(primary_fighter) or ""
+    # Load semantic memory for ALL identified fighters (not just primary)
+    semantic_parts = []
+    for fighter in fighters:
+        try:
+            fighter_mem = get_semantic(fighter)
+            if fighter_mem:
+                semantic_parts.append(f"=== {fighter} ===\n{fighter_mem}")
+        except Exception:
+            pass
+    semantic_memory = "\n\n".join(semantic_parts) if semantic_parts else ""
+
     episodic_memory = get_recent_episodic(5) or []
+
+    # Also load any specialist notes from previous analyses
+    specialist_notes = {}
+    try:
+        for spec_key in ["style", "form", "damage", "grappling", "pace"]:
+            notes = MEMORY_STORE.get_specialist_history(spec_key)
+            if notes:
+                # Get most recent note for relevance
+                recent = notes[-1] if notes else None
+                if recent and isinstance(recent, dict):
+                    specialist_notes[spec_key] = recent.get("content", "")[:500]  # Cap size
+    except Exception:
+        pass
 
     # === RETRIEVAL ===
     if not retrieved_context:
@@ -429,6 +461,7 @@ async def orchestrator(
         "unified_prediction": unified_prediction_payload,
         "prefetched_stats": prefetched_stats,
         "analytics_bundle": analytics_bundle,
+        "specialist_notes": specialist_notes,
     }
 
     # === DAG EXECUTION STATE ===
@@ -791,12 +824,40 @@ async def orchestrator(
             },
         )
 
+    # Write structured analytics memory for future retrieval
+    if analytics_bundle and fighters:
+        try:
+            sim_winner = ""
+            sim_data = analytics_bundle.get("simulation", {})
+            win_prob = sim_data.get("win_probability", {}) if sim_data else {}
+            if win_prob:
+                sim_winner = list(win_prob.keys())[0]
+            MEMORY_STORE.write_long_term({
+                "type": "analytics_snapshot",
+                "fighters": fighters,
+                "matchup_type": analytics_bundle.get("matchup", {}).get("matchup_type", ""),
+                "simulation_winner": sim_winner,
+                "confidence": final_output_meta.confidence,
+            })
+        except Exception:
+            pass
+
     # =====================================================================
 
     await summarize_and_store(llm, "Summarize this UFC analysis session:", [final_output_str])
 
-    if primary_fighter != "unknown":
-        await add_semantic(primary_fighter, final_output_str)
+    # Store semantic memory for all fighters (not just primary)
+    for fighter in fighters:
+        if fighter and fighter != "unknown":
+            try:
+                await add_semantic(fighter, final_output_str)
+            except Exception:
+                pass
+    if not fighters and primary_fighter != "unknown":
+        try:
+            await add_semantic(primary_fighter, final_output_str)
+        except Exception:
+            pass
 
     try:
         store_vectorized_memory(

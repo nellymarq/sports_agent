@@ -50,7 +50,8 @@ else:
 # PIPELINE PROFILING
 # ============================================================
 
-from typing import Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
+from data.input_validator import validate_user_input
 
 # Store recent pipeline timings for /stats
 _pipeline_timings: List[Dict[str, float]] = []
@@ -63,6 +64,28 @@ def get_pipeline_timings() -> List[Dict]:
 
 
 # ============================================================
+# HELPER: MINIMAL TASK PLAN FOR DEGRADED RETRY
+# ============================================================
+
+
+def _build_minimal_task_plan(original_plan: Dict[str, Any]) -> Dict[str, Any]:
+    """Build a minimal task plan with only core four specialists."""
+    core_four = {"style", "form", "sentiment", "weightcut"}
+    minimal = dict(original_plan)
+    if "tasks" in minimal:
+        minimal["tasks"] = [
+            t for t in minimal["tasks"]
+            if t.get("task_type") != "specialist" or t.get("specialist") in core_four
+            or t.get("task_type") in ("coordinator_merge", "critic_review")
+        ]
+        # Re-index task IDs
+        for i, t in enumerate(minimal["tasks"]):
+            t["id"] = i
+            t["depends_on"] = []
+    return minimal
+
+
+# ============================================================
 # FULL MULTI-AGENT PIPELINE (ASYNC)
 # ============================================================
 
@@ -71,6 +94,29 @@ async def _run_full_pipeline(
     user_input: str,
     on_stage: Optional[Callable[[str], None]] = None,
 ) -> str:
+    try:
+        return await asyncio.wait_for(
+            _run_full_pipeline_impl(user_input, on_stage),
+            timeout=300.0  # 5 minute max
+        )
+    except asyncio.TimeoutError:
+        return "[ERROR] Analysis timed out after 5 minutes. Try a simpler query."
+
+
+async def _run_full_pipeline_impl(
+    user_input: str,
+    on_stage: Optional[Callable[[str], None]] = None,
+) -> str:
+    # --- Input validation ---
+    validation = validate_user_input(user_input)
+    if not validation["valid"]:
+        return f"[INPUT ERROR] {validation['error']}"
+    user_input = validation["sanitized"]
+    if validation.get("warnings"):
+        _logger.warning(
+            "Input warnings: %s", "; ".join(validation["warnings"])
+        )
+
     history_pairs = load_history()
     history = [f"{role}: {content}" for role, content in history_pairs]
     episodic_memory_text = "\n".join(history) if history else ""
@@ -94,22 +140,31 @@ async def _run_full_pipeline(
 
     # 1. Retrieval
     _stage("retrieval")
-    retrieved_summary = await retrieval_agent(
-        llm=ACTIVE_LLM,
-        user_input=user_input,
-        history=history_pairs,
-        semantic_memory=None,
-        episodic_memory=None,
-    )
+    try:
+        retrieved_summary = await retrieval_agent(
+            llm=ACTIVE_LLM,
+            user_input=user_input,
+            history=history_pairs,
+            semantic_memory=None,
+            episodic_memory=None,
+        )
+    except Exception as e:
+        _logger.error(f"Retrieval failed: {e}")
+        retrieved_summary = ""  # Continue without retrieval
 
     # 2. Router
     _stage("routing")
-    routing = await router_agent(
-        llm=ACTIVE_LLM,
-        user_input=user_input,
-        semantic_memory="",
-        episodic_memory=episodic_memory_text,
-    )
+    try:
+        routing = await router_agent(
+            llm=ACTIVE_LLM,
+            user_input=user_input,
+            semantic_memory="",
+            episodic_memory=episodic_memory_text,
+        )
+    except Exception as e:
+        _logger.error(f"Router failed: {e}")
+        # Fallback: use default full analysis routing
+        routing = {"question_type": "who_wins", "specialists": ["style", "form", "sentiment", "weightcut", "metadata", "pace", "grappling", "damage"], "debug_specialists": []}
 
     # 3. Supervisor
     _stage("supervisor")
@@ -124,13 +179,31 @@ async def _run_full_pipeline(
 
     # 4. Orchestrator (uses GPT‑OSS 20B)
     _stage("orchestrator")
-    result = await orchestrator(
-        llm=LLM_ROUTING,                  # router/supervisor/specialists/critic
-        prediction_llm=LLM_ORCHESTRATOR,  # orchestrator + prediction specialist
-        tool_registry=TOOL_REGISTRY,
-        task_plan=task_plan,
-        test_mode=USE_TEST_MODE,
-    )
+    try:
+        result = await orchestrator(
+            llm=LLM_ROUTING,                  # router/supervisor/specialists/critic
+            prediction_llm=LLM_ORCHESTRATOR,  # orchestrator + prediction specialist
+            tool_registry=TOOL_REGISTRY,
+            task_plan=task_plan,
+            test_mode=USE_TEST_MODE,
+        )
+    except Exception as e:
+        _logger.error(f"Orchestrator failed: {e}. Retrying with reduced specialist set...")
+        _stage("orchestrator_retry")
+        try:
+            # Build minimal task plan with core four only
+            minimal_plan = _build_minimal_task_plan(task_plan)
+            result = await orchestrator(
+                llm=LLM_ROUTING,
+                prediction_llm=LLM_ORCHESTRATOR,
+                tool_registry=TOOL_REGISTRY,
+                task_plan=minimal_plan,
+                test_mode=USE_TEST_MODE,
+            )
+            result = "[DEGRADED MODE - some specialists unavailable]\n\n" + result
+        except Exception as e2:
+            _logger.error(f"Retry also failed: {e2}")
+            result = f"[ERROR] Analysis pipeline failed. Primary error: {e}. Retry error: {e2}"
 
     # Finalize timing for last stage
     now = time.monotonic()
