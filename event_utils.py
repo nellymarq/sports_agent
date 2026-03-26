@@ -129,20 +129,21 @@ async def get_next_scheduled_event() -> Optional[Dict[str, Any]]:
         return None
 
     upcoming.sort(key=lambda e: _parse_date(e.get("date", "")) or datetime.max)
-    next_ev = upcoming[0]
-    eid = next_ev.get("id")
-    if not eid:
-        return None
-
-    await ingest_event(eid)
-    return get_event_by_code(eid)
+    return upcoming[0]
 
 
 async def get_unified_event(event_id: str) -> Optional[Dict[str, Any]]:
     """
-    Ensure a specific event is ingested and return its legacy view.
+    Return event data from the local cache. Only ingests if no local data exists.
     """
-    await ingest_event(event_id)
+    existing = get_event_by_code(event_id)
+    if existing and existing.get("card"):
+        return existing
+    # No local data — try ingestion
+    try:
+        await ingest_event(event_id)
+    except Exception:
+        pass
     return get_event_by_code(event_id)
 
 

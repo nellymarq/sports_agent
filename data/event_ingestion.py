@@ -74,6 +74,19 @@ async def ingest_event(event_id: str) -> Optional[Dict[str, Any]]:
     unified: Event = await build_unified_event(event_id, legacy_seed=legacy_seed)
     legacy_updated = unified.to_legacy_dict()
 
+    # Guard: don't overwrite good seed data with empty provider results.
+    # If the unified result has fewer bouts/fighters than the seed, keep the seed.
+    if legacy_seed:
+        seed_bouts = len(legacy_seed.get("card", []))
+        updated_bouts = len(legacy_updated.get("card", legacy_updated.get("bouts", [])))
+        seed_has_main = bool(legacy_seed.get("main_event", {}).get("fighters"))
+        updated_has_main = bool(legacy_updated.get("main_event", {}).get("fighters"))
+
+        if seed_bouts > 0 and updated_bouts == 0:
+            return legacy_seed
+        if seed_has_main and not updated_has_main:
+            return legacy_seed
+
     new_events = _update_events_list(events, legacy_updated)
     _safe_write_json(EVENTS_PATH, new_events)
 

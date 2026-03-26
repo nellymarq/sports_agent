@@ -1,102 +1,116 @@
 [
   {
     "id": "ufc_fight_night_adesanya_vs_pyfer",
-    "code": "ufc_fight_night_adesanya_vs_pyfer",
     "name": "UFC Fight Night: Adesanya vs. Pyfer",
+    "date": "2026-03-28",
     "location": "Seattle, Washington, USA",
     "main_event": {
       "fighters": [
         "Israel Adesanya",
         "Joe Pyfer"
-      ]
+      ],
+      "weight_class": "Middleweight"
     },
     "co_main_event": {
       "fighters": [
         "Alexa Grasso",
         "Maycee Barber"
-      ]
+      ],
+      "weight_class": "Women's Flyweight"
     },
     "card": [
       {
         "fighters": [
           "Israel Adesanya",
           "Joe Pyfer"
-        ]
+        ],
+        "weight_class": "Middleweight"
       },
       {
         "fighters": [
           "Alexa Grasso",
           "Maycee Barber"
-        ]
+        ],
+        "weight_class": "Women's Flyweight"
       },
       {
         "fighters": [
           "Michael Chiesa",
           "Niko Price"
-        ]
+        ],
+        "weight_class": "Welterweight"
       },
       {
         "fighters": [
           "Julian Erosa",
           "Lerryan Douglas"
-        ]
+        ],
+        "weight_class": "Featherweight"
       },
       {
         "fighters": [
           "Mansur Abdul-Malik",
           "Yousri Belgaroui"
-        ]
+        ],
+        "weight_class": "Middleweight"
       },
       {
         "fighters": [
           "Terrance McKinney",
           "Kyle Nelson"
-        ]
+        ],
+        "weight_class": "Lightweight"
       },
       {
         "fighters": [
           "Ignacio Bahamondes",
           "Tofiq Musayev"
-        ]
+        ],
+        "weight_class": "Lightweight"
       },
       {
         "fighters": [
           "Chase Hooper",
           "Lance Gibson Jr."
-        ]
+        ],
+        "weight_class": "Lightweight"
       },
       {
         "fighters": [
           "Marcin Tybura",
           "Tyrell Fortune"
-        ]
+        ],
+        "weight_class": "Heavyweight"
       },
       {
         "fighters": [
           "Casey O'Neill",
           "Gabriella Fernandes"
-        ]
+        ],
+        "weight_class": "Women's Flyweight"
       },
       {
         "fighters": [
           "Navajo Stirling",
           "Bruno Lopes"
-        ]
+        ],
+        "weight_class": "Light Heavyweight"
       },
       {
         "fighters": [
           "Ricky Simon",
           "Adrian Yanez"
-        ]
+        ],
+        "weight_class": "Bantamweight"
       },
       {
         "fighters": [
           "Alexia Thainara",
           "Bruna Brasil"
-        ]
+        ],
+        "weight_class": "Women's Strawweight"
       }
-    ],
-    "date": "2026-03-28"
+    ]
   },
   {
     "id": "ufc_fight_night_moicano_vs_duncan",
